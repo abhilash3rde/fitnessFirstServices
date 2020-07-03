@@ -37,6 +37,9 @@ const userSchema = mongoose.Schema({
   displayPictureUrl: {
     type: String
   },
+  wallImageUrl: {
+    type: String
+  },
   bmi: {
     type: Number
   },

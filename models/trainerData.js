@@ -48,6 +48,10 @@ const trainerSchema = mongoose.Schema({
     type: String,
     default: ''
   },
+  wallImageUrl: {
+    type: String,
+    default:''
+  },
   city: {
     type: String,
     default: ''
@@ -191,6 +195,9 @@ async function create(fields) {
     }
   }
   const model = new Model(fields);
+  if(model['wallImageUrl'] === ''){
+    model['wallImageUrl'] = await utility.getRandomMedia();
+  }
   await model.save()
   return model;
 }

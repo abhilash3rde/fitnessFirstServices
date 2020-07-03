@@ -78,6 +78,36 @@ router.put('/displayImage', async function (req, res, next) {
   }
 });
 
+router.put('/wallImage', async function (req, res, next) {
+  try {
+
+    const mediaFile = req.files ? req.files.mediaContent : null;
+    const content = await utility.uploadMedia(mediaFile);
+
+    if (!content)
+      throw new Error("Image upload failed");
+
+    const contentURL = content.contentURL;
+
+    const {userId, userType} = req;
+    let model = userType === userTypes.TRAINER? TrainerData: UserData;
+
+    const userData = await model.edit(
+      userId,
+      {
+        wallImageUrl: contentURL,
+      });
+    if (!(userData && userData.email))
+      throw new Error("display image updation failed");
+
+    res.json({contentURL, success: true});
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 router.get('/mySubscriptions', async function (req, res, next) {
   try {
     const { userId } = req;

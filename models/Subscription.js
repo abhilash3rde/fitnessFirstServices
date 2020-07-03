@@ -1,0 +1,116 @@
+const cuid = require('cuid');
+const db = require('../config/db');
+
+const Package = require('./package');
+const TrainerData = require('./trainerData');
+const UserData = require('./userData');
+
+const Model = db.model('Subscription', {
+  _id: {
+    type: String,
+    default: cuid
+  },
+  packageId: {
+    type: String,
+    ref: 'Package',
+    index: true,
+    default: null
+  },
+  trainerId: {
+    type: String,
+    ref: 'TrainerData',
+    index: true,
+    default: null
+  },
+  subscribedBy: {
+    type: String,
+    ref: 'UserData',
+    index: true,
+    default: null
+  },
+  active:{
+      type:Boolean,
+      default: false
+  },
+  heldSessions:{
+    type:Number,
+    default:0
+  },
+  totalSessions:{
+    type:Number,
+    default:0
+  }
+});
+
+async function get(_id) {
+  const model = await Model.findOne(
+    {_id},
+    {__v: 0}
+  ).populate('subscribedBy')
+  .exec();
+  return model;
+}
+
+async function remove(_id,) {
+  const model = await get(_id);
+  if (!model) throw new Error("Slot not found");
+  await Model.deleteOne({
+    _id
+  });
+  return true;
+}
+
+async function create(fields) {
+console.log("Creating Subscription==>", fields);
+  const model = new Model(fields);
+  await model.save();
+  return model;
+}
+
+async function edit(_id, change) {
+  const model = await get(_id);
+  if (!model) throw new Error("Subscription not found");
+
+  Object.keys(change).forEach(key => {
+    model[key] = change[key]
+  });
+  await model.save();
+  return model;
+}
+
+async function activateSubscription(_id) {
+  return await edit(_id, {active: true});
+}
+
+async function deActivateSubscription(_id) {
+  return await edit(_id, {active: false});
+}
+
+async function getForPackage(packageId) {
+  const model = await Model.findOne({ packageId });
+  return model;
+}
+
+async function getAllForTrainer(trainerId) {
+  const model = await Model.find({ trainerId }).populate('subscribedBy').exec();
+  return model;
+}
+
+async function getAllForUser(subscribedBy) {
+  const model = await Model.find({ subscribedBy });
+  return model;
+}
+
+
+module.exports = {
+  get,
+  create,
+  edit,
+  remove,
+  activateSubscription,
+  deActivateSubscription,
+  getForPackage,
+  getAllForTrainer,
+  getAllForUser,
+  model: Model
+}

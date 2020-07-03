@@ -1,0 +1,26 @@
+const userTypes = {
+  TRAINER: 'TRAINER',
+  USER:'USER'
+}
+const CHANNELS = {
+  STORE_CLIENT_INFO:'STORE_CLIENT_INFO',
+  CHECK_USER_ONLINE:'CHECK_USER_ONLINE',
+  INITIATE_VIDEO_CALL:'INITIATE_VIDEO_CALL',
+  CONFIRM_VIDEO_CALL:'CONFIRM_VIDEO_CALL'
+}
+
+const CONTENT_TYPE = {
+  VIDEO:'VIDEO',
+  IMAGE:'IMAGE'
+}
+
+const ENABLE_FILE_UPLOAD = process.env.ENABLE_FILE_UPLOAD || true;
+
+const agoraAppId = 'de359ae21a884e08a18e38476b54ccea';
+module.exports = {
+  userTypes,
+  CHANNELS,
+  agoraAppId,
+  CONTENT_TYPE,
+  ENABLE_FILE_UPLOAD
+}

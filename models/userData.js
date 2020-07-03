@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const db = require('../config/db');
 const {userTypes} = require("../constants");
+const utility = require('../utility/utility')
 const opts = {toJSON: {virtuals: true}};
 
 const userSchema = mongoose.Schema({
@@ -35,10 +36,12 @@ const userSchema = mongoose.Schema({
     type: String
   },
   displayPictureUrl: {
-    type: String
+    type: String,
+    default:''
   },
   wallImageUrl: {
-    type: String
+    type: String,
+    default:''
   },
   bmi: {
     type: Number
@@ -107,6 +110,9 @@ async function create(fields) {
       return model;
   }
   const model = new Model(fields);
+  if(model['wallImageUrl'] === ''){
+    model['wallImageUrl'] = await utility.getRandomMedia();
+  }
   await model.save()
   return model;
 }

@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const { ENABLE_FILE_UPLOAD, CONTENT_TYPE } = require('../constants');
+const { ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE } = require('../constants');
 const url = require('url');
 
 
@@ -75,6 +75,12 @@ async function groupByDayAndTime(slots) {
   }, {});
 }
 
+
+async function getRandomMedia() {  
+  const randomNo = Math.floor(Math.random() * Object.keys(RAMDOM_WALL_IMAGE).length);
+  return RAMDOM_WALL_IMAGE[randomNo];
+}
+
 async function groupBy(datas, keys) {
   return datas.reduce((data, obj) => {
     const KEYS = [];
@@ -111,6 +117,6 @@ module.exports = {
   uploadMedia,
   groupByTime,
   groupByDayAndTime,
-  uploadRandomMedia,
+  getRandomMedia,
   groupBy
 }

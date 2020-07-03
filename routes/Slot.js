@@ -100,29 +100,40 @@ router.delete('/:slotId', async function (req, res, next) {
 });
 
 router.get('/getAllAvailable', async function (req, res, next) {
-
-  let daysSet = new Set();
-  let timesSet = new Set();
-
   try {
     const allSlots = await Slot.getAllAvailableSlots();
     const refinedSlots = [];
 
     allSlots.map(slot => {
-      daysSet.add(slot.dayOfWeek);
-      timesSet.add(slot.time);
+      // daysSet.add(slot.dayOfWeek);
+      // timesSet.add(slot.time);
       const { name, experience, rating, city, totalSlots, availableSlots } = slot.trainerId ;
       slot['trainerId'] = { name, experience, rating, city, totalSlots, availableSlots};
 
       refinedSlots.push(slot);
+    });    
+
+    const availableSlots = await utility.groupBy(refinedSlots, ['dayOfWeek']);
+    let resultSlots = [];
+
+    Object.keys(availableSlots).map(day=>{
+      const timeSet = new Set();
+
+      availableSlots[day].map(slot=>{
+        timeSet.add(slot.time);
+      })
+
+      const times = Array.from(timeSet);
+      const slots = availableSlots[day];
+      resultSlots.push({
+        times,
+        slots
+      })
+      availableSlots[day] = resultSlots;
+      resultSlots = [];
     });
 
-    const days = Array.from(daysSet);
-    const times = Array.from(timesSet);
-
-    const slots = await utility.groupByDayAndTime(refinedSlots);
-
-    res.json({ days, times, slots });
+    res.json({ availableSlots });
 
   } catch (err) {
     res.status(500).json({

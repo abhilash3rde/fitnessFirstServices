@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { ENABLE_FILE_UPLOAD, CONTENT_TYPE } = require('../constants');
+const url = require('url');
+
 
 const SALT_ROUNDS = 10;
 async function hashPassword(user) {
@@ -21,12 +23,12 @@ const uploadLocalFile = async (path) => {
   return res.secure_url;
 }
 
-const findMissingValue = (arr1, arr2, callback) =>{
+const findMissingValue = (arr1, arr2, callback) => {
   const set = new Set(arr2);
-  callback(arr1.filter(t => !set.has(t)));    
+  callback(arr1.filter(t => !set.has(t)));
 }
 
-async function uploadMedia(file){
+async function uploadMedia(file) {
   let contentURL = '';
   let contentType = CONTENT_TYPE.IMAGE;
 
@@ -49,29 +51,58 @@ async function uploadMedia(file){
 
 async function groupByTime(slots) {
   return slots.reduce((slot, obj) => {
-     const key = obj['time'];
- 
-     if (!slot[key]) {
-       slot[key] = [];
-     }
-     slot[key].push(obj);
-     return slot;
+    const key = obj['time'];
+
+    if (!slot[key]) {
+      slot[key] = [];
+    }
+    slot[key].push(obj);
+    return slot;
   }, {});
- }
+}
 
 //ToDo - revisit to make is generic solution
 async function groupByDayAndTime(slots) {
- return slots.reduce((slot, obj) => {
+  return slots.reduce((slot, obj) => {
     const key1 = obj['dayOfWeek'];
     const key2 = obj['time'];
 
-    if (!slot[key1+'#'+key2]) {
-      slot[key1+'#'+key2] = [];
+    if (!slot[key1 + '#' + key2]) {
+      slot[key1 + '#' + key2] = [];
     }
-    slot[key1+'#'+key2].push(obj);
+    slot[key1 + '#' + key2].push(obj);
     return slot;
- }, {});
+  }, {});
 }
+
+async function groupBy(datas, keys) {
+  return datas.reduce((data, obj) => {
+    const KEYS = [];
+    if (KEYS.length === 0) {
+      if (keys instanceof Array) {
+        for (let key of keys) {
+          const value = obj[key];
+          KEYS.push(value);
+        }
+      }
+      else {
+        KEYS.push(keys);
+      }
+      iterate = false;
+    }
+
+    const KEY = KEYS.join('#');
+
+    if (!data[KEY]) {
+      data[KEY] = [];
+    }
+    data[KEY].push(obj);
+    return data;
+  }, {});
+}
+
+
+
 
 module.exports = {
   hashPassword,
@@ -79,5 +110,7 @@ module.exports = {
   findMissingValue,
   uploadMedia,
   groupByTime,
-  groupByDayAndTime
+  groupByDayAndTime,
+  uploadRandomMedia,
+  groupBy
 }

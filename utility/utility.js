@@ -121,7 +121,7 @@ const sendNotification = async (tokens, message) =>{
   );
 }
 
-const getDayFullName = (day) =>{
+const getDayFullName = async (day) =>{
   let dayName = '';
   switch(day){
     case "MON":
@@ -143,7 +143,7 @@ const getDayFullName = (day) =>{
     dayName = WEEK_DAYS_FULL_NAMES.SAT;
     break;
     case "SUN":
-    dayName = WEEK_DAYS_FULL_NAMES.SN;
+    dayName = WEEK_DAYS_FULL_NAMES.SUN;
     break;
   }
   return dayName;

@@ -22,10 +22,11 @@ router.post('/:trainerId/book', async function (req, res, next) {
         }
 
         const trainerData = await TrainerData.getById(trainerId);
+        const dayFullName = await utility.getDayFullName(day);
 
         const appointment = await Appointment.findForUser(userId, trainerId, day, time);
         if (appointment) {
-            respone['message'] = "You already have appointment booked with "+trainerData.name+" for "+ utility.getDayFullName(day)+".";
+            respone['message'] = "You already have appointment booked with "+trainerData.name+" for "+ dayFullName +".";
         }
         else {
             const token = await fcm.getToken(trainerId);
@@ -33,7 +34,7 @@ router.post('/:trainerId/book', async function (req, res, next) {
 
             if (!token) throw new Error("Unable to get FCM token");
 
-            const msgText = "Congratulations!! " + userData.name + " booked your appointment for " + utility.getDayFullName(day);
+            const msgText = "Congratulations!! " + userData.name + " booked your appointment for " + dayFullName;
             const message = {
                 type: "appointmentNotification",
                 text: msgText
@@ -53,7 +54,7 @@ router.post('/:trainerId/book', async function (req, res, next) {
 
             respone = {
                 success : true,
-                message : "Congratulations!! appointment booked with "+trainerData.name+" for "+ utility.getDayFullName(day)+"."
+                message : "Congratulations!! appointment booked with "+trainerData.name+" for "+ dayFullName+"."
             }
         }
         res.json(respone);

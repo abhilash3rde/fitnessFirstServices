@@ -53,6 +53,19 @@ async function get(_id) {
   return model;
 }
 
+async function findForUser(userId, trainerId, dayOfWeek, time) {
+    const model = await Model.findOne(
+      {
+          userId,
+          trainerId,
+          dayOfWeek,
+          time
+      },
+      {__v: 0}
+    );
+    return model;
+  }
+
 async function create(fields) {
   const model = new Model(fields);
   await model.save();
@@ -62,5 +75,6 @@ async function create(fields) {
 module.exports = {
   get,
   create,
+  findForUser,
   model: Model
 }

@@ -107,8 +107,8 @@ router.get('/getAllAvailable', async function (req, res, next) {
     allSlots.map(slot => {
       // daysSet.add(slot.dayOfWeek);
       // timesSet.add(slot.time);
-      const { name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots } = slot['trainerId'] ;
-      slot['trainerId'] = { name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots};
+      const { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots } = slot['trainerId'] ;
+      slot['trainerId'] = { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots};
 
       refinedSlots.push(slot);
     });    

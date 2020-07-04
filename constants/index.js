@@ -32,6 +32,26 @@ const RAMDOM_WALL_IMAGE = {
 
 const ENABLE_FILE_UPLOAD = process.env.ENABLE_FILE_UPLOAD || true;
 
+const CRON_NOTIFY_HOWS_SESSION = " 0/30 * * * * * ";
+
+const WEEK_DAYS = ['SUN','MON','TUE','WED', 'THU', 'FRI', 'SAT'];
+
+const WEEK_DAYS_FULL_NAMES = {
+  SUN :"Sunday",
+  MON :"Monday",
+  TUE :"Tuesday",
+  WED :"Wednesday",
+  THU :"Thursday",
+  FRI :"Friday",
+  SAT :"Saturday"
+};
+
+const TIME_STRING = ['0000','0100','0200','0300','0400',
+                     '0500','0600','0700','0800','0900',
+                     '1000','1100','1200','1300','1400',
+                     '1500','1600','1700','1800','1900',
+                     '2000','2100','2200','2300']
+
 const agoraAppId = 'de359ae21a884e08a18e38476b54ccea';
 module.exports = {
   userTypes,
@@ -39,5 +59,9 @@ module.exports = {
   agoraAppId,
   CONTENT_TYPE,
   ENABLE_FILE_UPLOAD,
-  RAMDOM_WALL_IMAGE
+  RAMDOM_WALL_IMAGE,
+  CRON_NOTIFY_HOWS_SESSION,
+  WEEK_DAYS,
+  TIME_STRING,
+  WEEK_DAYS_FULL_NAMES
 }

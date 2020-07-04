@@ -1,8 +1,9 @@
 const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const { ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE } = require('../constants');
+const { ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES } = require('../constants');
 const url = require('url');
+const {admin} = require('../config');
 
 
 const SALT_ROUNDS = 10;
@@ -107,8 +108,46 @@ async function groupBy(datas, keys) {
   }, {});
 }
 
+const sendNotification = async (tokens, message) =>{
+  await admin.messaging().sendToDevice(
+    tokens,
+    {
+      data: {
+        "priority": "high",
+        "type": message.type,
+        "content": message.text
+      }
+    }
+  );
+}
 
-
+const getDayFullName = (day) =>{
+  let dayName = '';
+  switch(day){
+    case "MON":
+    dayName = WEEK_DAYS_FULL_NAMES.MON;
+    break;    
+    case "TUE":
+    dayName = WEEK_DAYS_FULL_NAMES.TUE;
+    break;
+    case "WED":
+    dayName = WEEK_DAYS_FULL_NAMES.THU;
+    break;
+    case "THU":
+    dayName = WEEK_DAYS_FULL_NAMES.WED;
+    break;
+    case "FRI":
+    dayName = WEEK_DAYS_FULL_NAMES.FRI;
+    break;
+    case "SAT":
+    dayName = WEEK_DAYS_FULL_NAMES.SAT;
+    break;
+    case "SUN":
+    dayName = WEEK_DAYS_FULL_NAMES.SN;
+    break;
+  }
+  return dayName;
+}
 
 module.exports = {
   hashPassword,
@@ -118,5 +157,7 @@ module.exports = {
   groupByTime,
   groupByDayAndTime,
   getRandomMedia,
-  groupBy
+  groupBy,
+  sendNotification,
+  getDayFullName
 }

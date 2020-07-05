@@ -15,10 +15,10 @@ router.get('/', async function (req, res, next) {
     let next;
     if(userType===userTypes.USER)
     {
-      record = await TrainerData.list();      
+      record = await TrainerData.list({page:1});      
     }
     else{
-      record = await UserData.list();
+      record = await UserData.list({page:1});
     } 
     const pages = record.pages;
     if(record.page < pages){

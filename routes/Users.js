@@ -7,11 +7,9 @@ const UserData = require('../models/userData');
 router.get('/', async function (req, res, next) {
     try {
       const {userType} = req;    
-      const {users, next} = await getPageUsers(userType, 1);
+      const {users, nextPage} = await getPageUsers(userType, 1);
   
-      console.log({users, next});
-  
-      res.json({users, next});
+      res.json({users, nextPage});
     } catch (err) {
       console.log(err)
       res.status(500).json({
@@ -25,9 +23,9 @@ router.get('/', async function (req, res, next) {
       const {userType} = req;
       const {page} = req.params;
   
-      const {users, next} = await getPageUsers(userType, page);
+      const {users, nextPage} = await getPageUsers(userType, page);
   
-      res.json({users, next});
+      res.json({users, nextPage});
     } catch (err) {
       console.log(err)
       res.status(500).json({
@@ -38,6 +36,7 @@ router.get('/', async function (req, res, next) {
   
   const getPageUsers = async (userType, page)=>{
     let record;
+    let nextPage;
     if(userType===userTypes.USER)
       {
         record = await TrainerData.list({page});      
@@ -47,11 +46,11 @@ router.get('/', async function (req, res, next) {
       } 
       const pages = record.pages;
       if(page < pages){
-         next = "/users/"+(parseInt(record.page) + 1);
+        nextPage = "/users/"+(parseInt(record.page) + 1);
       }
       users = record.docs;
   
-      return {users, next};
+      return {users, nextPage};
   }
 
   module.exports = router;

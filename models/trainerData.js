@@ -167,7 +167,7 @@ async function list(opts = {}) {
   let record = null;
   var options = {
     select: '',
-    sort: { rating: 1, experience: 1 },
+    sort: { rating: -1, experience: -1 },
     populate: [{
       path: 'packages',
       populate: {

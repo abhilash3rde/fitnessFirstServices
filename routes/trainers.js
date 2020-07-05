@@ -24,6 +24,9 @@ router.get('/', async function (req, res, next) {
     if(record.page < pages){
        next = "/trainers/"+(parseInt(record.page) + 1);
     }
+    else{
+      next = null;
+    }
     users = record.docs;
 
     res.json({trainers:users, next});

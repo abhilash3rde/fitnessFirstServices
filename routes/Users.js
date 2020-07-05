@@ -48,6 +48,9 @@ router.get('/', async function (req, res, next) {
       if(page < pages){
         nextPage = "/users/"+(parseInt(record.page) + 1);
       }
+      else{
+        nextPage = null;
+      }
       users = record.docs;
   
       return {users, nextPage};

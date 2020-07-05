@@ -6,6 +6,7 @@ const db = require('../config/db');
 const {userTypes} = require("../constants");
 const utility = require('../utility/utility')
 const opts = {toJSON: {virtuals: true}};
+const mongoosePaginate = require('mongoose-paginate');
 
 const userSchema = mongoose.Schema({
   _id: {
@@ -71,6 +72,7 @@ userSchema.virtual('totalPosts', {
   count: true
 });
 
+userSchema.plugin(mongoosePaginate);
 const Model = db.model('UserData', userSchema);
 
 async function get(email) {

@@ -104,11 +104,13 @@ router.get('/getAllAvailable', async function (req, res, next) {
     const allSlots = await Slot.getAllAvailableSlots();
     const refinedSlots = [];
 
+    console.log("Found "+allSlots.length+"Slots");
+
     allSlots.map(slot => {
       // daysSet.add(slot.dayOfWeek);
       // timesSet.add(slot.time);
-      const { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots } = slot['trainerId'] ;
-      slot['trainerId'] = { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots};
+      // const { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots } = slot['trainerId'] ;
+      // slot['trainerId'] = { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots};
 
       refinedSlots.push(slot);
     });    

@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
-const {isEmail} = require('validator');
+const { isEmail } = require('validator');
 
 const db = require('../config/db');
-const {userTypes} = require("../constants")
+const { userTypes } = require("../constants")
 
 const Package = require('./package');
 const Slot = require('./slot');
 const utility = require('../utility/utility');
+const mongoosePaginate = require('mongoose-paginate');
 
-const opts = {toJSON: {virtuals: true}};
+const opts = { toJSON: { virtuals: true } };
 
 const trainerSchema = mongoose.Schema({
   _id: {
@@ -19,7 +20,7 @@ const trainerSchema = mongoose.Schema({
   email: emailSchema({
     required: true
   }),
-  userType: {type: String, default: userTypes.TRAINER}, // helpful for frontend
+  userType: { type: String, default: userTypes.TRAINER }, // helpful for frontend
   name: {
     type: String,
     default: ''
@@ -36,8 +37,8 @@ const trainerSchema = mongoose.Schema({
   //   type: Array,
   //   default: []
   // },
-  slots: [{type: String, ref: 'Slot'}],
-  packages: [{type: String, ref: 'Package'}],
+  slots: [{ type: String, ref: 'Slot' }],
+  packages: [{ type: String, ref: 'Package' }],
   phone: {
     type: String
   },
@@ -50,7 +51,11 @@ const trainerSchema = mongoose.Schema({
   },
   wallImageUrl: {
     type: String,
-    default:''
+    default: ''
+  },
+  dateJoined: {
+    type: Date,
+    default: Date.now
   },
   city: {
     type: String,
@@ -89,7 +94,7 @@ trainerSchema.virtual('availableSlots', {
   localField: '_id',
   foreignField: 'trainerId',
   count: true,
-  match :{ active:true, subscriptionId : null }
+  match: { active: true, subscriptionId: null }
 });
 
 trainerSchema.virtual('totalPosts', {
@@ -99,11 +104,12 @@ trainerSchema.virtual('totalPosts', {
   count: true
 });
 
+trainerSchema.plugin(mongoosePaginate);
 const Model = db.model('TrainerData', trainerSchema);
 
 async function get(email) {
   const model = await Model.findOne(
-    {email},
+    { email },
   )
     .populate([{
       path: 'packages',
@@ -118,8 +124,8 @@ async function get(email) {
           path: 'subscribedBy'
         }
       }
-    },{path: 'totalPosts'}
-  ])
+    }, { path: 'totalPosts' }
+    ])
     .exec();
 
   return model;
@@ -127,7 +133,7 @@ async function get(email) {
 
 async function getById(_id) {
   const model = await Model.findOne(
-    {_id},
+    { _id },
   ).populate({
     path: 'packages',
     populate: {
@@ -147,7 +153,7 @@ async function getById(_id) {
           path: 'subscribedBy'
         }
       }
-    },{path: 'totalPosts'}])
+    }, { path: 'totalPosts' }])
     .exec();
 
   return model;
@@ -155,15 +161,14 @@ async function getById(_id) {
 
 async function list(opts = {}) {
   const {
-    offset = 0, limit = 25
+    page = 1, limit = 10
   } = opts;
-  const model = await Model.find({}, {__v: 0})
-    .sort({
-      _id: 1
-    })
-    .skip(offset)
-    .limit(limit)
-    .populate([{
+
+  let record = null;
+  var options = {
+    select: '',
+    sort: { rating: 1, experience: 1 },
+    populate: [{
       path: 'packages',
       populate: {
         path: 'totalSubscriptions'
@@ -176,9 +181,16 @@ async function list(opts = {}) {
           path: 'subscribedBy'
         }
       }
-    },{path: 'totalPosts'}])
-    .exec();
-  return model;
+    }, { path: 'totalPosts' },{ path: 'totalSlots' }, { path: 'availableSlots' }],
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  await Model.paginate({}, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
 }
 
 async function remove(email) {
@@ -190,12 +202,12 @@ async function remove(email) {
 async function create(fields) {
   if (fields._id) {
     const model = await getById(fields._id);
-    if (model){
+    if (model) {
       return model;
     }
   }
   const model = new Model(fields);
-  if(model['wallImageUrl'] === ''){
+  if (model['wallImageUrl'] === '') {
     model['wallImageUrl'] = await utility.getRandomMedia();
   }
   await model.save()
@@ -254,12 +266,12 @@ function emailSchema(opts = {}) {
       validator: isEmail,
       message: props => `${props.value} is not a valid email address`
     },
-      {
-        validator: function (email) {
-          return isUnique(this, email)
-        },
-        message: props => 'Email already in use'
-      }
+    {
+      validator: function (email) {
+        return isUnique(this, email)
+      },
+      message: props => 'Email already in use'
+    }
     ]
   }
 }

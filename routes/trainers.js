@@ -7,23 +7,21 @@ const Slot = require('../models/slot');
 const Package = require('../models/package');
 const {userTypes} = require("../constants")
 
-router.get('/:page', async function (req, res, next) {
+router.get('/', async function (req, res, next) {
   try {
     const {userType} = req;
-    const {page} = req.params;
     let users;
     let record;
     let next;
     if(userType===userTypes.USER)
     {
-      record = await TrainerData.list({page});
-      
+      record = await TrainerData.list();      
     }
     else{
-      record = await UserData.list({page});
+      record = await UserData.list();
     } 
     const pages = record.pages;
-    if(page < pages){
+    if(record.page < pages){
        next = "/trainers/"+(parseInt(record.page) + 1);
     }
     users = record.docs;

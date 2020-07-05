@@ -14,6 +14,9 @@ router.post('/:trainerId/book', async function (req, res, next) {
         const { userId } = req;
         const { trainerId } = req.params;
 
+        console.log("userId", userId)
+        console.log("trainerId", trainerId)
+
         const { day, time } = req.body;
 
         let respone = {
@@ -29,8 +32,11 @@ router.post('/:trainerId/book', async function (req, res, next) {
             respone['message'] = "You already have appointment booked with "+trainerData.name+" for "+ dayFullName +".";
         }
         else {
-            const token = await fcm.getToken(trainerId);
+            console.log("trainerId=>",trainerId);
             const userData = await UserData.getById(userId);
+            console.log("userData=>",userData);
+            const token = await fcm.getToken(trainerId);
+            
 
             if (!token) throw new Error("Unable to get FCM token");
 

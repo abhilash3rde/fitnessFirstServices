@@ -124,26 +124,28 @@ async function updateForDayTime(dayOfWeek, time, change) {
 async function getAllAvailableSlots(){
 
   const {
-    offset = 0, limit = 25
+    offset = 0, limit = 500
   } = opts;
   const model = await Model.find(
     { subscriptionId:null, active: true }, 
-    { time:1, dayOfWeek:1, duration:1 })
+    { time:1, dayOfWeek:1, duration:1, trainerId:1 })
     .sort({
       time: 1
     })
     .skip(offset)
-    .limit(limit)
-    .populate({
-      path:'trainerId',
-      populate:[{
-        path:'totalSlots'
-      },{
-      path:'availableSlots'
-    }
-    ]
-    })
-    .exec();
+    .limit(limit);
+  return model;
+}
+
+async function getAllToNotify(dayOfWeek, time){
+  console.log("dayOfWeek", dayOfWeek)
+  const model = await Model.find({
+    dayOfWeek,
+    time,
+     subscriptionId: {$ne  : null }, 
+     active: true, 
+     notified: false
+    });
   return model;
 }
 
@@ -160,5 +162,6 @@ module.exports = {
   findForDayAndTime,
   updateForDayTime,
   getAllAvailableSlots,
+  getAllToNotify,
   model: Model
 }

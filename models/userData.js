@@ -43,6 +43,10 @@ const userSchema = mongoose.Schema({
     type: String,
     default:''
   },
+  dateJoined:{
+    type:Date,
+    default:Date.now
+  },
   bmi: {
     type: Number
   },
@@ -85,16 +89,22 @@ async function getById(_id) {
 
 async function list(opts = {}) {
   const {
-    offset = 0, limit = 25
+    page = 1, limit = 10
   } = opts;
-  const model = await Model.find({}, {__v: 0})
-  .populate('totalPosts')
-    .sort({
-      _id: 1
-    })
-    .skip(offset)
-    .limit(limit)
-  return model;
+
+  let record = null;
+  var options = {
+    select: '',
+    sort: { rating: 1, experience: 1 },
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  await Model.paginate({}, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
 }
 
 async function remove(email) {

@@ -131,7 +131,7 @@ router.put('/updateTransaction', async function (req, res, next) {
   try {
     const { razorpay_order_id,  razorpay_payment_id, razorpay_signature } = req.body;
 
-    const status = paymentModule.orders.fetch(razorpay_order_id);
+    const status = await paymentModule.orders.fetch(razorpay_order_id);
 
     const transaction = await Transaction.update(
       {

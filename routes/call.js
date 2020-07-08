@@ -32,9 +32,9 @@ router.get('/:targetUserId', async function (req, res, next) {
       {
         data: {
           "priority": "high",
+          "type": "call",
           "sessionId": sessionId,
           "agoraAppId": agoraAppId,
-          "type": "call",
           "dpUrl":displayPictureUrl,
           "displayName":name
         }

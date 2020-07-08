@@ -53,6 +53,13 @@ const TIME_STRING = ['0000','0100','0200','0300','0400',
                      '2000','2100','2200','2300']
 
 const agoraAppId = 'de359ae21a884e08a18e38476b54ccea';
+
+//test key
+const paymentKey = {
+  key_id:'rzp_test_BuIiL164HHvbBm',
+  key_secret:'K04EHPRWO0XXd1JwapCcHR32'
+}
+
 module.exports = {
   userTypes,
   CHANNELS,
@@ -63,5 +70,6 @@ module.exports = {
   CRON_NOTIFY_HOWS_SESSION,
   WEEK_DAYS,
   TIME_STRING,
-  WEEK_DAYS_FULL_NAMES
+  WEEK_DAYS_FULL_NAMES,
+  paymentKey
 }

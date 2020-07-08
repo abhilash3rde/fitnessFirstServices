@@ -18,7 +18,8 @@ const callRouter = require('./routes/call');
 const packageRouter = require('./routes/Package');
 const slotRouter = require('./routes/Slot');
 const subscriptionRouter = require('./routes/Subscription');
-var fileupload = require('express-fileupload');
+const paymentRouter = require('./routes/payment');
+const fileUpload = require('express-fileupload');
 // const {onConnection} = require('./routes/socket');
 const appointmentRouter = require('./routes/Appointment');
 
@@ -28,7 +29,7 @@ const auth = require('./auth');
 const app = express();
 app.use(expressip().getIpInfoMiddleware);
 
-app.use(fileupload({
+app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },
   abortOnLimit:true,
   useTempFiles: true,
@@ -62,6 +63,7 @@ app.use('/package', auth.ensureUser, packageRouter);
 app.use('/slot', auth.ensureUser, slotRouter);
 app.use('/subscription', auth.ensureUser, subscriptionRouter);
 app.use('/appointment', auth.ensureUser, appointmentRouter);
+app.use('/payment',  paymentRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler

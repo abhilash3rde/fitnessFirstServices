@@ -72,7 +72,7 @@ async function create(fields) {
 async function update(orderId, keys) {
     const model = await getTransactionForOrder(orderId);
     Object.keys(keys).forEach(key => {
-        model[key] = change[key]
+        model[key] = keys[key]
     });
     await model.save();
     return await getTransactionForOrder(orderId);

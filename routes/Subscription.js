@@ -138,7 +138,8 @@ router.put('/updateTransaction', async function (req, res, next) {
         orderId:razorpay_order_id,
         status,
         paymentId: razorpay_payment_id,
-        paymentSignature: razorpay_signature
+        paymentSignature: razorpay_signature,
+        completedOn: Date.now()
       }
     )
 

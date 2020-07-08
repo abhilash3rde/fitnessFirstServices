@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "ENABLE_FILE_UPLOAD=true node ./bin/www",
-    "dev": "dbName=dev nodemon ./bin/www"
+    "dev": "dbName=dev nodemon ./bin/www",
+    "prod":"nodemon ./bin/www"
   },
   "dependencies": {
     "arg": "^4.1.3",

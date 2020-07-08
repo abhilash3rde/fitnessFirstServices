@@ -6,4 +6,4 @@ const instance = new Razorpay({
   key_secret: paymentKey.key_secret,
 })
 
-module.exports = instance
+module.exports = instance;

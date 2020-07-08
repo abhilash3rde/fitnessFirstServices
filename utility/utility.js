@@ -13,6 +13,8 @@ async function hashPassword(user) {
   user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
 }
 
+
+
 const uploadLocalFile = async (path) => {
   const res = await cloudinary.uploader.upload(path);
   fs.unlinkSync(path);

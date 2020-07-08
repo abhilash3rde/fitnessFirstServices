@@ -132,6 +132,7 @@ router.put('/updateTransaction', async function (req, res, next) {
     const { razorpay_order_id,  razorpay_payment_id, razorpay_signature } = req.body;
 
     const status = await paymentModule.orders.fetch(razorpay_order_id);
+    const completedOn = status === 'completed' ? Date.now() : null; 
 
     const transaction = await Transaction.update(
       {
@@ -139,7 +140,7 @@ router.put('/updateTransaction', async function (req, res, next) {
         status,
         paymentId: razorpay_payment_id,
         paymentSignature: razorpay_signature,
-        completedOn: Date.now()
+        completedOn
       }
     )
 

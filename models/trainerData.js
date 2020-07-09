@@ -23,7 +23,7 @@ const trainerSchema = mongoose.Schema({
   userType: { type: String, default: userTypes.TRAINER }, // helpful for frontend
   name: {
     type: String,
-    default: ''
+    default: 'Trainer'
   },
   experience: {
     type: Number,

@@ -149,6 +149,14 @@ async function getAllToNotify(dayOfWeek, time){
   return model;
 }
 
+async function findForSubsAndDay(subscriptionId, dayOfWeek) {
+  const model = await Model.findOne(
+    { subscriptionId, dayOfWeek },
+    { time:1, dayOfWeek:1 }
+  );
+  return model;
+}
+
 
 
 module.exports = {
@@ -163,5 +171,6 @@ module.exports = {
   updateForDayTime,
   getAllAvailableSlots,
   getAllToNotify,
+  findForSubsAndDay,
   model: Model
 }

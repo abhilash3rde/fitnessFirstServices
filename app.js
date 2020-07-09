@@ -22,6 +22,7 @@ const paymentRouter = require('./routes/payment');
 const fileUpload = require('express-fileupload');
 // const {onConnection} = require('./routes/socket');
 const appointmentRouter = require('./routes/Appointment');
+const activityRouter = require('./routes/Activity');
 
 const middleware = require('./middleware');
 const auth = require('./auth');
@@ -64,6 +65,7 @@ app.use('/slot', auth.ensureUser, slotRouter);
 app.use('/subscription', auth.ensureUser, subscriptionRouter);
 app.use('/appointment', auth.ensureUser, appointmentRouter);
 app.use('/payment',  paymentRouter);
+app.use('/activity', auth.ensureUser, activityRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler

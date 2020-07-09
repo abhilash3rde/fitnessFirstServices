@@ -23,69 +23,65 @@ router.get('/recent', async function (req, res, next) {
 
         if (userType === userTypes.TRAINER) {
             const mySubscribers = await Subscription.getAllForTrainer(userId);
-            console.log("mySubscribers=>", mySubscribers);
-            if(mySubscribers && mySubscribers.length > 0){
+            
                 await asyncForEach(mySubscribers, async subscriber => {
                     const slot = await Slot.findForSubsAndDay(subscriber._id, day);
-                    if (parseInt(slot.time) > parseInt(time)) {
+                    if (slot && parseInt(slot.time) > parseInt(time)) {
                         todaySessions.push({
-                            time: slot.subscribedBy.time,
-                            name: subscriber.subscribedBy.name,
+                            time: slot.time,
+                            user: subscriber.subscribedBy,
                             day:'Today',
-                            displayPictureUrl: subscriber.subscribedBy.displayPictureUrl,
                             sessionsLeft: (subscriber.totalSessions - subscriber.heldSessions)
                         });
                     }
     
                     const slotsNextDay = await Slot.findForSubsAndDay(subscriber._id, nextDay);
-                    nextDaySessions.push({
-                        time: slotsNextDay.time,
-                        day:slotsNextDay.dayOfWeek,
-                        name: subscriber.subscribedBy.name,
-                        displayPictureUrl: subscriber.subscribedBy.displayPictureUrl,
-                        sessionsLeft: (subscriber.totalSessions - subscriber.heldSessions)
-                    });
+                    if(slotsNextDay){
+                        nextDaySessions.push({
+                            time: slotsNextDay.time,
+                            day:slotsNextDay.dayOfWeek,
+                            user: subscriber.subscribedBy,
+                            sessionsLeft: (subscriber.totalSessions - subscriber.heldSessions)
+                        });
+                    }
                 })
-            }
         }
         else {
             const mySubscriptions = await Subscription.getAllForUser(userId);
-            console.log("User=>", mySubscriptions);
-            if(mySubscriptions.length > 0){
                 await asyncForEach(mySubscriptions, async subscription => {
                     const slot = await Slot.findForSubsAndDay(subscription._id, day);
-                    if (parseInt(slot.time) > parseInt(time)) {
+                    if (slot && parseInt(slot.time) > parseInt(time)) {
                         todaySessions.push({
                             time: slot.subscription.time,
                             day:'Today',
-                            name: subscription.trainerId.name,
-                            displayPictureUrl: subscription.trainerId.displayPictureUrl,
+                            trainer:subscription.trainerId,
                             sessionsLeft: (subscription.totalSessions - subscription.heldSessions)
                         });
                     }
     
                     const slotsNextDay = await Slot.findForSubsAndDay(subscription._id, nextDay);
-                    nextDaySessions.push({
-                        time: slotsNextDay.time,
-                        day:slotsNextDay.dayOfWeek,
-                        name: subscription.trainerId.name,
-                        displayPictureUrl: subscription.trainerId.displayPictureUrl,
-                        sessionsLeft: (subscription.totalSessions - subscription.heldSessions)
-                    });
+                    if(slotsNextDay){
+                        nextDaySessions.push({
+                            time: slotsNextDay.time,
+                            day:slotsNextDay.dayOfWeek,
+                            trainer:subscription.trainerId,
+                            sessionsLeft: (subscription.totalSessions - subscription.heldSessions)
+                        });
+                    }                    
                 });
-            }
         }
 
+        let posts;
         const record = await Posts.list();
-        if (record.docs.length === 0) throw new Error("Could not retrieve posts");
+        if (record.docs.length > 0){
+            let nextPage;
+            posts = record.docs;
+            if (record.page < record.total) {
+                nextPage = parseInt(record.page) + 1;
+            }
+        }        
 
-        let nextPage;
-        const posts = record.docs;
-        if (record.page < record.total) {
-            nextPage = parseInt(record.page) + 1;
-        }
-
-        res.json({ posts, todaySessions, nextDaySessions });
+        res.json({ todaySessions, nextDaySessions, posts });
 
     } catch (err) {
         res.status(500).json({

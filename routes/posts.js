@@ -8,11 +8,21 @@ const { saveFileToServer } = require('../config/uploadConfig');
 const fs = require('fs');
 var path = require('path');
 
-router.get('/', async function (req, res, next) {
+router.get('/getAll/:page?', async function (req, res, next) {
   try {
-    const posts = await Posts.list();
-    if (!posts) throw new Error("Could not retrieve posts");
-    res.json({ posts });
+
+    const page = req.params['page'] ? req.params['page'] : 1;
+
+    let posts = [];
+    let nextPage = null;
+    const records = await Posts.list({page});
+    if (records.docs.length > 0) {
+      posts = [...records.docs];
+      if (records.page < records.pages) {
+        nextPage = "/post/getAll/"+(parseInt(records.page) + 1);
+      }
+    }
+    res.json({ posts, nextPage });
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -23,13 +33,13 @@ router.get('/', async function (req, res, next) {
 router.put('/:postId/updateMedia', async function (req, res, next) {
   try {
     const { postId } = req.params;
-    const mediaFile = req.files ? req.files.mediaContent : null;    
-    const content = await utility.uploadMedia(mediaFile);    
+    const mediaFile = req.files ? req.files.mediaContent : null;
+    const content = await utility.uploadMedia(mediaFile);
 
     const post = await Posts.edit(
-      postId,{        
-        ...content
-      });
+      postId, {
+      ...content
+    });
     if (!post) throw new Error("Post updation failed");
 
     res.json({ post });
@@ -42,13 +52,13 @@ router.put('/:postId/updateMedia', async function (req, res, next) {
 
 router.put('/:postId/updateText', async function (req, res, next) {
   try {
-    const { postId } = req.params;    
-    const postContent = req.body;   
+    const { postId } = req.params;
+    const postContent = req.body;
 
     const post = await Posts.edit(
       postId, {
-        ...postContent
-      });
+      ...postContent
+    });
     if (!post) throw new Error("Post updation failed");
 
     res.json({ post });
@@ -62,9 +72,9 @@ router.put('/:postId/updateText', async function (req, res, next) {
 router.post('/', async function (req, res, next) {
   try {
     const { userId } = req;
-    
+
     const mediaFile = req.files ? req.files.mediaContent : null;
-    
+
     const content = await utility.uploadMedia(mediaFile);
     const postContent = req.body;
 
@@ -107,7 +117,7 @@ router.post('/:postId/like', async function (req, res, next) {
     const { postId } = req.params;
 
     const result = await Like.create({
-      likedBy : userId,
+      likedBy: userId,
       postId
     })
     if (result)
@@ -138,24 +148,27 @@ router.post('/:postId/unlike', async function (req, res, next) {
   }
 });
 
-router.get('/myPosts', async function (req, res, next) {
+router.get('/my/:page?', async function (req, res, next) {
   try {
     const { userId } = req;
+    const page = req.params['page'] ? req.params['page'] : 1;
 
-    const posts = await Posts.getMy({userId});
+    let posts = [];
+    let nextPage = null;
 
-    if(!posts){
-      throw Error("No Post found")
+    const records = await Posts.getMy({page}, userId);
+    if (records.docs.length > 0) {
+      posts = [...records.docs];
+      if (records.page < records.pages) {
+        nextPage = "/post/my/"+(parseInt(records.page) + 1);
+      }
     }
-    
-    res.json({ posts });
+    res.json({ posts, nextPage });
   } catch (err) {
     res.status(500).json({
       err: err.message
     });
   }
 });
-
-
 
 module.exports = router;

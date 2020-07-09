@@ -9,18 +9,17 @@ const User = require('../models/user');
 const {userTypes} =  require("../constants");
 const Subscription = require('../models/Subscription');
 
-router.get('/:userId?', async function (req, res, next) {
+router.get('/myInfo', async function (req, res, next) {
   try {
-    let {userId} = req.params;
-    if(!userId) userId = req.userId;
+    
+    const {userId} = req;
 
-    // const {userType} = await User.getById(userId);
-    // if(!userType) throw new Error('User does not exist');
     let user = await TrainerData.getById(userId);
-    if(!user) user = await UserData.getById(userId);
 
-    // let model = userType === userTypes.TRAINER? TrainerData: UserData;
-    // const user = await model.getById(userId);
+    if(!user){
+      user = await UserData.getById(userId);
+    } 
+
     if (!user) throw new Error('Internal server error. code 45621');
 
     res.json({user});

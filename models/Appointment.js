@@ -1,7 +1,7 @@
 const cuid = require('cuid');
 const mongoose = require('mongoose');
 
-const opts = {toJSON: {virtuals: true}};
+const opts = { toJSON: { virtuals: true } };
 
 const db = require('../config/db');
 const post = require('./post');
@@ -11,13 +11,13 @@ const appointmentSchema = mongoose.Schema({
     type: String,
     default: cuid
   },
-  userId:{
-    type:String,
+  userId: {
+    type: String,
     ref: 'UserData',
     required: true
   },
-  trainerId:{
-    type:String,
+  trainerId: {
+    type: String,
     ref: 'TrainerData',
     required: true
   },
@@ -31,19 +31,19 @@ const appointmentSchema = mongoose.Schema({
   },
   time: {
     type: String,
-    default:null
+    default: null
   },
-  notified:{
+  notified: {
     type: Boolean,
-    default:false
+    default: false
   },
-  connected:{
+  connected: {
     type: Boolean,
-    default:false
+    default: false
   },
-  appointmentDate:{
-    type:Date,
-    default:null
+  appointmentDate: {
+    type: Date,
+    default: null
   }
 }, opts);
 
@@ -51,34 +51,34 @@ const Model = db.model('Appointment', appointmentSchema);
 
 async function get(_id) {
   const model = await Model.findOne(
-    {_id},
-    {__v: 0}
+    { _id },
+    { __v: 0 }
   );
   return model;
 }
 
 async function findBooked(userId, trainerId, dayOfWeek) {
-    const model = await Model.findOne(
-      {
-          userId,
-          trainerId,
-          dayOfWeek,
-          connected:false
-      },
-      {__v: 0}
-    );
+  const model = await Model.findOne(
+    {
+      userId,
+      trainerId,
+      dayOfWeek,
+      connected: false
+    },
+    { __v: 0 }
+  );
 
-    if(model){
-      const today = new Date().getDate();
-      const bookedDay = model['createdOn'].getDate();
-      const appointmentDate = model['appointmentDate'].getDate();
+  if (model) {
+    const today = new Date().getDate();
+    const bookedDay = model['createdOn'].getDate();
+    const appointmentDate = model['appointmentDate'].getDate();
 
-      if(today - bookedDay < 7 || (appointmentDate - today > 0)){
-        return true;
-      }
+    if (today - bookedDay < 7 || (appointmentDate - today > 0)) {
+      return true;
     }
-    return false;
   }
+  return false;
+}
 
 async function create(fields) {
   const model = new Model(fields);
@@ -95,32 +95,49 @@ async function updateConnected(_id) {
 
 async function getTrainerAppointments(trainerId) {
   const model = await Model.find(
-    {trainerId},
-    {__v: 0}
+    { trainerId },
+    { __v: 0 }
   ).populate('userId').exec();;
   return model;
 }
 
 async function getUserAppointments(userId) {
   const model = await Model.find(
-    {userId},
-    {__v: 0}
+    { userId },
+    { __v: 0 }
   ).populate('trainerId').exec();;
   return model;
 }
 
 async function getTrainerAppointmentsForDate(trainerId, appointmentDate) {
+
+  let start = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), 1, 0, 0);
+  let end = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate() + 1, 0, 59, 59);
+
   const model = await Model.find(
-    {trainerId, appointmentDate},
-    {__v: 0}
+    {
+      trainerId, appointmentDate: {
+        $gte: start,
+        $lt: end
+      }
+    },
+    { __v: 0 }
   ).populate('userId').exec();
   return model;
 }
 
 async function getuserAppointmentsForDate(userId, appointmentDate) {
+  let start = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), 1, 0, 0);
+  let end = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate() + 1, 0, 59, 59);
+
   const model = await Model.find(
-    {userId, appointmentDate},
-    {__v: 0}
+    {
+      userId, appointmentDate: {
+        $gte: start,
+        $lt: end
+      }
+    },
+    { __v: 0 }
   ).populate('trainerId').exec();
   return model;
 }

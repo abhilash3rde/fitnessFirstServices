@@ -17,11 +17,36 @@ router.get('/myInfo', async function (req, res, next) {
     let upcomingActivities;
     let user;
 
-    if(userTypes.TRAINER === userType){
+    if (userTypes.TRAINER === userType) {
       user = await TrainerData.getById(userId);
-      upcomingActivities = await Activities.getTrainerActivities(userId);      
+      upcomingActivities = await Activities.getTrainerActivities(userId);
+    } else {
+      user = await UserData.getById(userId);
+      upcomingActivities = await Activities.getUserActivities(userId);
     }
-    else{
+
+    if (!user) throw new Error('Internal server error. code 45621');
+
+    res.json({user, upcomingActivities});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error)
+  }
+});
+
+router.get('/info/:userId', async function (req, res, next) {
+  try {
+
+    const {userId} = req.params;
+
+    let upcomingActivities;
+    let {userType} = await User.getById(userId);
+    let user;
+
+    if (userTypes.TRAINER === userType) {
+      user = await TrainerData.getById(userId);
+      upcomingActivities = await Activities.getTrainerActivities(userId);
+    } else {
       user = await UserData.getById(userId);
       upcomingActivities = await Activities.getUserActivities(userId);
     }

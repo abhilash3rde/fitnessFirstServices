@@ -77,7 +77,7 @@ async function getUserActivities(userId) {
         const slot = await Slot.findForSubsAndDay(subscription._id, day);
         if (slot) {
             todaySessions.push({
-                time: slot.subscription.time,
+                time: slot.time,
                 day: 'Today',
                 trainer: subscription.trainerId,
                 sessionsLeft: (subscription.totalSessions - subscription.heldSessions)

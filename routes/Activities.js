@@ -95,9 +95,9 @@ async function getUserActivities(userId) {
         }
     });
 
-    const todaysAppointments = await Appointment.getuserAppointmentsForDate(trainerId, date);
+    const todaysAppointments = await Appointment.getuserAppointmentsForDate(userId, date);
     const tomorrow = new Date(date.setDate(date.getDate() + 1));
-    const tomorrowsAppointments = await Appointment.getuserAppointmentsForDate(trainerId, tomorrow);
+    const tomorrowsAppointments = await Appointment.getuserAppointmentsForDate(userId, tomorrow);
 
     let todaysEvents = [...nextDaySessions];
     todaysAppointments.forEach(appointment=>{

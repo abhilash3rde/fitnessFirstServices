@@ -90,6 +90,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     }
 
     // await Subscription.activateSubscription(_subscription._id);
+    const noOfDays = 7 * (approxDuration);
+    await Package.updateEndDate(noOfDays);
 
     res.json({success: true, metadata, orderId: order.id});
   } catch (err) {
@@ -151,9 +153,6 @@ router.put('/updateTransaction', async function (req, res, next) {
     if (!transaction) {
       throw Error("Error updating transaction status")
     }
-
-    const noOfDays = 7 * (approxDuration);
-    await Package.updateEndDate(noOfDays);
 
     res.json({success: true});
   } catch (err) {

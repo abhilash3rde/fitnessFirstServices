@@ -64,27 +64,56 @@ router.post('/user', async function (req, res, next) {
 });
 
 
-router.post('/user/googleAuth', async function (req, res, next) {
+router.post('/googleAuth', async function (req, res, next) {
   try {
     const {idToken, fcmToken} = req.body;
+    let {name, picture, user_id, email} = await admin.auth().verifyIdToken(idToken);
     const ipInfo = req.ipInfo;
 
-    let {name, picture, user_id, email} = await admin.auth().verifyIdToken(idToken);
-    if (!name) name = 'User';
+    const userExists = await User.getById(user_id);
+    if (userExists) {
+      const userFcm = await Fcm.setFcmToken(user_id, fcmToken);
+      if (!userFcm) throw new Error("Unable to set FCM");
+      const {userType} = userExists;
+      switch (userType) {
+        case userTypes.USER: {
+          if (!name) name = 'User';
+          const user = await UserData.create({
+            email,
+            _id: user_id,
+            displayPictureUrl: picture,
+            name,
+            city: ipInfo.city ? ipInfo.city : ''
+          })
+          if (!user) throw new Error("Unable to create user");
 
-    const user = await UserData.create({
-      email,
-      _id: user_id,
-      displayPictureUrl: picture,
-      name,
-      city: ipInfo.city ? ipInfo.city : ''
-    })
-    if (!user) throw new Error("Unable to create user");
-    const userFcm = await Fcm.setFcmToken(user_id, fcmToken);
-    if (!userFcm) throw new Error("Unable to set FCM");
-
-    const authToken = await signJwt({userEmail: email, userType: userTypes.USER, userId: user_id});
-    res.json({email, userId: user_id, authToken, userType: userTypes.USER, success: true});
+          const authToken = await signJwt({userEmail: email, userType: userTypes.USER, userId: user_id});
+          res.json({email, userId: user_id, authToken, userType: userTypes.USER, success: true, newUser: false});
+        }
+          break;
+        case userTypes.TRAINER: {
+          if (!name) name = 'Trainer';
+          const trainer = await TrainerData.create({
+            email,
+            _id: user_id,
+            displayPictureUrl: picture,
+            name,
+            city: ipInfo.city ? ipInfo.city : ''
+          })
+          if (!trainer) throw new Error("Unable to create trainer");
+          const authToken = await signJwt({userEmail: email, userType: userTypes.TRAINER, userId: user_id});
+          res.json({email, userId: user_id, authToken, userType: userTypes.TRAINER, success: true, newUser: false});
+        }
+          break;
+      }
+    } else {
+      const user = await User.create({
+        email,
+        _id: user_id,
+      })
+      if (!user) throw new Error("Unable to create user");
+      res.json({newUser: true, success: true});
+    }
   } catch (err) {
     console.log(err);
     res.status(403).json({
@@ -93,29 +122,14 @@ router.post('/user/googleAuth', async function (req, res, next) {
   }
 });
 
-router.post('/trainer/googleAuth', async function (req, res, next) {
+router.post('/setUserType', async function (req, res, next) {
   try {
-    const {idToken, fcmToken} = req.body;
-    const ipInfo = req.ipInfo;
-    let {name, picture, user_id, email} = await admin.auth().verifyIdToken(idToken);
-    if (!name) name = 'Trainer';
-    const user = await TrainerData.create({
-      email,
-      _id: user_id,
-      displayPictureUrl: picture,
-      name,
-      city: ipInfo.city ? ipInfo.city : ''
-    })
-    if (!user) throw new Error("Unable to create trainer");
-    const userFcm = await Fcm.setFcmToken(user_id, fcmToken);
-    // console.log("set trainer fcm", userFcm)
-    if (!userFcm) throw new Error("Unable to set FCM");
-
-    const authToken = await signJwt({userEmail: email, userType: userTypes.TRAINER, userId: user_id});
-    res.json({email, userId: user_id, authToken, userType: userTypes.TRAINER, success: true});
+    const {userType, idToken} = req.body;
+    let {user_id} = await admin.auth().verifyIdToken(idToken);
+    await User.setUserType(user_id, userType);
+    res.json({success: true});
   } catch (err) {
-    console.log(err);
-    res.status(403).json({
+    res.status(500).json({
       err: err.message
     });
   }

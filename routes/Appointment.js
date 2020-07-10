@@ -7,7 +7,8 @@ const UserData = require('../models/userData');
 const utility = require('../utility/utility');
 const fcm = require('../models/fcm');
 const WEEK_DAYS_FULL_NAMES = require('../constants');
-const { userTypes } = require('../constants');
+const { userTypes, WEEK_DAYS } = require('../constants');
+const DateUtils = require('../utility/DateUtils');
 
 
 router.post('/:trainerId/book', async function (req, res, next) {
@@ -15,12 +16,18 @@ router.post('/:trainerId/book', async function (req, res, next) {
         const { userId } = req;
         const { trainerId } = req.params;
 
-        const { day, time, appointmentDate } = req.body;
+        const { day, time } = req.body;
+
+        let appointmentDate = req.body.appointmentDate;
 
         let response = {
             success: false,
             message: "",
             appointment:{}
+        }
+
+        if(!appointmentDate){
+            appointmentDate = await DateUtils.getDateBasedOnDay(WEEK_DAYS.indexOf(day));
         }
 
         const trainerData = await TrainerData.getById(trainerId);

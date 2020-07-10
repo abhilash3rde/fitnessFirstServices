@@ -17,7 +17,7 @@ async function getTrainerActivities(trainerId) {
 
     await asyncForEach(mySubscribers, async subscriber => {
         const slot = await Slot.findForSubsAndDay(subscriber._id, day);
-        if (slot && parseInt(slot.time) > parseInt(time)) {
+        if (slot) {
             todaySessions.push({
                 time: slot.time,
                 user: subscriber.subscribedBy,
@@ -75,7 +75,7 @@ async function getUserActivities(userId) {
     const mySubscriptions = await Subscription.getAllForUser(userId);
     await asyncForEach(mySubscriptions, async subscription => {
         const slot = await Slot.findForSubsAndDay(subscription._id, day);
-        if (slot && parseInt(slot.time) > parseInt(time)) {
+        if (slot) {
             todaySessions.push({
                 time: slot.subscription.time,
                 day: 'Today',

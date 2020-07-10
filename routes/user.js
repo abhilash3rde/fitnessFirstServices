@@ -8,21 +8,27 @@ const UserData = require('../models/userData');
 const User = require('../models/user');
 const {userTypes} = require("../constants");
 const Subscription = require('../models/Subscription');
+const Activities = require('./Activities')
 
 router.get('/myInfo', async function (req, res, next) {
   try {
 
-    const {userId} = req;
+    const {userId, userType} = req;
+    let upcomingActivities;
+    let user;
 
-    let user = await TrainerData.getById(userId);
-
-    if (!user) {
+    if(userTypes.TRAINER === userType){
+      user = await TrainerData.getById(userId);
+      upcomingActivities = await Activities.getTrainerActivities(userId);      
+    }
+    else{
       user = await UserData.getById(userId);
+      upcomingActivities = await Activities.getUserActivities(userId);
     }
 
     if (!user) throw new Error('Internal server error. code 45621');
 
-    res.json({user});
+    res.json({user, upcomingActivities});
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
     console.log(error)

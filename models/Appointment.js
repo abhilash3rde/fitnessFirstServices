@@ -53,17 +53,26 @@ async function get(_id) {
   return model;
 }
 
-async function findForUser(userId, trainerId, dayOfWeek, time) {
+async function findBooked(userId, trainerId, dayOfWeek) {
     const model = await Model.findOne(
       {
           userId,
           trainerId,
           dayOfWeek,
-          time
+          connected:false
       },
       {__v: 0}
     );
-    return model;
+
+    if(model){
+      const today = new Date().getDate();
+      const bookedDay = model['createdOn'].getDate();
+
+      if(today - bookedDay < 7){
+        return true;
+      }
+    }
+    return false;
   }
 
 async function create(fields) {
@@ -72,9 +81,35 @@ async function create(fields) {
   return model;
 }
 
+async function updateConnected(_id) {
+  const model = await get(_id);
+  model['connected'] = true;
+  await model.save();
+  return await get(_id);
+}
+
+async function getTrainerAppointments(trainerId) {
+  const model = await Model.find(
+    {trainerId},
+    {__v: 0}
+  );
+  return model;
+}
+
+async function getUserAppointments(userId) {
+  const model = await Model.find(
+    {userId},
+    {__v: 0}
+  );
+  return model;
+}
+
 module.exports = {
   get,
   create,
-  findForUser,
+  findBooked,
+  updateConnected,
+  getTrainerAppointments,
+  getUserAppointments,
   model: Model
 }

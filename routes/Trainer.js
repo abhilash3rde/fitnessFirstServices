@@ -57,20 +57,4 @@ router.get('/myPackages', async function (req, res, next) {
       });
     }
   });
-
-  router.get('/mySubscriptions', async function (req, res, next) {
-    try {
-      const { userId } = req;
-      const subscriptions = await Subscription.getAllForTrainer(userId);
-      
-      if(!subscriptions) {
-        throw Error("No Subscriptions")
-      }
-      res.json( subscriptions );
-    } catch (err) {
-      res.status(500).json({
-        err: err.message
-      });
-    }
-  });
   module.exports = router;

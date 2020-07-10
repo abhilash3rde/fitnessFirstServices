@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema({
   },
   city: {
     type: String,
-    default: ''
+    default: 'User'
   },
   bio: {
     type: String,
@@ -62,7 +62,7 @@ const userSchema = mongoose.Schema({
   },
   biceps: {
     type: Number
-  },
+  }
 }, opts);
 
 userSchema.virtual('totalPosts', {
@@ -72,20 +72,36 @@ userSchema.virtual('totalPosts', {
   count: true
 });
 
+userSchema.virtual('activeSubscriptions', {
+  ref: 'Subscription',
+  localField: '_id',
+  foreignField: 'subscribedBy',
+  count: true,
+  match:{active:true}
+});
+
 userSchema.plugin(mongoosePaginate);
 const Model = db.model('UserData', userSchema);
 
 async function get(email) {
   const model = await Model.findOne(
     {email},
-  ).populate('totalPosts').exec();
+  ).populate([{
+    path:'totalPosts'
+  },{
+    path:'activeSubscriptions',
+  }]).exec();
   return model;
 }
 
 async function getById(_id) {
   const model = await Model.findOne(
     {_id},
-  ).populate('totalPosts').exec();
+  ).populate([{
+    path:'totalPosts'
+  },{
+    path:'activeSubscriptions',
+  }]).exec();
   return model;
 }
 
@@ -97,7 +113,12 @@ async function list(opts = {}) {
   let record = null;
   var options = {
     select: '',
-    sort: { rating: 1, experience: 1 },
+    sort: { rating: -1, experience: -1 },
+    populate:[{
+      path:'totalPosts'
+    },{
+      path:'activeSubscriptions',
+    }],
     lean: true,
     page: page,
     limit: limit

@@ -6,6 +6,7 @@ const paymentModule = require('../config/payment');
 
 router.get('/', async function (req, res, next) {
   try {
+    //testing
     // let {userId} = req.params;
     // if(!userId) userId = req.userId;
     const options = {

@@ -4,6 +4,8 @@ const db = require('../config/db');
 const Comment = require('./comment');
 const CONSTANTS = require('../constants/index');
 const { CONTENT_TYPE } = require('../constants/index');
+const mongoosePaginate = require('mongoose-paginate');
+
 
 const opts = { toJSON: { virtuals: true } };
 
@@ -52,7 +54,7 @@ postSchema.virtual('likes', {
   count: true
 });
 
-
+postSchema.plugin(mongoosePaginate);
 const Model = db.model('Post', postSchema);
 
 async function get(_id) {
@@ -65,14 +67,36 @@ async function get(_id) {
 
 async function list(opts = {}) {
   const {
-    offset = 0, limit = 25
+    page = 1, limit = 25
   } = opts;
-  const model = await Model.find({}, { __v: 0 })
-    .sort({ updatedOn: -1 })
-    .skip(offset)
-    .limit(limit)
-    .populate('comments').exec();
-  return model;
+
+  let record = null;
+  var options = {
+    select: '',
+    sort: { updatedOn: -1 },
+    populate: 'comments',
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  await Model.paginate({}, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
+}
+
+async function remove(_id, userId) {
+  const model = await get(_id);
+  if (!model) throw new Error("Post not found");
+  if (model.createdBy !== userId) throw new Error("Not authorised to delete Post");
+
+  model.comments.map(comment => Comment.remove(comment._id, userId)); // Delete associated comments
+
+  await Model.deleteOne({
+    _id
+  });
+  return true;
 }
 
 async function remove(_id, userId) {
@@ -119,31 +143,25 @@ async function removeComment(postId, commentId) {
   return await get(model._id);
 }
 
-async function getMy(options) {
-
+async function getMy(opts = {}, userId) {
   const {
-    offset = 0, limit = 25, userId
-  } = options;
+    page = 1, limit = 1
+  } = opts;
 
-  const model = await Model.find({createdBy: userId},
-    { __v: 0 }
-  )
-  .sort({
-    updatedOn: -1
-  })
-  .skip(offset)
-  .limit(limit)
-  .populate([
-    {
-    path:'comments',
-    populate:{
-      path:'likes'
-    }
-  },{
-    path: 'likes'
-  }
-]).exec();
-  return model;
+  let record = null;
+  var options = {
+    select: '',
+    sort: { updatedOn: -1 },
+    populate: 'comments',
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  await Model.paginate({}, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
 }
 
 module.exports = {

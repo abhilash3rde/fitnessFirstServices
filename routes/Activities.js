@@ -1,7 +1,8 @@
 const { userTypes, TIME_STRING, WEEK_DAYS } = require('../constants');
 const Subscription = require('../models/Subscription');
 const Slot = require('../models/slot');
-const DateUtils = require('../utility/DateUtils')
+const DateUtils = require('../utility/DateUtils');
+const Appointment = require('../models/Appointment');
 
 async function getTrainerActivities(trainerId) {
     const todaySessions = [];
@@ -20,8 +21,7 @@ async function getTrainerActivities(trainerId) {
             todaySessions.push({
                 time: slot.time,
                 user: subscriber.subscribedBy,
-                day: 'Today',
-                sessionsLeft: (subscriber.totalSessions - subscriber.heldSessions)
+                type:'SESSION'
             });
         }
 
@@ -29,13 +29,38 @@ async function getTrainerActivities(trainerId) {
         if (slotsNextDay) {
             nextDaySessions.push({
                 time: slotsNextDay.time,
-                day: slotsNextDay.dayOfWeek,
                 user: subscriber.subscribedBy,
-                sessionsLeft: (subscriber.totalSessions - subscriber.heldSessions)
+                type:'SESSION'
             });
         }
     });
-    return { todaySessions, nextDaySessions }
+
+    const todaysAppointments = await Appointment.getTrainerAppointmentsForDate(trainerId, date);
+    const tomorrow = new Date(date.setDate(date.getDate() + 1));
+    const tomorrowsAppointments = await Appointment.getTrainerAppointmentsForDate(trainerId, tomorrow);
+
+    let todaysEvents = [...nextDaySessions];
+    todaysAppointments.forEach(appointment=>{
+        todaysEvents.push({
+            time: appointment.time,
+            user: appointment.userId,
+            type:'APPOINTMENT'
+        })
+    });
+
+    let tomorrowsEvents = [...todaySessions];
+    tomorrowsAppointments.forEach(appointment=>{
+        tomorrowsEvents.push({
+            time: appointment.time,
+            user: appointment.userId,
+            type:'APPOINTMENT'
+        })
+    });
+
+    todaysEvents.sort((o1, o2)=> parseInt(o1.time) - parseInt(o2.time));
+    tomorrowsEvents.sort((o1, o2)=> parseInt(o1.time) - parseInt(o2.time));
+
+    return { todaysEvents, tomorrowsEvents }
 }
 
 async function getUserActivities(userId) {
@@ -70,7 +95,32 @@ async function getUserActivities(userId) {
         }
     });
 
-    return { todaySessions, nextDaySessions }
+    const todaysAppointments = await Appointment.getuserAppointmentsForDate(trainerId, date);
+    const tomorrow = new Date(date.setDate(date.getDate() + 1));
+    const tomorrowsAppointments = await Appointment.getuserAppointmentsForDate(trainerId, tomorrow);
+
+    let todaysEvents = [...nextDaySessions];
+    todaysAppointments.forEach(appointment=>{
+        todaysEvents.push({
+            time: appointment.time,
+            user: appointment.trainerId,
+            type:'APPOINTMENT'
+        })
+    });
+
+    let tomorrowsEvents = [...todaySessions];
+    tomorrowsAppointments.forEach(appointment=>{
+        tomorrowsEvents.push({
+            time: appointment.time,
+            user: appointment.trainerId,
+            type:'APPOINTMENT'
+        })
+    });
+
+    todaysEvents.sort((o1, o2)=> parseInt(o1.time) - parseInt(o2.time));
+    tomorrowsEvents.sort((o1, o2)=> parseInt(o1.time) - parseInt(o2.time));
+
+    return { todaysEvents, tomorrowsEvents }
 }
 
 async function asyncForEach(array, callback) {

@@ -92,12 +92,18 @@ async function getForPackage(packageId) {
 }
 
 async function getAllForTrainer(trainerId) {
-  const model = await Model.find({ trainerId }).populate('subscribedBy').exec();
+  const model = await Model.find({ trainerId }).populate([
+    {path:'subscribedBy'},
+    {path:'packageId'}
+  ]).exec();
   return model;
 }
 
 async function getAllForUser(subscribedBy) {
-  const model = await Model.find({ subscribedBy });
+  const model = await Model.find({ subscribedBy }).populate([
+    {path:'trainerId'},
+    {path:'packageId'}
+  ]).exec();
   return model;
 }
 

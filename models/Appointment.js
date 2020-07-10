@@ -40,6 +40,10 @@ const appointmentSchema = mongoose.Schema({
   connected:{
     type: Boolean,
     default:false
+  },
+  appointmentDate:{
+    type:Date,
+    default:null
   }
 }, opts);
 
@@ -67,8 +71,9 @@ async function findBooked(userId, trainerId, dayOfWeek) {
     if(model){
       const today = new Date().getDate();
       const bookedDay = model['createdOn'].getDate();
+      const appointmentDate = model['appointmentDate'].getDate();
 
-      if(today - bookedDay < 7){
+      if(today - bookedDay < 7 || (appointmentDate - today > 0)){
         return true;
       }
     }
@@ -92,7 +97,7 @@ async function getTrainerAppointments(trainerId) {
   const model = await Model.find(
     {trainerId},
     {__v: 0}
-  );
+  ).populate('userId').exec();;
   return model;
 }
 
@@ -100,7 +105,23 @@ async function getUserAppointments(userId) {
   const model = await Model.find(
     {userId},
     {__v: 0}
-  );
+  ).populate('trainerId').exec();;
+  return model;
+}
+
+async function getTrainerAppointmentsForDate(trainerId, appointmentDate) {
+  const model = await Model.find(
+    {trainerId, appointmentDate},
+    {__v: 0}
+  ).populate('userId').exec();
+  return model;
+}
+
+async function getuserAppointmentsForDate(userId, appointmentDate) {
+  const model = await Model.find(
+    {userId, appointmentDate},
+    {__v: 0}
+  ).populate('trainerId').exec();
   return model;
 }
 
@@ -111,5 +132,7 @@ module.exports = {
   updateConnected,
   getTrainerAppointments,
   getUserAppointments,
+  getTrainerAppointmentsForDate,
+  getuserAppointmentsForDate,
   model: Model
 }

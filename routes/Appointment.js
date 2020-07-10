@@ -15,7 +15,7 @@ router.post('/:trainerId/book', async function (req, res, next) {
         const { userId } = req;
         const { trainerId } = req.params;
 
-        const { day, time } = req.body;
+        const { day, time, appointmentDate } = req.body;
 
         let response = {
             success: false,
@@ -50,6 +50,7 @@ router.post('/:trainerId/book', async function (req, res, next) {
                 trainerId,
                 dayOfWeek: day,
                 time,
+                appointmentDate,
                 notified: true
             });
             if (!appointment) throw new Error("Error in booking appointment");

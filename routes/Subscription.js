@@ -51,8 +51,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       })
     });
 
-
     const approxDuration = package.noOfSessions / days.length;
+
     const metadata = {
       packageName: package.title,
       sessionCount: package.noOfSessions,
@@ -151,6 +151,9 @@ router.put('/updateTransaction', async function (req, res, next) {
     if (!transaction) {
       throw Error("Error updating transaction status")
     }
+
+    const noOfDays = 7 * (approxDuration);
+    await Package.updateEndDate(noOfDays);
 
     res.json({success: true});
   } catch (err) {

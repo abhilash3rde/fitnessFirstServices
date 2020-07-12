@@ -15,14 +15,12 @@ const Model = db.model('Like', {
         type: Date,
         default: Date.now
     },
-    postId: {
-        type: String,
-        ref: 'Post',
+    contentId:{
+        type:String,
         default:null
     },
-    commentId: {
-        type: String,
-        ref: 'Comment',
+    contentType:{
+        type:String,
         default:null
     }
 });
@@ -52,17 +50,9 @@ async function create(fields) {
     return true;
   }
 
-  async function unlikeComment(commentId) {
-    const model = await Model.findOne({commentId});
+  async function unlike(contentId) {
+    const model = await Model.findOne({contentId});
 
-    if(!model){
-        throw Error("No Like");
-    }
-    return await remove(model._id);
-  }
-
-  async function unlikePost(postId) {
-    const model = await Model.findOne({postId});
     if(!model){
         throw Error("No Like");
     }
@@ -72,7 +62,6 @@ async function create(fields) {
 module.exports = {
     get,
     create,
-    unlikeComment,
-    unlikePost,
+    unlike,
     model: Model
 }

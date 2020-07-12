@@ -49,20 +49,23 @@ router.put('/:commentId', async function (req, res, next) {
   }
 });
 
-router.delete('/:commentId', async function (req, res, next) {
+//TODO: revisit
+router.delete('/:postId/:commentId', async function (req, res, next) {
   try {
-    const { commentId } = req.params;
+    const { postId, commentId } = req.params;
     const { userId } = req;
-    const postId = await Comment.remove(
+
+    const post = await Posts.removeComment(postId, commentId);
+
+    await Comment.remove(
       commentId,
       userId
     );
-    if (postId) {
-      const post = await Posts.removeComment(postId, commentId);
-      if (!post) throw new Error("Error deleting Comment");
+    if(!post){
+      throw Error ("Error deleting comment"); 
     }
 
-    res.json({ success: true });
+    res.json({ post });
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -77,7 +80,8 @@ router.post('/:commentId/like', async function (req, res, next) {
 
     const result = await Like.create({
       likedBy : userId,
-      commentId
+      contentId: commentId,
+      contentType: 'COMMENT'
     })
     if (result)
       res.json({
@@ -94,12 +98,88 @@ router.post('/:commentId/unlike', async function (req, res, next) {
   try {
     const { commentId } = req.params;
 
-    const result = await Like.unlikeComment(commentId);
+    const result = await Like.unlike(commentId);
 
     if (result)
       res.json({
         success: true
       });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.put('/:commentId/reportSpam', async function (req, res, next) {
+  try {
+    const { commentId } = req.params;
+    const result = await Comment.edit(commentId, {spam: true});
+
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+
+//Admin only
+router.put('/:commentId/removeSpam', async function (req, res, next) {
+  try {
+    const { commentId } = req.params;
+    const result = await Comment.edit(commentId, {spam: false});
+
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+//Admin only
+router.put('/:commentId/approve', async function (req, res, next) {
+  try {
+    const { userId } = req;
+    const { commentId } = req.params;
+
+    const result = await Comment.edit(
+     commentId, {approved : true});
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+
+router.get('/getForPost/:postId/:page', async function (req, res, next) {
+  try {
+
+    const {postId, page} = req.params;
+
+    let comments = [];
+    let nextPage = null;
+    const records = await Comment.getForPosts({page}, postId);
+    if (records.docs.length > 0) {
+      comments = [...records.docs];
+      if (records.page < records.pages) {
+        nextPage = "/comment/getForPost/"+postId+"/"+(parseInt(records.page) + 1);
+      }
+    }
+    res.json({ comments, nextPage });
   } catch (err) {
     res.status(500).json({
       err: err.message

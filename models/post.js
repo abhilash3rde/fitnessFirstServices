@@ -6,7 +6,6 @@ const CONSTANTS = require('../constants/index');
 const { CONTENT_TYPE } = require('../constants/index');
 const mongoosePaginate = require('mongoose-paginate');
 
-
 const opts = { toJSON: { virtuals: true } };
 
 const postSchema = mongoose.Schema({
@@ -40,18 +39,35 @@ const postSchema = mongoose.Schema({
     type: String,
     default: null
   },
-  comments: [{ type: String, ref: 'Comment', index: true }],
+  comments: [{ type: String, ref: 'Comment', index:true}],
   shares: {
     type: Number,
     default: 0
-  }
+  },
+  spam:{
+    type:Boolean,
+    default: false
+  },
+  approved:{
+    type:Boolean,
+    default: false
+  },
 }, opts);
 
 postSchema.virtual('likes', {
   ref: 'Like',
   localField: '_id',
+  foreignField: 'contentId',
+  count: true,
+  match:{contentType:'POST'}
+});
+
+postSchema.virtual('totalComments', {
+  ref: 'Comment',
+  localField: '_id',
   foreignField: 'postId',
-  count: true
+  count: true,
+  match:{spam:false, approved: true}
 });
 
 postSchema.plugin(mongoosePaginate);
@@ -61,7 +77,12 @@ async function get(_id) {
   const model = await Model.findOne(
     { _id },
     { __v: 0 }
-  ).populate('comments').exec();
+  ).populate([{
+    path:'totalComments'
+  },
+  {
+    path:'likes'
+  }]);
   return model;
 }
 
@@ -74,13 +95,16 @@ async function list(opts = {}) {
   var options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: 'comments',
+    populate: [{path:'totalComments'}, {path: 'likes'}],
     lean: true,
     page: page,
     limit: limit
   };
+  const query = {
+    spam:false, approved: true
+  }
 
-  await Model.paginate({}, options, async (err, result) =>{
+  await Model.paginate(query, options, async (err, result) =>{
     record = result;
   });
   return record;
@@ -90,27 +114,20 @@ async function remove(_id, userId) {
   const model = await get(_id);
   if (!model) throw new Error("Post not found");
   if (model.createdBy !== userId) throw new Error("Not authorised to delete Post");
+  
+  const commentsRemoved = await Comment.deleteComments(model._id);
 
-  model.comments.map(comment => Comment.remove(comment._id, userId)); // Delete associated comments
-
-  await Model.deleteOne({
-    _id
-  });
-  return true;
+  if(commentsRemoved){
+    await Model.deleteOne({
+      _id
+    });
+    return true;
+  }
+  else{
+    return false;
+  } 
 }
 
-async function remove(_id, userId) {
-  const model = await get(_id);
-  if (!model) throw new Error("Post not found");
-  if (model.createdBy !== userId) throw new Error("Not authorised to delete Post");
-
-  model.comments.map(comment => Comment.remove(comment._id, userId)); // Delete associated comments
-
-  await Model.deleteOne({
-    _id
-  });
-  return true;
-}
 
 async function create(fields) {
   const model = new Model(fields);
@@ -138,27 +155,34 @@ async function addComment(postId, commentId) {
 
 async function removeComment(postId, commentId) {
   const model = await get(postId);
-  model.comments.filter(comment=> comment._id !== commentId);
+  
+  model.comments = await model.comments.filter(async comment=> await comment.id !== commentId);
+
   await model.save();
-  return await get(model._id);
+  return model;
 }
 
 async function getMy(opts = {}, userId) {
   const {
-    page = 1, limit = 1
+    page = 1, limit = 25
   } = opts;
 
   let record = null;
-  var options = {
+  const options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: 'comments',
+    populate: [{path: 'totalComments'},{path: 'likes'}],
     lean: true,
     page: page,
     limit: limit
   };
 
-  await Model.paginate({}, options, async (err, result) =>{
+  const query = {
+    createdBy:userId, 
+    spam:false, approved: true
+  }
+
+  await Model.paginate(query, options, async (err, result) =>{
     record = result;
   });
   return record;

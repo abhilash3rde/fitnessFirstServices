@@ -9,7 +9,7 @@ const fs = require('fs');
 var path = require('path');
 const Comment = require('../models/comment');
 
-router.get('/getAll/:page?', async function (req, res, next) {
+router.get('/getAll/:page', async function (req, res, next) {
   try {
 
     const page = req.params['page'] ? req.params['page'] : 1;
@@ -175,7 +175,7 @@ router.post('/:postId/unlike', async function (req, res, next) {
   }
 });
 
-router.get('/my/:page?', async function (req, res, next) {
+router.get('/my/:page', async function (req, res, next) {
   try {
     const { userId } = req;
     const page = req.params['page'] ? req.params['page'] : 1;
@@ -246,6 +246,29 @@ router.put('/:postId/approve', async function (req, res, next) {
       res.json({
         success: true
       });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.get('/user/:userId/:page', async function (req, res, next) {
+  try {
+    const userId = req.params['userId'];
+    const page = req.params['page'] ? req.params['page'] : 1;
+
+    let posts = [];
+    let nextPage = null;
+
+    const records = await Post.getMy({page}, userId);
+    if (records.docs.length > 0) {
+      posts = [...records.docs];
+      if (records.page < records.pages) {
+        nextPage = "/post/my/"+(parseInt(records.page) + 1);
+      }
+    }
+    res.json({ posts, nextPage });
   } catch (err) {
     res.status(500).json({
       err: err.message

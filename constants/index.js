@@ -10,6 +10,7 @@ const CHANNELS = {
 }
 
 const CONTENT_TYPE = {
+  TEXT: 'TEXT',
   VIDEO:'VIDEO',
   IMAGE:'IMAGE'
 }

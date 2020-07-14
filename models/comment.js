@@ -1,17 +1,18 @@
 const cuid = require('cuid');
 const mongoose = require('mongoose');
-const opts = {toJSON: {virtuals: true}};
-
+const opts = { toJSON: { virtuals: true } };
+const mongoosePaginate = require('mongoose-paginate');
 const db = require('../config/db');
-const post = require('./post');
+
+const Post = require('./post')
 
 const commentSchema = mongoose.Schema({
   _id: {
     type: String,
     default: cuid
   },
-  commentedBy:{
-    type:String,
+  commentedBy: {
+    type: String,
     ref: 'User',
     required: true
   },
@@ -27,7 +28,7 @@ const commentSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  postId:{
+  postId: {
     type: String,
     ref: 'Post',
     required: true
@@ -36,37 +37,60 @@ const commentSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  spam: {
+    type: Boolean,
+    default: false
+  },
+  approved: {
+    type: Boolean,
+    default: false
+  }
 }, opts);
 
-commentSchema.virtual('likes',{
+commentSchema.virtual('likes', {
   ref: 'Like',
   localField: '_id',
-  foreignField: 'commentId',
-  count: true
+  foreignField: 'contentId',
+  count: true,
+  match: { contentType: 'COMMENT' }
 });
 
-
+commentSchema.plugin(mongoosePaginate);
 const Model = db.model('Comment', commentSchema);
 
 async function get(_id) {
   const model = await Model.findOne(
-    {_id},
-    {__v: 0}
+    { _id },
+    { __v: 0 }
   );
   return model;
 }
 
 async function remove(_id, userId) {
   const model = await get(_id);
-  const postId = model['postId'];
-  if(!model) throw new Error("Comment not found");
-  if (model.commentedBy === userId){
+  if (!model) throw new Error("Comment not found");
+
+  if (model.commentedBy === userId) {
     await Model.deleteOne({
       _id
     });
-    return postId;
+    return true;
   }
   else throw new Error("Not authorised to delete comment");
+}
+
+async function deleteComments(postId) {
+  const model = await Model.find({ postId });
+  if (!model) throw new Error("Comment not found");
+
+  try {
+    //model.map(async comment=> await Model.deleteOne(comment._id));
+    await Model.deleteMany({postId});
+    return true;
+  }
+  catch(err){
+    return false;
+  }
 }
 
 async function create(fields) {
@@ -75,22 +99,51 @@ async function create(fields) {
   return model;
 }
 
-async function edit(_id, userId, commentText) {
+async function edit(_id, change) {
   const model = await get(_id);
-  if(!model) throw new Error("Comment not found");
-  if (model.commentedBy !== userId) throw new Error("Not authorised to edit comment");
+  if (!model) throw new Error("Comment not found");
 
-  model.commentText = commentText;
-  model.isEdited = true;
-  model.updatedOn = Date.now();
+  Object.keys(change).forEach(key => {
+    model[key] = change[key]
+  });
+  model['updatedOn'] = Date.now();
   await model.save();
-  return model;
+  return await get(_id);
 }
+
+
+async function getForPosts(opts = {}, postId) {
+  const {
+    page = 1, limit = 25
+  } = opts;
+
+  let record = null;
+  var options = {
+    select: '',
+    sort: { updatedOn: -1 },
+    populate: 'likes',
+    lean: true,
+    page: page,
+    limit: limit
+  };
+  const query = {
+    postId, spam:false, //approved:true -- just for testing 
+  }
+
+  await Model.paginate(query, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
+}
+
+
 
 module.exports = {
   get,
   create,
   edit,
   remove,
+  deleteComments,
+  getForPosts,
   model: Model
 }

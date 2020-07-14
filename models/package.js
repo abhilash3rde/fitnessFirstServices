@@ -34,10 +34,6 @@ const packageSchema = mongoose.Schema({
   description: {
     type: String,
     default: "Add or create new packages, customise their duration and cost. Click to add or delete packages"
-  },
-  endDate:{
-    type:Date,
-    default:null
   }
 }, opts);
 
@@ -136,16 +132,6 @@ async function deActivatePackage(_id) {
   return await model.save();
 }
 
-async function updateEndDate(_id, noOfDays){
-  const model = await get(_id);
-  const today = new Date();
-  const endDate = new Date(today.setDate(today.getDate() + noOfDays));
-
-  model['endDate'] = endDate;
-  return await model.save();
-
-}
-
 
 
 module.exports = {
@@ -157,6 +143,5 @@ module.exports = {
   // removeSubscription,
   activatepackage,
   deActivatePackage,
-  updateEndDate,
   model: Model
 }

@@ -29,7 +29,7 @@ const postSchema = mongoose.Schema({
   contentType: {
     type: String,
     default: CONTENT_TYPE.TEXT,
-    enum: [CONTENT_TYPE.IMAGE, CONTENT_TYPE.VIDEO]
+    enum: [CONTENT_TYPE.TEXT, CONTENT_TYPE.IMAGE, CONTENT_TYPE.VIDEO]
   },
   textContent: {
     type: String,

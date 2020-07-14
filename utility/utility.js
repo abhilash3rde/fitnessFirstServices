@@ -33,7 +33,7 @@ const findMissingValue = (arr1, arr2, callback) => {
 
 async function uploadMedia(file) {
   let contentURL = '';
-  let contentType = CONTENT_TYPE.IMAGE;
+  let contentType = CONTENT_TYPE.TEXT;
 
   if (ENABLE_FILE_UPLOAD) {
     if (file && file.tempFilePath) {

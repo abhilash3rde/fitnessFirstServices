@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const db = require('../config/db');
 const Comment = require('./comment');
 const CONSTANTS = require('../constants/index');
-const { CONTENT_TYPE } = require('../constants/index');
+const { CONTENT_TYPE, POST_TYPE } = require('../constants/index');
 const mongoosePaginate = require('mongoose-paginate');
 
 const opts = { toJSON: { virtuals: true } };
@@ -29,7 +29,7 @@ const postSchema = mongoose.Schema({
   contentType: {
     type: String,
     default: CONTENT_TYPE.TEXT,
-    enum: [CONTENT_TYPE.IMAGE, CONTENT_TYPE.VIDEO]
+    enum: [CONTENT_TYPE.TEXT, CONTENT_TYPE.IMAGE, CONTENT_TYPE.VIDEO]
   },
   textContent: {
     type: String,
@@ -52,6 +52,11 @@ const postSchema = mongoose.Schema({
     type:Boolean,
     default: true
   },
+  postCategory:{
+    type:String,
+    default: POST_TYPE.TYPE_POST,
+    enum: [POST_TYPE.TYPE_POST, POST_TYPE.TYPE_WORKOUT]
+  }
 }, opts);
 
 postSchema.virtual('likes', {

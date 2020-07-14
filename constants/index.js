@@ -10,8 +10,14 @@ const CHANNELS = {
 }
 
 const CONTENT_TYPE = {
+  TEXT: 'TEXT',
   VIDEO:'VIDEO',
   IMAGE:'IMAGE'
+}
+
+const POST_TYPE = {
+  TYPE_POST: 'TYPE_POST',
+  TYPE_WORKOUT:'TYPE_WORKOUT'
 }
 
 //TODO - this is random allocation if no wall image
@@ -71,5 +77,6 @@ module.exports = {
   WEEK_DAYS,
   TIME_STRING,
   WEEK_DAYS_FULL_NAMES,
-  paymentKey
+  paymentKey,
+  POST_TYPE
 }

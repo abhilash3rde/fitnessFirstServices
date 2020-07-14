@@ -79,6 +79,10 @@ const trainerSchema = mongoose.Schema({
   },
   biceps: {
     type: Number
+  },
+  approved:{
+    type: Boolean,
+    default: false
   }
 }, opts);
 

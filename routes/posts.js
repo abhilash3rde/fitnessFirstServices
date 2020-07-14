@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const Posts = require('../models/post');
+const Post = require('../models/post');
 const Like = require('../models/like');
 const utility = require('../utility/utility');
 const { saveFileToServer } = require('../config/uploadConfig');
 const fs = require('fs');
 var path = require('path');
+const Comment = require('../models/comment');
 
 router.get('/getAll/:page?', async function (req, res, next) {
   try {
@@ -15,7 +16,7 @@ router.get('/getAll/:page?', async function (req, res, next) {
 
     let posts = [];
     let nextPage = null;
-    const records = await Posts.list({page});
+    const records = await Post.list({page});
     if (records.docs.length > 0) {
       posts = [...records.docs];
       if (records.page < records.pages) {
@@ -36,7 +37,7 @@ router.put('/:postId/updateMedia', async function (req, res, next) {
     const mediaFile = req.files ? req.files.mediaContent : null;
     const content = await utility.uploadMedia(mediaFile);
 
-    const post = await Posts.edit(
+    const post = await Post.edit(
       postId, {
       ...content
     });
@@ -55,7 +56,7 @@ router.put('/:postId/updateText', async function (req, res, next) {
     const { postId } = req.params;
     const postContent = req.body;
 
-    const post = await Posts.edit(
+    const post = await Post.edit(
       postId, {
       ...postContent
     });
@@ -78,7 +79,7 @@ router.post('/', async function (req, res, next) {
     const content = await utility.uploadMedia(mediaFile);
     const postContent = req.body;
 
-    const post = await Posts.create(
+    const post = await Post.create(
       {
         ...content,
         createdBy: userId,
@@ -99,11 +100,36 @@ router.delete('/:postId', async function (req, res, next) {
     const { userId } = req;
     const { postId } = req.params;
 
-    const result = await Posts.remove(postId, userId);
+    const result = await Post.remove(postId, userId);
     if (result)
       res.json({
         success: true
       });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.get('/:postId', async function (req, res, next) {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.get(postId);
+    let comments = [];
+    let nextPage = null;
+
+    const records = await Comment.getForPosts({page: 1}, postId);
+    if (records.docs.length > 0) {
+      comments = [...records.docs];
+      if (records.page < records.pages) {
+        nextPage = "/comment/getForPost/"+postId+"/"+(parseInt(records.page) + 1);
+      }
+    }
+
+    if (post)
+      res.json({ post, comments, nextPage});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -118,7 +144,8 @@ router.post('/:postId/like', async function (req, res, next) {
 
     const result = await Like.create({
       likedBy: userId,
-      postId
+      contentId: postId,
+      contentType: 'POST'
     })
     if (result)
       res.json({
@@ -135,7 +162,7 @@ router.post('/:postId/unlike', async function (req, res, next) {
   try {
     const { postId } = req.params;
 
-    const result = await Like.unlikePost(postId);
+    const result = await Like.unlike(postId);
 
     if (result)
       res.json({
@@ -156,7 +183,7 @@ router.get('/my/:page?', async function (req, res, next) {
     let posts = [];
     let nextPage = null;
 
-    const records = await Posts.getMy({page}, userId);
+    const records = await Post.getMy({page}, userId);
     if (records.docs.length > 0) {
       posts = [...records.docs];
       if (records.page < records.pages) {
@@ -164,6 +191,61 @@ router.get('/my/:page?', async function (req, res, next) {
       }
     }
     res.json({ posts, nextPage });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.put('/:postId/reportSpam', async function (req, res, next) {
+  try {
+    const { postId } = req.params;
+
+    const result = await Post.edit(
+     postId, {spam : true});
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+//Admin only
+router.put('/:postId/removeSpam', async function (req, res, next) {
+  try {
+    const { userId } = req;
+    const { postId } = req.params;
+
+    const result = await Post.edit(
+     postId, {spam : false});
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+//Admin only
+router.put('/:postId/approve', async function (req, res, next) {
+  try {
+    const { userId } = req;
+    const { postId } = req.params;
+
+    const result = await Post.edit(
+     postId, {approved : true});
+    if (result)
+      res.json({
+        success: true
+      });
   } catch (err) {
     res.status(500).json({
       err: err.message

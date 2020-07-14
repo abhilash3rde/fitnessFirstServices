@@ -15,6 +15,11 @@ const CONTENT_TYPE = {
   IMAGE:'IMAGE'
 }
 
+const POST_TYPE = {
+  TYPE_POST: 'TYPE_POST',
+  TYPE_WORKOUT:'TYPE_WORKOUT'
+}
+
 //TODO - this is random allocation if no wall image
 const RAMDOM_WALL_IMAGE = {
   1:"https://res.cloudinary.com/matrim/image/upload/v1593788759/oottv1b6pa143q6kcdxl.jpg",
@@ -72,5 +77,6 @@ module.exports = {
   WEEK_DAYS,
   TIME_STRING,
   WEEK_DAYS_FULL_NAMES,
-  paymentKey
+  paymentKey,
+  POST_TYPE
 }

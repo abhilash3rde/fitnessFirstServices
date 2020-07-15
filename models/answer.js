@@ -33,7 +33,7 @@ const answerSchema = mongoose.Schema({
   },
   approved:{
     type: Boolean,
-    default: false
+    default: true //todo discuss
   }
 
 }, opts);

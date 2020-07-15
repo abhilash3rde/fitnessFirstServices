@@ -59,9 +59,19 @@ async function create(fields) {
     return await remove(model._id);
   }
 
+  async function getForContent(contentId) {
+    const model = await Model.find({contentId}, {likedBy:1, likedOn:1});
+
+    if(!model){
+        throw Error("No Like");
+    }
+    return model;
+  }
+
 module.exports = {
     get,
     create,
     unlike,
+    getForContent,
     model: Model
 }

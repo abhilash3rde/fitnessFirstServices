@@ -151,6 +151,12 @@ async function getDayFullName(day){
   return dayName;
 }
 
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+  }
+}
+
 module.exports = {
   hashPassword,
   uploadLocalFile,
@@ -161,5 +167,6 @@ module.exports = {
   getRandomMedia,
   groupBy,
   sendNotification,
-  getDayFullName
+  getDayFullName,
+  asyncForEach
 }

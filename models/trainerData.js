@@ -299,6 +299,17 @@ async function addWorkingDays(trainerId, workingDays) {
   return getById(model);
 }
 
+async function getTrainer(_id) {
+  const model = await Model.findOne(
+    { _id },
+    { name:1, experience:1, rating:1, displayPictureUrl:1, wallImageUrl:1, city:1 }
+  );
+
+  const { name, experience, rating, displayPictureUrl, wallImageUrl, city } = model;
+
+  return { name, experience, rating, displayPictureUrl, wallImageUrl, city };
+}
+
 
 module.exports = {
   get,
@@ -313,5 +324,6 @@ module.exports = {
   removePackage,
   removeSlot,
   addWorkingDays,
+  getTrainer,
   model: Model
 }

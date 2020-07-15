@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const db = require('../config/db');
 const Comment = require('./comment');
 const CONSTANTS = require('../constants/index');
-const { CONTENT_TYPE, POST_TYPE } = require('../constants/index');
+const { CONTENT_TYPE, POST_TYPE, userTypes } = require('../constants/index');
 const mongoosePaginate = require('mongoose-paginate');
+const TrainerData = require('../models/trainerData');
+const utility = require('../utility/utility');
 
 const opts = { toJSON: { virtuals: true } };
 
@@ -59,14 +61,6 @@ const postSchema = mongoose.Schema({
   }
 }, opts);
 
-postSchema.virtual('likes', {
-  ref: 'Like',
-  localField: '_id',
-  foreignField: 'contentId',
-  count: true,
-  match:{contentType:'POST'}
-});
-
 postSchema.virtual('totalComments', {
   ref: 'Comment',
   localField: '_id',
@@ -85,9 +79,8 @@ async function get(_id) {
   ).populate([{
     path:'totalComments'
   },
-  {
-    path:'likes'
-  }]);
+  {path:'createdBy', select:'_id, userType'}]).exec();
+
   return model;
 }
 
@@ -100,7 +93,7 @@ async function list(opts = {}) {
   var options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: [{path:'totalComments'}, {path: 'likes'}],
+    populate: [{path:'totalComments'}, {path:'createdBy', select:'_id, userType'}],
     lean: true,
     page: page,
     limit: limit
@@ -176,7 +169,7 @@ async function getMy(opts = {}, userId) {
   const options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: [{path: 'totalComments'},{path: 'likes'}],
+    populate: [{path: 'totalComments'}, {path:'createdBy', select:'_id, userType'}],
     lean: true,
     page: page,
     limit: limit

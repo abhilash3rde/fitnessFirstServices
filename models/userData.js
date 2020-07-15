@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema({
   },
   city: {
     type: String,
-    default: 'User'
+    default: ''
   },
   bio: {
     type: String,
@@ -188,6 +188,17 @@ async function isUnique(doc, property) {
   return !existing || doc._id === existing._id;
 }
 
+async function getUser(_id) {
+  const model = await Model.findOne(
+    { _id },
+    { name:1, displayPictureUrl:1, wallImageUrl:1, city:1 }
+  );
+
+  const { name, displayPictureUrl, wallImageUrl, city } = model;
+
+  return { name, displayPictureUrl, wallImageUrl, city };
+}
+
 module.exports = {
   get,
   getById,
@@ -195,5 +206,6 @@ module.exports = {
   create,
   edit,
   remove,
+  getUser,
   model: Model
 }

@@ -102,11 +102,16 @@ async function list(opts = {}) {
     populate: [
       {
         path:'answers',
-        populate:{
+        populate:[{
+          path:'postedBy', select:'_id, userType'
+        },{
           path:'likes'
-        }
+        }]
     }, 
-      {path: 'likes'}],
+      {path: 'likes'},
+    {
+      path : 'postedBy', select:'_id, userType'
+    }],
     lean: true,
     page: page,
     limit: limit

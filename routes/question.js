@@ -3,6 +3,8 @@ const router = express.Router();
 const Like = require('../models/like');
 const Question = require('../models/question');
 const Answer = require('../models/answer');
+const UserUtils = require('../utility/userUtils')
+const Utility = require('../utility/utility')
 
 router.get('/getAll/:page?', async function (req, res, next) {
     try {
@@ -13,7 +15,21 @@ router.get('/getAll/:page?', async function (req, res, next) {
       let nextPage = null;
       const records = await Question.list({page});
       if (records.docs.length > 0) {
-        questions = [...records.docs];
+        questionRecords = [...records.docs];
+
+        await Utility.asyncForEach(questionRecords, async question=>{
+          question.postedBy = await UserUtils.populateUser(question.postedBy._id, question.postedBy.userType);
+          const answerRecords = question.answers;
+          let answers = [];
+
+          await Utility.asyncForEach(answerRecords, async answer=>{
+            answer.postedBy = await UserUtils.populateUser(answer.postedBy._id, answer.postedBy.userType);
+            answers.push({...answer});
+          });
+          question.answers = [...answers];
+          questions.push({...question});
+        });
+
         if (records.page < records.pages) {
           nextPage = "/question/getAll/"+(parseInt(records.page) + 1);
         }

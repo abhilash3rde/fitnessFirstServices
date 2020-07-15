@@ -178,7 +178,7 @@ router.get('/getForPost/:postId/:page', async function (req, res, next) {
     if (records.docs.length > 0) {
       const commentRecords = [...records.docs];
 
-      await asyncForEach(commentRecords, async comment=>{
+      await Utility.asyncForEach(commentRecords, async comment=>{
         const likes = await Like.getForContent(comment._id);
         comments.push({...comment, likes});
       });

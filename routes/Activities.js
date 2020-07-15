@@ -124,7 +124,6 @@ async function getUserActivities(userId) {
 }
 
 async function asyncForEach(array, callback) {
-    console.log("array=>", array)
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);
     }

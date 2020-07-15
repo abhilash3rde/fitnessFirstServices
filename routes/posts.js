@@ -8,6 +8,7 @@ const { saveFileToServer } = require('../config/uploadConfig');
 const fs = require('fs');
 var path = require('path');
 const Comment = require('../models/comment');
+const UserUtils = require('../utility/userUtils')
 
 router.get('/getAll/:page?', async function (req, res, next) {
   try {
@@ -17,8 +18,17 @@ router.get('/getAll/:page?', async function (req, res, next) {
     let posts = [];
     let nextPage = null;
     const records = await Post.list({page});
+
     if (records.docs.length > 0) {
-      posts = [...records.docs];
+      const postRecords = [...records.docs];
+
+     await asyncForEach(postRecords, async post=>{
+        const likes = await Like.getForContent(post._id);
+        
+        post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+        posts.push({...post, likes});
+      });
+
       if (records.page < records.pages) {
         nextPage = "/post/getAll/"+(parseInt(records.page) + 1);
       }
@@ -117,19 +127,29 @@ router.get('/:postId', async function (req, res, next) {
     const { postId } = req.params;
 
     const post = await Post.get(postId);
+    const likes = await Like.getForContent(post._id);
+
     let comments = [];
     let nextPage = null;
 
     const records = await Comment.getForPosts({page: 1}, postId);
     if (records.docs.length > 0) {
-      comments = [...records.docs];
+      const commentRecords = [...records.docs];
+
+      await asyncForEach(commentRecords, async comment=>{
+        const likes = await Like.getForContent(comment._id);
+        comments.push({...comment, likes});
+      });
+
       if (records.page < records.pages) {
         nextPage = "/comment/getForPost/"+postId+"/"+(parseInt(records.page) + 1);
       }
     }
 
-    if (post)
-      res.json({ post, comments, nextPage});
+    if (post){
+      post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+    }
+    res.json({ post, likes, comments, nextPage});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -185,9 +205,16 @@ router.get('/user/my/:page?', async function (req, res, next) {
 
     const records = await Post.getMy({page}, userId);
     if (records.docs.length > 0) {
-      posts = [...records.docs];
+      const postRecords = [...records.docs];
+
+      await asyncForEach(postRecords, async post=>{
+        const likes = await Like.getForContent(post._id);
+        post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+         posts.push({...post, likes});
+      });
+
       if (records.page < records.pages) {
-        nextPage = "/post/my/"+(parseInt(records.page) + 1);
+        nextPage = "/post/user/my/"+(parseInt(records.page) + 1);
       }
     }
     res.json({ posts, nextPage });
@@ -253,7 +280,7 @@ router.put('/:postId/approve', async function (req, res, next) {
   }
 });
 
-router.get('/user/:userId/:page', async function (req, res, next) {
+router.get('/user/:userId/:page?', async function (req, res, next) {
   try {
     const userId = req.params['userId'];
     const page = req.params['page'] ? req.params['page'] : 1;
@@ -263,9 +290,16 @@ router.get('/user/:userId/:page', async function (req, res, next) {
 
     const records = await Post.getMy({page}, userId);
     if (records.docs.length > 0) {
-      posts = [...records.docs];
+      const postRecords = [...records.docs];
+
+      await asyncForEach(postRecords, async post=>{
+        const likes = await Like.getForContent(post._id);
+        post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+        posts.push({post, likes});
+      });
+
       if (records.page < records.pages) {
-        nextPage = "/post/my/"+(parseInt(records.page) + 1);
+        nextPage = "/post/user/"+userId+"/"+(parseInt(records.page) + 1);
       }
     }
     res.json({ posts, nextPage });
@@ -275,5 +309,11 @@ router.get('/user/:userId/:page', async function (req, res, next) {
     });
   }
 });
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+  }
+}
 
 module.exports = router;

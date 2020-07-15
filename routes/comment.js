@@ -5,6 +5,8 @@ const Posts = require('../models/post');
 const Like = require('../models/like');
 const Comment = require('../models/comment');
 
+const Utility = require('../utility/utility')
+
 router.post('/:postId', async function (req, res, next) {
   try {
     const { postId } = req.params;
@@ -174,7 +176,13 @@ router.get('/getForPost/:postId/:page', async function (req, res, next) {
     let nextPage = null;
     const records = await Comment.getForPosts({page}, postId);
     if (records.docs.length > 0) {
-      comments = [...records.docs];
+      const commentRecords = [...records.docs];
+
+      await asyncForEach(commentRecords, async comment=>{
+        const likes = await Like.getForContent(comment._id);
+        comments.push({...comment, likes});
+      });
+
       if (records.page < records.pages) {
         nextPage = "/comment/getForPost/"+postId+"/"+(parseInt(records.page) + 1);
       }

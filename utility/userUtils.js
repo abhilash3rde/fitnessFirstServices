@@ -16,7 +16,6 @@ async function populateUser(userId, userType) {
         displayPictureUrl = userData.displayPictureUrl;
         wallImageUrl = userData.wallImageUrl;
     }
-    console.log("displayPictureUrl", displayPictureUrl)
     return { name, displayPictureUrl, wallImageUrl };
 
 }

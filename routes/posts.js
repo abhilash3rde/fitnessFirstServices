@@ -9,7 +9,7 @@ const fs = require('fs');
 var path = require('path');
 const Comment = require('../models/comment');
 
-router.get('/getAll/:page', async function (req, res, next) {
+router.get('/getAll/:page?', async function (req, res, next) {
   try {
 
     const page = req.params['page'] ? req.params['page'] : 1;
@@ -175,7 +175,7 @@ router.post('/:postId/unlike', async function (req, res, next) {
   }
 });
 
-router.get('/my/:page', async function (req, res, next) {
+router.get('/user/my/:page?', async function (req, res, next) {
   try {
     const { userId } = req;
     const page = req.params['page'] ? req.params['page'] : 1;

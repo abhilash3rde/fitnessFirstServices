@@ -138,6 +138,7 @@ router.get('/:postId', async function (req, res, next) {
 
       await asyncForEach(commentRecords, async comment=>{
         const likes = await Like.getForContent(comment._id);
+        comment.commentedBy = await UserUtils.populateUser(comment.commentedBy._id, comment.commentedBy.userType);
         comments.push({...comment, likes});
       });
 

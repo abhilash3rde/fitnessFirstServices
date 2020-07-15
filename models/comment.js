@@ -121,7 +121,7 @@ async function getForPosts(opts = {}, postId) {
   var options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: 'likes',
+    populate: [{path:'likes'}, {path:'commentedBy', select: '_id userType'}],
     lean: true,
     page: page,
     limit: limit

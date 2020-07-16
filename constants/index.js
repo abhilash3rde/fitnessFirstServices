@@ -90,6 +90,5 @@ module.exports = {
   paymentKey,
   POST_TYPE,
   firebaseTopics,
-  fcmTypes,
   remoteMessageTypes
 }

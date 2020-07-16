@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const {admin} = require('../config');
+const {firebaseTopics,remoteMessageTypes} = require('../constants');
 const Post = require('../models/post');
 const Like = require('../models/like');
 const utility = require('../utility/utility');
@@ -114,6 +115,7 @@ router.post('/', async function (req, res, next) {
 
     res.json({ post });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });

@@ -99,7 +99,8 @@ router.post('/', async function (req, res, next) {
     if (!post) throw new Error("Post creation failed");
     const message = {
       data: {
-        type: remoteMessageTypes.UPDATE_POSTS
+        type: remoteMessageTypes.UPDATE_POSTS,
+        userId
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };

@@ -1,5 +1,4 @@
 const express = require('express');
-const cuid = require('cuid');
 const {admin} = require('../config');
 const {userTypes} = require("../constants")
 const TrainerData = require('../models/trainerData');

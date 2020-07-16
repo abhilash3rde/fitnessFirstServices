@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const {admin} = require('../config');
 const Post = require('../models/post');
 const Like = require('../models/like');
 const utility = require('../utility/utility');

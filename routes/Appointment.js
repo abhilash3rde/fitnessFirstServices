@@ -7,7 +7,7 @@ const UserData = require('../models/userData');
 const utility = require('../utility/utility');
 const fcm = require('../models/fcm');
 const WEEK_DAYS_FULL_NAMES = require('../constants');
-const { userTypes, WEEK_DAYS } = require('../constants');
+const { userTypes, WEEK_DAYS, remoteMessageTypes } = require('../constants');
 const DateUtils = require('../utility/DateUtils');
 
 
@@ -45,7 +45,7 @@ router.post('/:trainerId/book', async function (req, res, next) {
 
             const msgText = "Congratulations!! " + userData.name + " booked your appointment for " + dayFullName+".";
             const message = {
-                type: "appointmentNotification",
+                type: remoteMessageTypes.APPOINTMENT,
                 text: msgText
             }
 

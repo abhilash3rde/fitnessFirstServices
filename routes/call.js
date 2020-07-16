@@ -8,7 +8,7 @@ const ActiveCalls = require('../models/activeCalls');
 const router = express.Router();
 
 const Fcm = require('../models/fcm');
-const {agoraAppId} = require('../constants');
+const {agoraAppId, remoteMessageTypes} = require('../constants');
 
 const getHash = (str) => {
   let hash = 0, i, chr;
@@ -46,7 +46,7 @@ router.post('/', async function (req, res, next) {
       {
         data: {
           "priority": "high",
-          "type": "call",
+          "type": remoteMessageTypes.CALL,
           "sessionId": sessionId,
           "agoraAppId": agoraAppId,
           "dpUrl": displayPictureUrl,

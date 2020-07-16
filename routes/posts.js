@@ -95,6 +95,22 @@ router.post('/', async function (req, res, next) {
       });
 
     if (!post) throw new Error("Post creation failed");
+    const message = {
+      data: {
+        type: remoteMessageTypes.UPDATE_POSTS
+      },
+      topic: firebaseTopics.SILENT_NOTIFICATION,
+    };
+    admin
+      .messaging()
+      .send(message)
+      .then(response => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch(error => {
+        console.log('Error sending message:', error);
+      });
+
     res.json({ post });
   } catch (err) {
     res.status(500).json({

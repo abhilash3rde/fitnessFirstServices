@@ -1,6 +1,5 @@
 const {admin} = require('./config');
-
-const {agoraAppId} = require('./constants');
+const {agoraAppId,firebaseTopics,remoteMessageTypes} = require('./constants');
 
 const sendNotification = async (fcmToken, data) => {
   await admin.messaging().sendToDevice(
@@ -33,5 +32,22 @@ switch (process.argv[2]) {
       type: 'appointmentNotification',
       content: 'Random message'
     });
+  case 'topic':
+    const message = {
+      data: {
+        type: remoteMessageTypes.UPDATE_POSTS
+      },
+      topic: firebaseTopics.SILENT_NOTIFICATION,
+    };
+
+    admin
+      .messaging()
+      .send(message)
+      .then(response => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch(error => {
+        console.log('Error sending message:', error);
+      });
     break;
 }

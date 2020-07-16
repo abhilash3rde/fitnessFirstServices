@@ -4,9 +4,7 @@ const router = express.Router();
 const Post = require('../models/post');
 const Like = require('../models/like');
 const utility = require('../utility/utility');
-const { saveFileToServer } = require('../config/uploadConfig');
-const fs = require('fs');
-var path = require('path');
+
 const Comment = require('../models/comment');
 const UserUtils = require('../utility/userUtils')
 

@@ -294,7 +294,7 @@ router.get('/user/:userId/:page?', async function (req, res, next) {
       await asyncForEach(postRecords, async post=>{
         const likes = await Like.getForContent(post._id);
         post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
-        posts.push({post, likes});
+        posts.push({...post, likes});
       });
 
       if (records.page < records.pages) {

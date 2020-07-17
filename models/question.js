@@ -39,7 +39,7 @@ const questionSchema = mongoose.Schema({
   },
   approved:{
     type: Boolean,
-    default: false
+    default: true
   }
 
 }, opts);

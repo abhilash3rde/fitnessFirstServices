@@ -11,7 +11,7 @@ async function getTimeZoneDate(tz){
 
 async function getDateBasedOnDay(dayNo){
     let date;
-    const now = new Date();
+    const now = await getTimeZoneDate("IN");
     const todayNo = now.getDay();
 
     if(todayNo > dayNo){

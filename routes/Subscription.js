@@ -163,5 +163,40 @@ router.put('/updateTransaction', async function (req, res, next) {
   }
 });
 
+router.put('/:subscriptionId/rollback', async function (req, res, next) {
+  try {    
+
+    const completedOn = status === 'completed' ? Date.now() : null;
+    const {subscriptionId} = req.params;
+    const {razorpay_order_id} = req.body;
+    
+    const slots = await Slot.findForSubs(subscriptionId);
+
+    await Utility.asyncForEach(slots, slot=>{
+      slot.subscriptionId = null;
+    });
+
+    await Slot.updateAll(slots);
+
+    const transaction = await Transaction.update(
+      razorpay_order_id,{
+        status : "ROLLBACK",
+        completedOn
+      }
+    )
+
+    if (!transaction) {
+      throw Error("Error updating transaction status")
+    }
+
+    res.json({success: true});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 
 module.exports = router;

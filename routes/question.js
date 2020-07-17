@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Like = require('../models/like');
 const Question = require('../models/question');
-const Answer = require('../models/answer');
 const UserUtils = require('../utility/userUtils')
 const Utility = require('../utility/utility')
 

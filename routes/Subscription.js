@@ -93,7 +93,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const noOfDays = 7 * (approxDuration);
     await Subscription.updateEndDate(_subscription._id, noOfDays);
 
-    res.json({success: true, metadata, orderId: order.id});
+    res.json({success: true, metadata, orderId: order.id, subscriptionId:_subscription._id});
   } catch (err) {
     console.log(err)
     res.status(500).json({

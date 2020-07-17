@@ -7,7 +7,8 @@ const Slot = require('../models/slot');
 const Package = require('../models/package');
 const Utility = require('../utility/utility');
 const paymentModule = require('../config/payment');
-const Transaction = require('../models/Transaction')
+const Transaction = require('../models/Transaction');
+const DateUtils = require('../utility/DateUtils');
 
 router.post('/:trainerId/:packageId', async function (req, res, next) {
   try {
@@ -164,18 +165,26 @@ router.put('/updateTransaction', async function (req, res, next) {
 });
 
 router.put('/:subscriptionId/rollback', async function (req, res, next) {
-  try {
-    const completedOn = Date.now();
+
+  try {    
+
+    const completedOn = await DateUtils.getTimeZoneDate('IN');
     const {subscriptionId} = req.params;
     const {razorpay_order_id} = req.body;
 
     const slots = await Slot.findForSubs(subscriptionId);
 
-    await Utility.asyncForEach(slots, slot => {
-      slot.subscriptionId = null;
-    });
+    const newSlots = [];
 
-    await Slot.updateAll(slots);
+    if(slots && slots.length > 0){
+      await Utility.asyncForEach(slots, slot=>{
+        newSlots.push({...slot, subscriptionId : null});
+      });
+
+      await Slot.deleteAll(slots);
+      await Slot.insertAll(newSlots);
+    }
+    
 
     const transaction = await Transaction.update(
       razorpay_order_id, {

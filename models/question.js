@@ -41,7 +41,6 @@ const questionSchema = mongoose.Schema({
     type: Boolean,
     default: true
   }
-
 }, opts);
 
 questionSchema.virtual('likes', {

@@ -93,7 +93,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const noOfDays = 7 * (approxDuration);
     await Subscription.updateEndDate(_subscription._id, noOfDays);
 
-    res.json({success: true, metadata, orderId: order.id, subscriptionId:_subscription._id});
+    res.json({success: true, metadata, orderId: order.id, subscriptionId: _subscription._id});
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -164,27 +164,25 @@ router.put('/updateTransaction', async function (req, res, next) {
 });
 
 router.put('/:subscriptionId/rollback', async function (req, res, next) {
-  try {    
-
-    const completedOn = status === 'completed' ? Date.now() : null;
+  try {
+    const completedOn = Date.now();
     const {subscriptionId} = req.params;
     const {razorpay_order_id} = req.body;
-    
+
     const slots = await Slot.findForSubs(subscriptionId);
 
-    await Utility.asyncForEach(slots, slot=>{
+    await Utility.asyncForEach(slots, slot => {
       slot.subscriptionId = null;
     });
 
     await Slot.updateAll(slots);
 
     const transaction = await Transaction.update(
-      razorpay_order_id,{
-        status : "ROLLBACK",
+      razorpay_order_id, {
+        status: "ROLLBACK",
         completedOn
       }
     )
-
     if (!transaction) {
       throw Error("Error updating transaction status")
     }
@@ -197,6 +195,5 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     });
   }
 });
-
 
 module.exports = router;

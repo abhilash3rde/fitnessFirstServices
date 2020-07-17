@@ -5,6 +5,7 @@ const opts = { toJSON: { virtuals: true } };
 
 const db = require('../config/db');
 const post = require('./post');
+const DateUtils = require('../utility/DateUtils');
 
 const appointmentSchema = mongoose.Schema({
   _id: {
@@ -94,18 +95,36 @@ async function updateConnected(_id) {
 }
 
 async function getTrainerAppointments(trainerId) {
+
+  const now = await DateUtils.getTimeZoneDate("IN");
+  let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 1, 0, 0);
+
   const model = await Model.find(
-    { trainerId },
+    { trainerId, appointmentDate: {
+      $gte: start
+    }},
     { __v: 0 }
-  ).populate('userId').exec();;
+  )
+  .populate('userId')
+  .sort({appointmentDate : -1})
+  .exec();;
   return model;
 }
 
 async function getUserAppointments(userId) {
+
+  const now = await DateUtils.getTimeZoneDate("IN");
+  let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 1, 0, 0);
+
   const model = await Model.find(
-    { userId },
+    { userId, appointmentDate: {
+      $gte: start
+    }},
     { __v: 0 }
-  ).populate('trainerId').exec();;
+  )
+  .populate('trainerId')
+  .sort({appointmentDate : -1})
+  .exec();;
   return model;
 }
 

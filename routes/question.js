@@ -23,8 +23,9 @@ router.get('/getAll/:page?', async function (req, res, next) {
           let answers = [];
 
           await Utility.asyncForEach(answerRecords, async answer=>{
+            const likes = await Like.getForContent(answer._id);
             answer.postedBy = await UserUtils.populateUser(answer.postedBy._id, answer.postedBy.userType);
-            answers.push({...answer});
+            answers.push({...answer, likes});
           });
           question.answers = [...answers];
           questions.push({...question});

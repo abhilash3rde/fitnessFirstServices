@@ -108,6 +108,11 @@ async function updateAll(allSlots) {
   return slots;
 }
 
+async function deleteAll(allSlots) {
+  const slots = await Model.deleteMany(allSlots);
+  return slots;
+}
+
 async function insertAll(allSlots) {
   const slots = await Model.insertMany(allSlots);
   return slots;
@@ -180,5 +185,6 @@ module.exports = {
   getAllToNotify,
   findForSubsAndDay,
   findForSubs,
+  deleteAll,
   model: Model
 }

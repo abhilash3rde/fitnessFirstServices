@@ -163,7 +163,7 @@ async function findForSubsAndDay(subscriptionId, dayOfWeek) {
 }
 
 async function findForSubs(subscriptionId) {
-  const model = await Model.findOne(
+  const model = await Model.find(
     { subscriptionId }
   );
   return model;

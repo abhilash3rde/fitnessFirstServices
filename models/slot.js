@@ -1,6 +1,7 @@
 const cuid = require('cuid');
 const db = require('../config/db');
 const TrainerData = require('./trainerData');
+const Subscription = require('./Subscription');
 
 const opts = {toJSON: {virtuals: true}};
 
@@ -65,13 +66,16 @@ async function remove(_id,) {
   if (!model) throw new Error("Slot not found");
 
   if(model.subscriptionId && model.subscriptionId !== null){
-    throw Error("Slot has active subscription");
-  }
+    const subscription = await Subscription.get(model.subscriptionId);
 
-  await Model.deleteOne({
-    _id
-  });
-  return true;
+    if(subscription && subscription.active !== true){
+      await Model.deleteOne({
+        _id
+      });
+      return true;
+    }
+  }  
+  return false;
 }
 
 async function create(fields) {

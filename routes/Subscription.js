@@ -174,19 +174,27 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     const slots = await Slot.findForSubs(subscriptionId);
 
     const newSlots = [];
+    let trainerId;
 
     if(slots && slots.length > 0){
       await Utility.asyncForEach(slots, async slot=>{
-        newSlots.push({...slot, subscriptionId : null});
+        trainerId = slot.trainerId;
+
+        newSlots.push({
+            time : slot.time,
+            dayOfWeek: slot.dayOfWeek,
+            duration: slot.duration,
+            trainerId: slot.trainerId
+          });
 
         const slotsRemoved = await Slot.remove(slot._id);
 
         if(!slotsRemoved){
           throw Error("Error in rollback");
         }
-
       });
-      await Slot.insertAll(newSlots);
+      const insertedSlots = await Slot.insertAll(newSlots);
+      await TrainerData.addSlots(trainerId, insertedSlots);
     }
     
 

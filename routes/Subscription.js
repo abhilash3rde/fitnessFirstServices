@@ -177,11 +177,11 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     const newSlots = [];
 
     if(slots && slots.length > 0){
-      await Utility.asyncForEach(slots, slot=>{
+      await Utility.asyncForEach(slots, async slot=>{
         newSlots.push({...slot, subscriptionId : null});
-      });
 
-      await Slot.deleteAll(slots);
+        await Slot.remove(slot._id);
+      });
       await Slot.insertAll(newSlots);
     }
     

@@ -19,8 +19,8 @@ router.post('/createOrUpdate', async function (req, res, next) {
     const availableSlots = [];
     trainerData.slots.map(
       slot => {
-        if (slot.subscriptionId && slot.subscriptionId !== null) {
-          const key = slot.day +"#"+ slot.time;
+        if (slot.subscriptionId) {
+          const key = slot.dayOfWeek +"#"+ slot.time;
           bookedSlots.set(key, slot);
         }
         else {

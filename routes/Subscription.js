@@ -12,8 +12,8 @@ const DateUtils = require('../utility/DateUtils');
 
 router.post('/:trainerId/:packageId', async function (req, res, next) {
   try {
-    const {userId} = req;
-    const {trainerId, packageId} = req.params;
+    const { userId } = req;
+    const { trainerId, packageId } = req.params;
 
     const { time, days, startDate } = req.body;
 
@@ -106,7 +106,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
 
 router.put('/:subsId/activate', async function (req, res, next) {
   try {
-    const {subsId} = req.params;
+    const { subsId } = req.params;
 
     await Subscription.activateSubscription(subsId);
     res.json({ success: true });
@@ -119,10 +119,10 @@ router.put('/:subsId/activate', async function (req, res, next) {
 
 router.put('/:subsId/deactivate', async function (req, res, next) {
   try {
-    const {subsId} = req.params;
+    const { subsId } = req.params;
 
     await Subscription.deActivateSubscription(subsId);
-    res.json({success: true});
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -132,11 +132,11 @@ router.put('/:subsId/deactivate', async function (req, res, next) {
 
 router.put('/updateTransaction', async function (req, res, next) {
   try {
-    const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    const {status, notes} = await paymentModule.orders.fetch(razorpay_order_id);
+    const { status, notes } = await paymentModule.orders.fetch(razorpay_order_id);
     const completedOn = status === 'completed' ? Date.now() : null;
-    const {subscriptionId} = notes;
+    const { subscriptionId } = notes;
     console.log("Activating subscription", subscriptionId);
     await Subscription.activateSubscription(subscriptionId);
     console.log("Updating transaction", razorpay_order_id);
@@ -155,7 +155,7 @@ router.put('/updateTransaction', async function (req, res, next) {
       throw Error("Error updating transaction status")
     }
 
-    res.json({success: true});
+    res.json({ success: true });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -165,15 +165,15 @@ router.put('/updateTransaction', async function (req, res, next) {
 });
 
 router.put('/:subscriptionId/rollback', async function (req, res, next) {
-
-  try {    
+  try {
 
     const completedOn = await DateUtils.getTimeZoneDate('IN');
-    const {subscriptionId} = req.params;
-    const {razorpay_order_id} = req.body;
+    const { subscriptionId } = req.params;
+    const { razorpay_order_id } = req.body;
 
-    const slots = await Slot.findForSubs(subscriptionId);
 
+    const slots = await Slot.findForSubs(subscriptionId);   
+    
     const newSlots = [];
     let trainerId;
 
@@ -211,7 +211,7 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
       throw Error("Error updating transaction status")
     }
 
-    res.json({success: true});
+    res.json({ success: true });
   } catch (err) {
     console.log(err);
     res.status(500).json({

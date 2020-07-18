@@ -7,44 +7,52 @@ const utility = require('../utility/utility');
 
 router.post('/createOrUpdate', async function (req, res, next) {
   try {
-    const { userId } = req;
+    const trainerId = req.userId;
     const requestSlots = req.body;
 
     const newSlots = [];
-    const updatedSlots = [];
     let processedSlots = [];
 
-    let trainerData = await TrainerData.getById(userId);
+    let trainerData = await TrainerData.getById(trainerId);
 
-    requestSlots.map(requestSlot => {
+    const bookedSlots = new Map();
+    const availableSlots = [];
+    trainerData.slots.map(
+      slot => {
+        if (slot.subscriptionId && slot.subscriptionId !== null) {
+          const key = slot.day +"#"+ slot.time;
+          bookedSlots.set(key, slot);
+        }
+        else {
+          availableSlots.push(slot._id);
+        }
+      });
+
+      await TrainerData.removeSlots(trainerId, availableSlots);
+      const deleted = await Slot.deleteAll({trainerId, subscriptionId:null});
+      console.log("No of slots removed=>", deleted.deletedCount)
+
+    await utility.asyncForEach(requestSlots, requestSlot => {
       const time = requestSlot.time;
       const duration = requestSlot.duration;
 
-      const bookedSlots = trainerData.slots.filter(
-        slot => {
-          return slot.time === time && requestSlot.days.includes(slot.dayOfWeek)
-        }).flatMap(slots => slots.dayOfWeek);
-
       requestSlot.days.map(async day => {
-        if (!bookedSlots.includes(day)) {
+        const key = day +"#"+ time;
+        if (!bookedSlots.has(key)) {
           newSlots.push({
             time,
             dayOfWeek: day,
             duration: duration,
-            trainerId: userId
+            trainerId
           });
-        }
-        else {
-          const updateSlot = await Slot.updateForDayTime(day, time, { duration });
-          updatedSlots.push(updateSlot)
         }
       });
     });
 
     const insertedSlots = await Slot.insertAll(newSlots);
-    trainerData = await TrainerData.addSlots(userId, insertedSlots);
+    trainerData = await TrainerData.addSlots(trainerId, insertedSlots);
 
-    processedSlots = await utility.groupByTime([...updatedSlots, ...insertedSlots]);
+    processedSlots = await utility.groupByTime([...trainerData.slots]);
 
     res.json(processedSlots);
   } catch (err) {
@@ -104,7 +112,7 @@ router.get('/getAllAvailable', async function (req, res, next) {
     const allSlots = await Slot.getAllAvailableSlots();
     const refinedSlots = [];
 
-    console.log("Found "+allSlots.length+"Slots");
+    console.log("Found " + allSlots.length + "Slots");
 
     allSlots.map(slot => {
       // daysSet.add(slot.dayOfWeek);
@@ -113,15 +121,15 @@ router.get('/getAllAvailable', async function (req, res, next) {
       // slot['trainerId'] = { _id, name, experience, rating, city, displayPictureUrl, totalSlots, availableSlots};
 
       refinedSlots.push(slot);
-    });    
+    });
 
     const availableSlots = await utility.groupBy(refinedSlots, ['dayOfWeek']);
     let resultSlots = [];
 
-    Object.keys(availableSlots).map(day=>{
+    Object.keys(availableSlots).map(day => {
       const timeSet = new Set();
 
-      availableSlots[day].map(slot=>{
+      availableSlots[day].map(slot => {
         timeSet.add(slot.time);
       })
 

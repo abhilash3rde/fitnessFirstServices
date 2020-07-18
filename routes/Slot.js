@@ -52,7 +52,7 @@ router.post('/createOrUpdate', async function (req, res, next) {
     const insertedSlots = await Slot.insertAll(newSlots);
     trainerData = await TrainerData.addSlots(trainerId, insertedSlots);
 
-    processedSlots = await utility.groupByTime([...trainerData.slots]);
+    processedSlots = [...trainerData.slots];//await utility.groupByTime([...trainerData.slots]);
 
     res.json(processedSlots);
   } catch (err) {

@@ -184,6 +184,25 @@ async function findForSubs(subscriptionId) {
   return model;
 }
 
+async function getDayAndTime(criteria) {
+ let result;
+ await Model.aggregate(
+    [{'$match':{ ...criteria } },
+      {'$group': {
+        '_id': '$time',
+        daysOfWeek: { $addToSet : "$dayOfWeek"}
+    }},    
+    ],(err, docs)=>{
+      if(err)
+      console.log(err);
+      else{ 
+        result = docs;
+      }
+    }
+  );
+  return result;
+}
+
 
 
 module.exports = {
@@ -201,5 +220,6 @@ module.exports = {
   findForSubsAndDay,
   findForSubs,
   deleteAll,
+  getDayAndTime,
   model: Model
 }

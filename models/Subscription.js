@@ -111,7 +111,7 @@ async function getAllForTrainer(trainerId) {
 async function getAllForUser(subscribedBy) {
   const model = await Model.find({ subscribedBy }).populate([
     { path: 'trainerId' },
-    { path: 'packageId' }
+    { path: 'packageId'}
   ]).exec();
   return model;
 }

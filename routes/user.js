@@ -8,7 +8,8 @@ const UserData = require('../models/userData');
 const User = require('../models/user');
 const {userTypes} = require("../constants");
 const Subscription = require('../models/Subscription');
-const Activities = require('./Activities')
+const Activities = require('./Activities');
+const Slot = require('../models/slot');
 
 router.get('/myInfo', async function (req, res, next) {
   try {
@@ -141,14 +142,67 @@ router.put('/wallImage', async function (req, res, next) {
 router.get('/mySubscriptions', async function (req, res, next) {
   try {
     const {userId, userType} = req;
+
+    const mySubscriptions = [];
+
     const subscriptions = userType === userTypes.USER ?
       await Subscription.getAllForUser(userId) :
       await Subscription.getAllForTrainer(userId);
 
+      await utility.asyncForEach(subscriptions, async subscription=>{
+        const result = await Slot.getDayAndTime({ "subscriptionId": subscription._id });
+
+        const subsData = {
+          active:subscription.active,
+          heldSessions:subscription.heldSessions,
+          totalSessions:subscription.totalSessions,
+          endDate:subscription.endDate,
+          _id:subscription._id,
+          startDate:subscription.startDate,
+        };
+
+       // console.log("result", result)
+        
+        if(result && result.length > 0){
+
+          let trainerData = {};
+          let userData = {};
+  
+          //User need trainer data...
+          if(userType === userTypes.USER){
+            trainerData = {
+              userType: subscription.trainerId.userType,
+              name: subscription.trainerId.name,
+              _id: subscription.trainerId._id,
+              displayPictureUrl: subscription.trainerId.displayPictureUrl,
+            };
+          }
+          else{          
+            userData = {
+              userType: subscription.subscribedBy.userType,
+              name: subscription.subscribedBy.name,
+              _id: subscription.subscribedBy._id,
+              displayPictureUrl: subscription.subscribedBy.displayPictureUrl,
+            };
+          }
+
+          mySubscriptions.push({
+            ...subsData,
+            package: subscription.packageId,
+            trainer: trainerData,
+            user: userData,
+            slot:{
+              time: result[0]._id, //dont change groupBy field
+              daysOfWeek: result[0].daysOfWeek
+            }
+          })
+        }
+      });
+
     if (!subscriptions) {
       throw Error("No Subscriptions")
     }
-    res.json(subscriptions);
+    res.json(mySubscriptions);
   } catch (err) {
     res.status(500).json({
       err: err.message

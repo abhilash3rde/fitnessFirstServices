@@ -252,7 +252,27 @@ async function removePackage(trainerId, packageId) {
 
 async function removeSlot(trainerId, slotId) {
   const model = await getById(trainerId);
-  model.slots = model.slots.filter(slot => slot._id !== slotId);
+
+  for(var i =0; i < model.slots.length; i++){
+    if(slotId === model.slots[i]._id){
+      model.slots.splice(i, 1);
+      i--;
+    }
+  }
+  
+  await model.save();
+  return model;
+}
+
+async function removeSlots(trainerId, slots) {
+  const model = await getById(trainerId);
+
+  for(var i =0; i < model.slots.length; i++){
+    if(slots.includes(model.slots[i]._id)){
+      model.slots.splice(i, 1);
+      i--;
+    }
+  }
   await model.save();
   return model;
 }
@@ -325,5 +345,6 @@ module.exports = {
   removeSlot,
   addWorkingDays,
   getTrainer,
+  removeSlots,
   model: Model
 }

@@ -4,6 +4,7 @@ const db = require('../config/db');
 const Package = require('./package');
 const TrainerData = require('./trainerData');
 const UserData = require('./userData');
+const DateUtils = require('../utility/DateUtils');
 
 const Model = db.model('Subscription', {
   _id: {
@@ -40,6 +41,10 @@ const Model = db.model('Subscription', {
     type: Number,
     default: 0
   },
+  startDate: {
+    type: Date,
+    default: Date.now
+  },
   endDate: {
     type: Date,
     default: null
@@ -57,7 +62,7 @@ async function get(_id) {
 
 async function remove(_id,) {
   const model = await get(_id);
-  if (!model) throw new Error("Slot not found");
+  if (!model) throw new Error("Subscription not found");
   await Model.deleteOne({
     _id
   });
@@ -111,10 +116,10 @@ async function getAllForUser(subscribedBy) {
   return model;
 }
 
-async function updateEndDate(_id, noOfDays) {
+async function updateEndDate(_id, startDate, noOfDays) {
   const model = await get(_id);
   
-  const today = new Date();
+  const today = startDate ? new Date(startDate) : await DateUtils.getTimeZoneDate('IN');
   const endDate = new Date(today.setDate(today.getDate() + noOfDays));
 
   model['endDate'] = endDate;

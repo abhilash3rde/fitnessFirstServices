@@ -1,6 +1,7 @@
 const cuid = require('cuid');
 const db = require('../config/db');
 const TrainerData = require('./trainerData');
+const Subscription = require('./Subscription');
 
 const opts = {toJSON: {virtuals: true}};
 
@@ -60,18 +61,25 @@ async function findForDayAndTime(dayOfWeek, time) {
   return model;
 }
 
-async function remove(_id,) {
+async function remove(_id) {
   const model = await get(_id);
   if (!model) throw new Error("Slot not found");
 
-  if(model.subscriptionId && model.subscriptionId !== null){
-    throw Error("Slot has active subscription");
+  if(!model.subscriptionId){
+    await Model.deleteOne({
+      _id
+    });
+    return true;
   }
-
-  await Model.deleteOne({
-    _id
-  });
-  return true;
+  else{
+    if(model.subscriptionId.active !== true){
+      await Model.deleteOne({
+        _id
+      });
+      return true;
+    }
+  }
+  return false;
 }
 
 async function create(fields) {
@@ -84,7 +92,7 @@ async function edit(_id, change) {
   const model = await get(_id);
   if (!model) throw new Error("Slot not found");
 
-  if(model.subscriptionId && model.subscriptionId !== null){
+  if (model.subscriptionId && model.subscriptionId !== null) {
     throw Error("Slot has active subscription");
   }
 
@@ -97,8 +105,8 @@ async function edit(_id, change) {
 
 async function findAvailableSlots(object) {
   return await Model.find({
-    trainerId:object.trainerId,
-    dayOfWeek:{$in : object.days},
+    trainerId: object.trainerId,
+    dayOfWeek: { $in: object.days },
     time: object.time
   });
 }
@@ -108,8 +116,15 @@ async function updateAll(allSlots) {
   return slots;
 }
 
-async function deleteAll(allSlots) {
-  const slots = await Model.deleteMany(allSlots);
+async function deleteAll(condition) {
+  const criteria = {};
+  Object.keys(condition).forEach(key => {
+    criteria[key] = condition[key]
+  });
+
+  console.log("criteria", criteria)
+
+  const slots = await Model.deleteMany({...criteria});
   return slots;
 }
 
@@ -169,6 +184,25 @@ async function findForSubs(subscriptionId) {
   return model;
 }
 
+async function getDayAndTime(criteria) {
+ let result;
+ await Model.aggregate(
+    [{'$match':{ ...criteria } },
+      {'$group': {
+        '_id': '$time',
+        daysOfWeek: { $addToSet : "$dayOfWeek"}
+    }},    
+    ],(err, docs)=>{
+      if(err)
+      console.log(err);
+      else{ 
+        result = docs;
+      }
+    }
+  );
+  return result;
+}
+
 
 
 module.exports = {
@@ -186,5 +220,6 @@ module.exports = {
   findForSubsAndDay,
   findForSubs,
   deleteAll,
+  getDayAndTime,
   model: Model
 }

@@ -15,7 +15,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const { userId } = req;
     const { trainerId, packageId } = req.params;
 
-    const { time, days } = req.body;
+    const { time, days, startDate } = req.body;
 
     const trainerData = await TrainerData.getById(trainerId);
     const package = trainerData.packages.find(package => package._id === packageId);
@@ -43,7 +43,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     });
 
     const _subscription = await Subscription.create({
-      packageId, trainerId, subscribedBy: userId, totalSessions: package.noOfSessions
+      packageId, trainerId, subscribedBy: userId, totalSessions: package.noOfSessions, startDate
     });
 
     availableSlots.map(async slot => {
@@ -92,9 +92,9 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
 
     // await Subscription.activateSubscription(_subscription._id);
     const noOfDays = 7 * (approxDuration);
-    await Subscription.updateEndDate(_subscription._id, noOfDays);
+    await Subscription.updateEndDate(_subscription._id, startDate, noOfDays);
 
-    res.json({ success: true, metadata, orderId: order.id, subscriptionId: _subscription._id });
+    res.json({success: true, metadata, orderId: order.id, subscriptionId: _subscription._id});
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -171,25 +171,42 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     const { subscriptionId } = req.params;
     const { razorpay_order_id } = req.body;
 
+
     const slots = await Slot.findForSubs(subscriptionId);   
+    
     const newSlots = [];
+    let trainerId;
 
-    await Utility.asyncForEach(slots, async slot => {
-      newSlots.push({ ...slot, subscriptionId: null });
+    if (slots && slots.length > 0) {
+      await Utility.asyncForEach(slots, async slot => {
+        trainerId = slot.trainerId;
 
-      await Slot.remove(slot._id);
-    });
-    await Slot.insertAll(newSlots);
+        newSlots.push({
+          time: slot.time,
+          dayOfWeek: slot.dayOfWeek,
+          duration: slot.duration,
+          trainerId: slot.trainerId
+        });
 
+        const slotRemoved = await TrainerData.removeSlot(trainerId, slot._id);
+        const slotsDeleted = await Slot.remove(slot._id);
+
+
+        if (!slotsDeleted || !slotRemoved) {
+          throw Error("Error in rollback");
+        }
+      });
+      const insertedSlots = await Slot.insertAll(newSlots);
+      await TrainerData.addSlots(trainerId, insertedSlots);
+    }
 
 
     const transaction = await Transaction.update(
       razorpay_order_id, {
-      status: "ROLLBACK",
-      completedOn
-    }
+        status: "ROLLBACK",
+        completedOn
+      }
     )
-
     if (!transaction) {
       throw Error("Error updating transaction status")
     }
@@ -202,6 +219,5 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     });
   }
 });
-
 
 module.exports = router;

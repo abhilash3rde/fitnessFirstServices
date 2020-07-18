@@ -75,7 +75,7 @@ async function update(orderId, keys) {
         model[key] = keys[key]
     });
     await model.save();
-    return await getTransactionForOrder(orderId);
+    return model;
 }
 
 async function updateStatus(orderId, status) {

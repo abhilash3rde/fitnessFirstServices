@@ -15,7 +15,7 @@ const bmiSchema = mongoose.Schema({
   },
   userId:{
     type:String,
-    ref:'UserData'
+    ref:'User'
   },
   bmi:{
     type:Number,

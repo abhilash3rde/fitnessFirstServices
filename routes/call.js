@@ -7,7 +7,7 @@ const ActiveCalls = require('../models/activeCalls');
 const router = express.Router();
 
 const Fcm = require('../models/fcm');
-const {agoraAppId, remoteMessageTypes} = require('../constants');
+const {agoraAppIds, remoteMessageTypes} = require('../constants');
 
 const getHash = (str) => {
   let hash = 0, i, chr;
@@ -18,15 +18,21 @@ const getHash = (str) => {
   }
   return hash;
 }
-
+let roundRobinIndex = 0;
+const getAgoraAppId = () => {
+  const appId = agoraAppIds[roundRobinIndex];
+  console.log("Using agora app #", roundRobinIndex + 1);
+  roundRobinIndex = (roundRobinIndex + 1) % agoraAppIds.length;
+  return appId;
+}
 router.post('/', async function (req, res, next) {
   try {
     const {targetUserId} = req.body;
     const {userId, userType} = req;
     const sessionId = (getHash(userId) | getHash(targetUserId)).toString();
     const isBusy = await ActiveCalls.isBusy(targetUserId);
-    if(isBusy){
-      res.json({success:false, message:"User is on another call"});
+    if (isBusy) {
+      res.json({success: false, message: "User is on another call"});
       return;
     }
     const fcmToken = await Fcm.getToken(targetUserId);
@@ -40,6 +46,7 @@ router.post('/', async function (req, res, next) {
     if (!!!displayPictureUrl) displayPictureUrl = 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png';
 
     console.log(name, displayPictureUrl, sessionId);
+    const agoraAppId = getAgoraAppId();
     await admin.messaging().sendToDevice(
       [fcmToken],
       {
@@ -58,7 +65,7 @@ router.post('/', async function (req, res, next) {
       },
     );
     await ActiveCalls.create(userId);
-    res.json({sessionId, agoraAppId, success:true}); // TODO : add call config here
+    res.json({sessionId, agoraAppId, success: true}); // TODO : add call config here
   } catch (err) {
     console.log(err)
     res.status(500).json({

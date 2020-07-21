@@ -58,8 +58,11 @@ const TIME_STRING = ['0000', '0100', '0200', '0300', '0400',
   '1500', '1600', '1700', '1800', '1900',
   '2000', '2100', '2200', '2300']
 
-const agoraAppId = 'de359ae21a884e08a18e38476b54ccea';
-
+const agoraApps = {
+  primary: 'de359ae21a884e08a18e38476b54ccea',
+  secondary: 'da0c4d0c5bcb47799554eb975cb8f86a'
+}
+const agoraAppIds = [agoraApps.primary, agoraApps.secondary]
 //test key
 const paymentKey = {
   key_id: 'rzp_test_BuIiL164HHvbBm',
@@ -79,7 +82,6 @@ const remoteMessageTypes = {
 module.exports = {
   userTypes,
   CHANNELS,
-  agoraAppId,
   CONTENT_TYPE,
   ENABLE_FILE_UPLOAD,
   RAMDOM_WALL_IMAGE,
@@ -90,5 +92,6 @@ module.exports = {
   paymentKey,
   POST_TYPE,
   firebaseTopics,
-  remoteMessageTypes
+  remoteMessageTypes,
+  agoraAppIds
 }

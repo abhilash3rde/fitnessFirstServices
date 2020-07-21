@@ -25,6 +25,7 @@ const appointmentRouter = require('./routes/Appointment');
 const activityRouter = require('./routes/Activity');
 const questionRouter = require('./routes/question');
 const answerRouter = require('./routes/answer');
+const fitnessRouter = require('./routes/fitness');
 
 const middleware = require('./middleware');
 const auth = require('./auth');
@@ -70,6 +71,7 @@ app.use('/payment',  paymentRouter);
 app.use('/activity', auth.ensureUser, activityRouter);
 app.use('/question', auth.ensureUser, questionRouter);
 app.use('/answer', auth.ensureUser, answerRouter);
+app.use('/fitness', auth.ensureUser, fitnessRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler

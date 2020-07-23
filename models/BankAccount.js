@@ -49,6 +49,12 @@ async function getForUser(userId) {
 }
 
 async function create(fields) {
+  //TODO correct this
+  const {userId} = fields;
+  const existingModel = await getForUser(userId);
+  if (existingModel) {
+    update(userId, fields);
+  }
   const model = new Model(fields);
   await model.save();
   return model;

@@ -1,18 +1,18 @@
 const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const { ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES } = require('../constants');
+const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES} = require('../constants');
 const url = require('url');
 const {admin} = require('../config');
 
 
 const SALT_ROUNDS = 10;
+
 async function hashPassword(user) {
   if (!user.password) throw user.invalidate('password', 'password is required')
   if (user.password.length < 6) throw user.invalidate('password', 'password must be at least 6 characters')
   user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
 }
-
 
 
 const uploadLocalFile = async (path) => {
@@ -44,12 +44,11 @@ async function uploadMedia(file) {
       }
       contentType = file.mimetype.toUpperCase().indexOf("IMAGE") > -1 ? CONTENT_TYPE.IMAGE : CONTENT_TYPE.VIDEO;
     }
-  }
-  else {
+  } else {
     contentURL = 'https://res.cloudinary.com/matrim/image/upload/v1593552838/iavrrhcdjiwgdzqxzkf5.jpg';
   }
 
-  return { contentURL, contentType };
+  return {contentURL, contentType};
 }
 
 async function groupByTime(slots) {
@@ -79,7 +78,7 @@ async function groupByDayAndTime(slots) {
 }
 
 
-async function getRandomMedia() {  
+async function getRandomMedia() {
   const randomNo = Math.floor(Math.random() * Object.keys(RAMDOM_WALL_IMAGE).length);
   return RAMDOM_WALL_IMAGE[randomNo];
 }
@@ -93,8 +92,7 @@ async function groupBy(datas, keys) {
           const value = obj[key];
           KEYS.push(value);
         }
-      }
-      else {
+      } else {
         KEYS.push(keys);
       }
       iterate = false;
@@ -110,7 +108,7 @@ async function groupBy(datas, keys) {
   }, {});
 }
 
-const sendNotification = async (tokens, message) =>{
+const sendNotification = async (tokens, message) => {
   await admin.messaging().sendToDevice(
     tokens,
     {
@@ -123,38 +121,44 @@ const sendNotification = async (tokens, message) =>{
   );
 }
 
-async function getDayFullName(day){
+async function getDayFullName(day) {
   let dayName = '';
-  switch(day){
+  switch (day) {
     case "MON":
-    dayName = WEEK_DAYS_FULL_NAMES.MON;
-    break;    
+      dayName = WEEK_DAYS_FULL_NAMES.MON;
+      break;
     case "TUE":
-    dayName = WEEK_DAYS_FULL_NAMES.TUE;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.TUE;
+      break;
     case "WED":
-    dayName = WEEK_DAYS_FULL_NAMES.THU;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.THU;
+      break;
     case "THU":
-    dayName = WEEK_DAYS_FULL_NAMES.WED;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.WED;
+      break;
     case "FRI":
-    dayName = WEEK_DAYS_FULL_NAMES.FRI;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.FRI;
+      break;
     case "SAT":
-    dayName = WEEK_DAYS_FULL_NAMES.SAT;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.SAT;
+      break;
     case "SUN":
-    dayName = WEEK_DAYS_FULL_NAMES.SUN;
-    break;
+      dayName = WEEK_DAYS_FULL_NAMES.SUN;
+      break;
   }
   return dayName;
 }
 
 async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array);
+    await callback(array[index], index, array);
   }
+}
+
+const monthsFromNow = (count = 3) => {
+  const today = new Date();
+  let parsedCount = parseInt(count);
+  return new Date(today.setMonth(today.getMonth() + parsedCount));
 }
 
 module.exports = {
@@ -168,5 +172,6 @@ module.exports = {
   groupBy,
   sendNotification,
   getDayFullName,
-  asyncForEach
+  asyncForEach,
+  monthsFromNow
 }

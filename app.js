@@ -34,10 +34,10 @@ const app = express();
 app.use(expressip().getIpInfoMiddleware);
 
 app.use(fileUpload({
-  limits: { fileSize: 50 * 1024 * 1024 },
-  abortOnLimit:true,
+  limits: {fileSize: 50 * 1024 * 1024},
+  abortOnLimit: true,
   useTempFiles: true,
-  tempFileDir : './uploads'
+  tempFileDir: './uploads'
 }));
 
 app.use(cors());
@@ -62,12 +62,12 @@ app.use('/user', auth.ensureUser, userRouter);
 app.use('/users', auth.ensureUser, usersRouter);
 app.use('/post', auth.ensureUser, postRouter);
 app.use('/comment', auth.ensureUser, commentRouter);
-app.use('/call', auth.ensureUser,callRouter);
+app.use('/call', auth.ensureUser, callRouter);
 app.use('/package', auth.ensureUser, packageRouter);
 app.use('/slot', auth.ensureUser, slotRouter);
 app.use('/subscription', auth.ensureUser, subscriptionRouter);
 app.use('/appointment', auth.ensureUser, appointmentRouter);
-app.use('/payment',  paymentRouter);
+app.use('/payment', auth.ensureUser, paymentRouter);
 app.use('/activity', auth.ensureUser, activityRouter);
 app.use('/question', auth.ensureUser, questionRouter);
 app.use('/answer', auth.ensureUser, answerRouter);

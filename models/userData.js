@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema({
     type: String,
     // required: true
   },
+  dateOfBirth:{
+    type:Date,
+    default:null
+  },
   city: {
     type: String,
     default: ''

@@ -33,6 +33,10 @@ const trainerSchema = mongoose.Schema({
     type: Number,
     default: 4.0
   },
+  dateOfBirth:{
+    type:Date,
+    default:null
+  },
   // workingDays: {
   //   type: Array,
   //   default: []

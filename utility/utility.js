@@ -161,6 +161,15 @@ const monthsFromNow = (count = 3) => {
   return new Date(today.setMonth(today.getMonth() + parsedCount));
 }
 
+function calculateBmi(weight, height) {
+  weight = parseInt(weight);
+  height = parseInt(height)
+  if (weight > 0 && height > 0) {
+    return (weight / (height / 100 * height / 100) ).toPrecision(3)
+  }
+  return 0;
+}
+
 module.exports = {
   hashPassword,
   uploadLocalFile,
@@ -173,5 +182,6 @@ module.exports = {
   sendNotification,
   getDayFullName,
   asyncForEach,
-  monthsFromNow
+  monthsFromNow,
+  calculateBmi
 }

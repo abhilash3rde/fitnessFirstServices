@@ -5,6 +5,7 @@ const {saveFileToServer} = require('../config/uploadConfig');
 
 const TrainerData = require('../models/trainerData');
 const UserData = require('../models/userData');
+const BmiHistory = require('../models/BmiHistory');
 const User = require('../models/user');
 const {userTypes} = require("../constants");
 const Subscription = require('../models/Subscription');
@@ -66,11 +67,21 @@ router.put('/', async function (req, res, next) {
     console.log(`User ${req.userId} update request`);
     const {userId, userType} = req;
     let model = userType === userTypes.TRAINER ? TrainerData : UserData;
+
     const userData = await model.edit(
       userId,
       {
         ...req.body
       });
+    if (req.body.weight && req.body.height) {
+      const bmi = utility.calculateBmi(req.body.weight, req.body.height);
+      const record = await BmiHistory.create({
+        bmi,
+        weight: req.body.weight,
+        userId
+      });
+      console.log("saved bmi", record);
+    }
     if (userData) {
       res.json({success: true, userData});
     } else throw new Error("Could not update user data");
@@ -149,55 +160,54 @@ router.get('/mySubscriptions', async function (req, res, next) {
       await Subscription.getAllForUser(userId) :
       await Subscription.getAllForTrainer(userId);
 
-      await utility.asyncForEach(subscriptions, async subscription=>{
-        const result = await Slot.getDayAndTime({ "subscriptionId": subscription._id });
+    await utility.asyncForEach(subscriptions, async subscription => {
+      const result = await Slot.getDayAndTime({"subscriptionId": subscription._id});
 
-        const subsData = {
-          active:subscription.active,
-          heldSessions:subscription.heldSessions,
-          totalSessions:subscription.totalSessions,
-          endDate:subscription.endDate,
-          _id:subscription._id,
-          startDate:subscription.startDate,
-        };
+      const subsData = {
+        active: subscription.active,
+        heldSessions: subscription.heldSessions,
+        totalSessions: subscription.totalSessions,
+        endDate: subscription.endDate,
+        _id: subscription._id,
+        startDate: subscription.startDate,
+      };
 
-       // console.log("result", result)
-        
-        if(result && result.length > 0){
+      // console.log("result", result)
 
-          let trainerData = {};
-          let userData = {};
-  
-          //User need trainer data...
-          if(userType === userTypes.USER){
-            trainerData = {
-              userType: subscription.trainerId.userType,
-              name: subscription.trainerId.name,
-              _id: subscription.trainerId._id,
-              displayPictureUrl: subscription.trainerId.displayPictureUrl,
-            };
-          }
-          else{          
-            userData = {
-              userType: subscription.subscribedBy.userType,
-              name: subscription.subscribedBy.name,
-              _id: subscription.subscribedBy._id,
-              displayPictureUrl: subscription.subscribedBy.displayPictureUrl,
-            };
-          }
+      if (result && result.length > 0) {
 
-          mySubscriptions.push({
-            ...subsData,
-            package: subscription.packageId,
-            trainer: trainerData,
-            user: userData,
-            slot:{
-              time: result[0]._id, //dont change groupBy field
-              daysOfWeek: result[0].daysOfWeek
-            }
-          })
+        let trainerData = {};
+        let userData = {};
+
+        //User need trainer data...
+        if (userType === userTypes.USER) {
+          trainerData = {
+            userType: subscription.trainerId.userType,
+            name: subscription.trainerId.name,
+            _id: subscription.trainerId._id,
+            displayPictureUrl: subscription.trainerId.displayPictureUrl,
+          };
+        } else {
+          userData = {
+            userType: subscription.subscribedBy.userType,
+            name: subscription.subscribedBy.name,
+            _id: subscription.subscribedBy._id,
+            displayPictureUrl: subscription.subscribedBy.displayPictureUrl,
+          };
         }
-      });
+
+        mySubscriptions.push({
+          ...subsData,
+          package: subscription.packageId,
+          trainer: trainerData,
+          user: userData,
+          slot: {
+            time: result[0]._id, //dont change groupBy field
+            daysOfWeek: result[0].daysOfWeek
+          }
+        })
+      }
+    });
 
     if (!subscriptions) {
       throw Error("No Subscriptions")

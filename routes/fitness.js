@@ -57,8 +57,8 @@ router.put('/preferences', async function (req, res, next) {
 router.get('/preferences', async function (req, res, next) {
   try {
     const {userId} = req;
-    const {preferences} = await UserPreferences.getForUser(userId);
-    res.json({preferences});
+    const {preferences, exerciseIndex} = await UserPreferences.getForUser(userId);
+    res.json({preferences, exerciseIndex});
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -67,6 +67,19 @@ router.get('/preferences', async function (req, res, next) {
   }
 });
 
+router.post('/preferences/exerciseIndex/:index', async function (req, res, next) {
+  try {
+    const {userId} = req;
+    const {index} = req.params;
+    await UserPreferences.updateExerciseIndex(userId, index);
+    res.json({success: true});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
 
 module.exports = router;
 

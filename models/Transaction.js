@@ -5,7 +5,6 @@ const opts = { toJSON: { virtuals: true } };
 
 const db = require('../config/db');
 
-
 const transactionSchema = mongoose.Schema({
     _id: {
         type: String,

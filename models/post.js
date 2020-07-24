@@ -111,7 +111,7 @@ async function list(opts = {}) {
 async function remove(_id, userId) {
   const model = await get(_id);
   if (!model) throw new Error("Post not found");
-  if (model.createdBy !== userId) throw new Error("Not authorised to delete Post");
+  if (model.createdBy._id !== userId) throw new Error("Not authorised to delete Post");
   
   const commentsRemoved = await Comment.deleteComments(model._id);
 

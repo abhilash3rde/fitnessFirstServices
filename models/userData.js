@@ -66,10 +66,6 @@ const userSchema = mongoose.Schema({
   },
   biceps: {
     type: Number
-  },
-  exerciseIndex : {
-    type: Number,
-    default : 3
   }
 }, opts);
 

@@ -15,7 +15,11 @@ const userPreferencesSchema = mongoose.Schema({
   preferences: [{
     type: String,
     default: ''
-  }]
+  }],
+  exerciseIndex: {
+    type: Number,
+    default: 3
+  },
 });
 
 const Model = db.model('UserPreferences', userPreferencesSchema);
@@ -49,9 +53,17 @@ async function createOrUpdate(fields) {
   return model;
 }
 
+async function updateExerciseIndex(userId, index){
+  const model = await getForUser(userId);
+  model.exerciseIndex = index;
+  await model.save();
+  return true;
+}
+
 module.exports = {
   get,
   createOrUpdate,
   getForUser,
+  updateExerciseIndex,
   model: Model
 }

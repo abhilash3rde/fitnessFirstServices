@@ -85,9 +85,8 @@ router.post('/', async function (req, res, next) {
     const { userId } = req;
 
     const mediaFile = req.files ? req.files.mediaContent : null;
-
-    const content = await utility.uploadMedia(mediaFile);
     const postContent = req.body;
+    const content = await utility.uploadMedia(mediaFile);
 
     const post = await Post.create(
       {

@@ -20,6 +20,12 @@ const userPreferencesSchema = mongoose.Schema({
     type: Number,
     default: 3
   },
+  targetWeight: {
+    type: Number
+  },
+  targetDate: {
+    type: Date
+  }
 });
 
 const Model = db.model('UserPreferences', userPreferencesSchema);
@@ -53,11 +59,19 @@ async function createOrUpdate(fields) {
   return model;
 }
 
-async function updateExerciseIndex(userId, index){
+async function updateExerciseIndex(userId, index) {
   const model = await getForUser(userId);
   model.exerciseIndex = index;
   await model.save();
-  return true;
+  return model;
+}
+
+async function updateTarget(userId, weight, date) {
+  const model = await getForUser(userId);
+  model.targetWeight = weight;
+  model.targetDate = date;
+  await model.save();
+  return model;
 }
 
 module.exports = {
@@ -65,5 +79,6 @@ module.exports = {
   createOrUpdate,
   getForUser,
   updateExerciseIndex,
+  updateTarget,
   model: Model
 }

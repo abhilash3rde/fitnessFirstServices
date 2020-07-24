@@ -16,7 +16,7 @@ async function hashPassword(user) {
 
 
 const uploadLocalFile = async (path) => {
-  const res = await cloudinary.uploader.upload(path);
+  const res = await cloudinary.uploader.upload(path,  {resource_type: "auto"});
   fs.unlinkSync(path);
   if (res && res.secure_url) {
     console.log('file uploaded to Cloudinary', res.secure_url);
@@ -165,7 +165,7 @@ function calculateBmi(weight, height) {
   weight = parseInt(weight);
   height = parseInt(height)
   if (weight > 0 && height > 0) {
-    return (weight / (height / 100 * height / 100) ).toPrecision(3)
+    return (weight / (height / 100 * height / 100)).toPrecision(3)
   }
   return 0;
 }

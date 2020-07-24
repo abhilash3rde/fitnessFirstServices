@@ -81,6 +81,20 @@ router.post('/preferences/exerciseIndex/:index', async function (req, res, next)
   }
 });
 
+router.post('/target/', async function (req, res, next) {
+  try {
+    const {userId} = req;
+    const {weight,date} = req.body;
+    const model = await UserPreferences.updateTarget(userId, weight,date);
+    res.json({success: true, preferences:model});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 module.exports = router;
 
 

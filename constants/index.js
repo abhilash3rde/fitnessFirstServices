@@ -79,6 +79,12 @@ const remoteMessageTypes = {
   UPDATE_POSTS: 'UPDATE_POSTS',
 }
 
+const claimStatus = {
+  NONE:'NONE',
+  REQUESTED:'REQUESTED',
+  DONE:'DONE'
+}
+
 module.exports = {
   userTypes,
   CHANNELS,
@@ -93,5 +99,8 @@ module.exports = {
   POST_TYPE,
   firebaseTopics,
   remoteMessageTypes,
-  agoraAppIds
+  agoraAppIds,
+  claimStatus
 }
+
+

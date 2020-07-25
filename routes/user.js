@@ -67,7 +67,7 @@ router.put('/', async function (req, res, next) {
     console.log(`User ${req.userId} update request`);
     const {userId, userType} = req;
     let model = userType === userTypes.TRAINER ? TrainerData : UserData;
-
+    console.log(req.body);
     const userData = await model.edit(
       userId,
       {

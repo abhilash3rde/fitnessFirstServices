@@ -29,6 +29,11 @@ const Model = db.model('Subscription', {
     index: true,
     default: null
   },
+  couponId:{
+    type:String,
+    ref:'Coupon',
+    default:null
+  },
   active: {
     type: Boolean,
     default: false
@@ -48,7 +53,8 @@ const Model = db.model('Subscription', {
   endDate: {
     type: Date,
     default: null
-  }
+  },
+
 });
 
 async function get(_id) {

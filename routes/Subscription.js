@@ -21,10 +21,11 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const trainerData = await TrainerData.getById(trainerId);
     const package = trainerData.packages.find(package => package._id === packageId);
     let finalPrice = package.price;
+    let coupon = null;
     if (!!couponCode) {
       let discount = await Coupon.peek(couponCode, trainerId);
       if (discount)
-        await Coupon.redeem(couponCode, trainerId);
+        coupon = (await Coupon.redeem(couponCode, trainerId)).couponId;
       finalPrice = finalPrice - (finalPrice * discount / 100);
     }
 
@@ -51,7 +52,12 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     });
 
     const _subscription = await Subscription.create({
-      packageId, trainerId, subscribedBy: userId, totalSessions: package.noOfSessions, startDate
+      packageId,
+      trainerId,
+      subscribedBy: userId,
+      totalSessions: package.noOfSessions,
+      startDate,
+      couponId:coupon
     });
 
     availableSlots.map(async slot => {
@@ -61,7 +67,6 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     });
 
     const approxDuration = package.noOfSessions / days.length;
-
 
     const metadata = {
       packageName: package.title,

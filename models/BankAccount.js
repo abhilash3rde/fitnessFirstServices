@@ -16,7 +16,7 @@ const bankAccountSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  BankName: {
+  bankName: {
     type: String,
     default: ''
   },
@@ -41,21 +41,18 @@ async function get(_id) {
 }
 
 async function getForUser(userId) {
-  const model = await Model.findOne(
+  const model = await Model.find(
     {userId},
     {__v: 0}
   );
   return model;
 }
 
-async function create(fields) {
-  //TODO correct this
-  const {userId} = fields;
-  const existingModel = await getForUser(userId);
-  if (existingModel) {
-    update(userId, fields);
-  }
-  const model = new Model(fields);
+async function create(userId, fields) {
+  const model = new Model({
+    ...fields,
+    userId
+  });
   await model.save();
   return model;
 }

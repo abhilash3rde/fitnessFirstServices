@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {claimStatus} = require('../constants');
 const Coupon = require('../models/Coupon');
+const BankAccount = require('../models/BankAccount');
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transaction');
 const {monthsFromNow} = require('../utility/utility');
@@ -105,6 +106,28 @@ router.get('/accountSummary', async function (req, res, next) {
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
     console.log(error)
+  }
+});
+
+router.get('/getMyAccounts', async function (req, res, next) {
+  try {
+    let {userId} = req;
+    let accounts = await BankAccount.getForUser(userId);
+    res.json({accounts});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error);
+  }
+});
+
+router.post('/addAccount', async function (req, res, next) {
+  try {
+    let {userId} = req;
+    let account = await BankAccount.create(userId, req.body);
+    res.json({account, success: true});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error);
   }
 });
 

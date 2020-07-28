@@ -57,7 +57,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       subscribedBy: userId,
       totalSessions: package.noOfSessions,
       startDate,
-      couponId:coupon
+      couponId: coupon
     });
 
     availableSlots.map(async slot => {
@@ -67,7 +67,19 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     });
 
     const approxDuration = package.noOfSessions / days.length;
-
+    const noOfDays = 7 * (approxDuration);
+    await Subscription.updateEndDate(_subscription._id, startDate, noOfDays);
+    if (finalPrice === 0) {
+      await Subscription.activateSubscription(_subscription._id);
+      await Transaction.create({
+        orderId: _subscription._id,
+        subscriptionId: _subscription._id,
+        transferAttempts: 0,
+        status: 'paid'
+      });
+      res.json({success: true, payment: false});
+      return;
+    }
     const metadata = {
       packageName: package.title,
       sessionCount: package.noOfSessions,
@@ -103,10 +115,6 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     if (!transaction) {
       throw Error("Error while creating Transaction");
     }
-
-    // await Subscription.activateSubscription(_subscription._id);
-    const noOfDays = 7 * (approxDuration);
-    await Subscription.updateEndDate(_subscription._id, startDate, noOfDays);
 
     res.json({success: true, metadata, orderId: order.id, subscriptionId: _subscription._id});
   } catch (err) {

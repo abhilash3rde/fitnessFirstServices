@@ -57,7 +57,7 @@ router.get('/accountSummary', async function (req, res, next) {
     let strippedSubs = await Promise.all(subscriptions.reverse().map(async subscription => {
       const {heldSessions, totalSessions, packageId, startDate, endDate, subscribedBy, _id: subscriptionId, couponId} = subscription;
       const transaction = await Transaction.getTransactionForSubscription(subscriptionId);
-      if (transaction.status !== 'paid') return null; // TODO: rollback these transactions
+      if (!transaction || transaction.status !== 'paid') return null; // TODO: rollback these transactions
 
       let couponDetails = null;
       let finalPrice = packageId.price;
@@ -94,7 +94,7 @@ router.get('/accountSummary', async function (req, res, next) {
       }
     }))
     strippedSubs = strippedSubs.filter(sub => sub)
-
+['']
     res.json({
       statements: strippedSubs,
       earnings: {

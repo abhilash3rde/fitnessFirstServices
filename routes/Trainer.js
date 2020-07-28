@@ -50,6 +50,7 @@ router.get('/myPackages', async function (req, res, next) {
         }
 
       const subscribers = subscriptions.flatMap(subscription => subscription.subscribedBy);
+        console.log('my',subscriptions);
       res.json( subscribers );
     } catch (err) {
       res.status(500).json({

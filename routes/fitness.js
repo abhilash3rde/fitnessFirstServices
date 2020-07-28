@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 const BmiHistory = require('../models/BmiHistory');
 const UserData = require('../models/userData');
+const TrainerData = require('../models/trainerData');
 const UserPreferences = require('../models/UserPreferences');
-
+const {userTypes} = require('../constants')
 router.post('/recordBmi', async function (req, res, next) {
   try {
-    const {userId} = req;
+    const {userId, userType} = req;
     const {bmi, weight} = req.body;
-    await UserData.edit(userId, {weight});
+    userType === userTypes.TRAINER && await TrainerData.edit(userId, {weight});
+    userType === userTypes.USER && await UserData.edit(userId, {weight});
     const record = await BmiHistory.create({
       bmi,
       weight,

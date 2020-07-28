@@ -98,6 +98,7 @@ async function sign(payload) {
 
 async function verify(jwtString = '') {
   jwtString = jwtString.replace(/^Bearer /i, '')
+  console.log(jwtString);
   try {
     const payload = await jwt.verify(jwtString, jwtSecret);
     return payload;

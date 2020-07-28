@@ -6,6 +6,7 @@ const UserData = require('../models/userData');
 const ActiveCalls = require('../models/activeCalls');
 const router = express.Router();
 
+const defaultDp = 'https://media.istockphoto.com/photos/middle-aged-gym-coach-picture-id475467038';
 const Fcm = require('../models/fcm');
 const {agoraAppIds, remoteMessageTypes} = require('../constants');
 
@@ -36,14 +37,23 @@ router.post('/', async function (req, res, next) {
       return;
     }
     const fcmToken = await Fcm.getToken(targetUserId);
-    let userData = {};
+    let userData = {}, targetUserData ={};
     if (userType === userTypes.TRAINER) {
       userData = await TrainerData.getById(userId);
-    } else userData = await UserData.getById(userId);
+      targetUserData = await UserData.getById(targetUserId);
+    } else {
+      userData = await UserData.getById(userId);
+      targetUserData = await TrainerData.getById(targetUserId);
+    }
+
 
     let {name, displayPictureUrl} = userData;
     if (!!!name) name = "User";
-    if (!!!displayPictureUrl) displayPictureUrl = 'https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png';
+    if (!!!displayPictureUrl) displayPictureUrl = defaultDp;
+
+    let {name:targetName, displayPictureUrl:targetDisplayPictureUrl} = targetUserData;
+    if (!!!targetName) targetName = "User";
+    if (!!!targetDisplayPictureUrl) targetDisplayPictureUrl = defaultDp;
 
     console.log(name, displayPictureUrl, sessionId);
     const agoraAppId = getAgoraAppId();
@@ -65,7 +75,7 @@ router.post('/', async function (req, res, next) {
       },
     );
     await ActiveCalls.create(userId);
-    res.json({sessionId, agoraAppId, displayPictureUrl, displayName: name, success: true}); // TODO : add call config here
+    res.json({sessionId, agoraAppId, displayPictureUrl:targetDisplayPictureUrl, displayName: targetName, success: true}); // TODO : add call config here
   } catch (err) {
     console.log(err)
     res.status(500).json({

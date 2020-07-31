@@ -53,6 +53,7 @@ router.get('/accountSummary', async function (req, res, next) {
   try {
     const {userId} = req;
     const subscriptions = await Subscription.getAllForTrainer(userId);
+    console.log(`found ${subscriptions.length} subs for trainer`);
     let totalEarnings = 0, claimedAmount = 0, claimableAmount = 0;
     let strippedSubs = await Promise.all(subscriptions.reverse().map(async subscription => {
       const {heldSessions, totalSessions, packageId, startDate, endDate, subscribedBy, _id: subscriptionId, couponId} = subscription;
@@ -92,9 +93,11 @@ router.get('/accountSummary', async function (req, res, next) {
           paymentDate: transaction.startedOn // not taking completed on as it can be null in case of pending payment
         },
       }
-    }))
-    strippedSubs = strippedSubs.filter(sub => sub)
-['']
+    }));
+    console.log('stripped', strippedSubs);
+    strippedSubs = strippedSubs.filter(sub => sub);
+    console.log('after', strippedSubs);
+
     res.json({
       statements: strippedSubs,
       earnings: {

@@ -94,9 +94,9 @@ router.get('/accountSummary', async function (req, res, next) {
         },
       }
     }));
-    console.log('stripped', strippedSubs);
+    // console.log('stripped', strippedSubs);
     strippedSubs = strippedSubs.filter(sub => sub);
-    console.log('after', strippedSubs);
+    // console.log('after', strippedSubs);
 
     res.json({
       statements: strippedSubs,

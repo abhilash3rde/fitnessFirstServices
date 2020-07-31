@@ -7,16 +7,16 @@ const TrainerData = require('../models/trainerData');
 
 router.post('/create', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { title, noOfSessions, price, description } = req.body;
+    const {userId} = req;
+    const {title, noOfSessions, price, description, category} = req.body;
 
     const package = await Package.create({
-      title, noOfSessions, price, description
+      title, noOfSessions, price, description, category
     });
     if (!package) throw new Error("Error in creating package");
 
     await TrainerData.addPackage(userId, package._id);
-    res.json({ package });
+    res.json({package});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -27,10 +27,10 @@ router.post('/create', async function (req, res, next) {
 router.put('/:packageId', async function (req, res, next) {
   try {
     const {packageId} = req.params;
-    const { title, noOfSessions, price, description } = req.body;
+    const {title, noOfSessions, price, description, category} = req.body;
 
     const package_ = await Package.edit(packageId, {
-      title, noOfSessions, price, description
+      title, noOfSessions, price, description, category
     });
     if (!package_) throw new Error("Error in editing package");
 
@@ -44,7 +44,7 @@ router.put('/:packageId', async function (req, res, next) {
 
 router.get('/:packageId', async function (req, res, next) {
   try {
-    const { packageId } = req.params;
+    const {packageId} = req.params;
 
     const package_ = await Package.get(packageId);
     if (!package_) throw new Error("Error in locating package");
@@ -74,9 +74,9 @@ router.delete('/:packageId', async function (req, res, next) {
 
 router.put('/:packageId/activate', async function (req, res, next) {
   try {
-    const { packageId } = req.params;
+    const {packageId} = req.params;
     await Package.activatepackage(packageId);
-    res.json({ success: true });
+    res.json({success: true});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -86,9 +86,9 @@ router.put('/:packageId/activate', async function (req, res, next) {
 
 router.put('/:packageId/deactivate', async function (req, res, next) {
   try {
-    const { packageId } = req.params;
+    const {packageId} = req.params;
     await Package.deActivatePackage(packageId);
-    res.json({ success: true });
+    res.json({success: true});
   } catch (err) {
     res.status(500).json({
       err: err.message

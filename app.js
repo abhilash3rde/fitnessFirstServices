@@ -26,7 +26,7 @@ const activityRouter = require('./routes/Activity');
 const questionRouter = require('./routes/question');
 const answerRouter = require('./routes/answer');
 const fitnessRouter = require('./routes/fitness');
-
+const callbackRouter = require('./routes/Callback');
 const middleware = require('./middleware');
 const auth = require('./auth');
 
@@ -72,6 +72,7 @@ app.use('/activity', auth.ensureUser, activityRouter);
 app.use('/question', auth.ensureUser, questionRouter);
 app.use('/answer', auth.ensureUser, answerRouter);
 app.use('/fitness', auth.ensureUser, fitnessRouter);
+app.use('/callback', auth.ensureUser, callbackRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler
@@ -84,19 +85,4 @@ app.use(middleware.handleError);
 //   scheduler.notifyHowsSession();
 // });
 
-// admin.messaging().sendToDevice(
-//   ['dZe1F-nmTbqxzJ9w6DyfTM:APA91bE1Zh_f8f4PMBkPryzLK6HzkONOk29vog5nfHWC4W-6cULvxoQ8hlSmD2sMTx4zzDCP8VZPwpBK_5BEDXsgVx2eS6ttACF_4kPwUAqL5TkECEeKdafe_bcwNkoObsJkUi65pe58'],
-//   {
-//     data: {
-//       "priority": "high",
-//       "uuid": "uuid of user",
-//       "name": "RNVoip",
-//       "type": "call"
-//     }
-//   },
-//   {
-//     contentAvailable: true,
-//     priority: 'high'
-//   },
-// );
 module.exports = app;

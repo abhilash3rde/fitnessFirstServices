@@ -15,6 +15,10 @@ const packageSchema = mongoose.Schema({
     type: String,
     default: 'Sample package'
   },
+  category: {
+    type: String,
+    required: true
+  },
   noOfSessions: {
     type: Number,
     default: 0
@@ -37,7 +41,7 @@ const packageSchema = mongoose.Schema({
   }
 }, opts);
 
-packageSchema.virtual('totalSubscriptions',{
+packageSchema.virtual('totalSubscriptions', {
   ref: 'Subscription',
   localField: '_id',
   foreignField: 'packageId',
@@ -101,7 +105,7 @@ async function edit(_id, change) {
 
 async function checkForSubscription(packageId) {
   const subscription = await Subscription.getForPackage(packageId);
-  console.log('subs',subscription)
+  console.log('subs', subscription)
   return !!(subscription);
 }
 
@@ -131,7 +135,6 @@ async function deActivatePackage(_id) {
   model["active"] = true;
   return await model.save();
 }
-
 
 
 module.exports = {

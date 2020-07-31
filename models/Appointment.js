@@ -4,9 +4,8 @@ const mongoose = require('mongoose');
 const opts = { toJSON: { virtuals: true } };
 
 const db = require('../config/db');
-const post = require('./post');
 const DateUtils = require('../utility/DateUtils');
-
+const {callbackStatus} = require('../constants');
 const appointmentSchema = mongoose.Schema({
   _id: {
     type: String,
@@ -21,6 +20,10 @@ const appointmentSchema = mongoose.Schema({
     type: String,
     ref: 'TrainerData',
     required: true
+  },
+  status:{
+    type:String,
+    default:callbackStatus.REQUESTED
   },
   createdOn: {
     type: Date,
@@ -107,7 +110,7 @@ async function getTrainerAppointments(trainerId) {
   )
   .populate('userId')
   .sort({appointmentDate : -1})
-  .exec();;
+  .exec();
   return model;
 }
 
@@ -161,6 +164,17 @@ async function getuserAppointmentsForDate(userId, appointmentDate) {
   return model;
 }
 
+async function accept(appointmentId){
+  const model = await get(appointmentId);
+  model.status=callbackStatus.ACCEPTED;
+  await model.save();
+}
+async function reject(appointmentId){
+  const model = await get(appointmentId);
+  model.status=callbackStatus.REJECTED;
+  await model.save();
+}
+
 module.exports = {
   get,
   create,
@@ -170,5 +184,7 @@ module.exports = {
   getUserAppointments,
   getTrainerAppointmentsForDate,
   getuserAppointmentsForDate,
+  accept,
+  reject,
   model: Model
 }

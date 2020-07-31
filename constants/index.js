@@ -77,12 +77,28 @@ const remoteMessageTypes = {
   APPOINTMENT: "appointmentNotification",
   SESSION: 'sessionNotification',
   UPDATE_POSTS: 'UPDATE_POSTS',
+  CALLBACK:'CALLBACK'
 }
-
 const claimStatus = {
-  NONE:'NONE',
+  NONE: 'NONE',
+  REQUESTED: 'REQUESTED',
+  DONE: 'DONE'
+}
+const packageTypes = {
+  FAT_LOSS: 'Fat Loss',
+  WEIGHT_LOSS: 'Weight Loss',
+  WEIGHT_GAIN: 'Weight Gain',
+  MUSCLE_GAIN: 'Muscle Gain',
+  BODY_MASS_GAIN: 'Body Mass Gain',
+  LEAN_BODY_MASS: 'Lean Body Mass',
+  POWER_LIFTING: 'Power Lifting',
+  STRENGTH_GAIN: 'Strength Gain'
+}
+const callbackStatus = {
   REQUESTED:'REQUESTED',
-  DONE:'DONE'
+  ACCEPTED:'ACCEPTED',
+  REJECTED:'REJECTED',
+  COMPLETED:'COMPLETED'
 }
 
 module.exports = {
@@ -100,7 +116,9 @@ module.exports = {
   firebaseTopics,
   remoteMessageTypes,
   agoraAppIds,
-  claimStatus
+  claimStatus,
+  packageTypes,
+  callbackStatus
 }
 
 

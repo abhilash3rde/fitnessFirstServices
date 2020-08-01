@@ -66,54 +66,34 @@ router.post('/user', async function (req, res, next) {
 
 router.post('/googleAuth', async function (req, res, next) {
   try {
-    const {idToken, fcmToken} = req.body;
+    const {idToken, fcmToken, userType} = req.body;
+    console.log('Auth req for ', userType)
     let {name, picture, user_id, email} = await admin.auth().verifyIdToken(idToken);
     const ipInfo = req.ipInfo;
 
-    const userExists = await User.getById(user_id);
-    if (userExists) {
-      const userFcm = await Fcm.setFcmToken(user_id, fcmToken);
-      if (!userFcm) throw new Error("Unable to set FCM");
-      const {userType} = userExists;
-      switch (userType) {
-        case userTypes.USER: {
-          if (!name) name = 'User';
-          const user = await UserData.create({
-            email,
-            _id: user_id,
-            displayPictureUrl: picture,
-            name,
-            city: ipInfo.city ? ipInfo.city : ''
-          })
-          if (!user) throw new Error("Unable to create user");
+    if (!name)
+      name = userType === userTypes.TRAINER ? 'Trainer' : 'User';
 
-          const authToken = await signJwt({userEmail: email, userType: userTypes.USER, userId: user_id});
-          res.json({email, userId: user_id, authToken, userType: userTypes.USER, success: true, newUser: false});
-        }
-          break;
-        case userTypes.TRAINER: {
-          if (!name) name = 'Trainer';
-          const trainer = await TrainerData.create({
-            email,
-            _id: user_id,
-            displayPictureUrl: picture,
-            name,
-            city: ipInfo.city ? ipInfo.city : ''
-          })
-          if (!trainer) throw new Error("Unable to create trainer");
-          const authToken = await signJwt({userEmail: email, userType: userTypes.TRAINER, userId: user_id});
-          res.json({email, userId: user_id, authToken, userType: userTypes.TRAINER, success: true, newUser: false});
-        }
-          break;
-      }
-    } else {
-      const user = await User.create({
-        email,
-        _id: user_id,
-      })
-      if (!user) throw new Error("Unable to create user");
-      res.json({newUser: true, success: true});
-    }
+    const user = await User.create({
+      email,
+      _id: user_id,
+      userType
+    });
+
+    const userFcm = await Fcm.setFcmToken(user_id, fcmToken);
+
+    const Model = userType === userTypes.TRAINER ? TrainerData : UserData;
+    const userData = await Model.create({
+      email,
+      _id: user_id,
+      displayPictureUrl: picture,
+      name,
+      city: ipInfo.city ? ipInfo.city : ''
+    })
+    if (!user) throw new Error("Unable to create user data");
+
+    const authToken = await signJwt({userEmail: email, userType, userId: user_id});
+    res.json({email, userId: user_id, authToken, userType,userData, success: true});
   } catch (err) {
     console.log(err);
     res.status(403).json({
@@ -121,19 +101,5 @@ router.post('/googleAuth', async function (req, res, next) {
     });
   }
 });
-
-router.post('/setUserType', async function (req, res, next) {
-  try {
-    const {userType, idToken} = req.body;
-    let {user_id} = await admin.auth().verifyIdToken(idToken);
-    await User.setUserType(user_id, userType);
-    res.json({success: true});
-  } catch (err) {
-    res.status(500).json({
-      err: err.message
-    });
-  }
-});
-
 
 module.exports = router;

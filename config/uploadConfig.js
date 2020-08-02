@@ -2,9 +2,9 @@ const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 
 cloudinary.config({
-  cloud_name: 'matrim',
-  api_key: '183547949416228',
-  api_secret: 'XIdpSQr52PYMmkBR-lSbBVec20o'
+  cloud_name: 'primefitness',
+  api_key: '572783897338239',
+  api_secret: 'qz3WFwYxgkjWfPjp5Y7nf9heejI'
 });
 
 var storage = multer.diskStorage({

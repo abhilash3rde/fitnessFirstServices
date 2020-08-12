@@ -90,6 +90,7 @@ router.post('/:commentId/like', async function (req, res, next) {
         success: true
       });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });
@@ -107,6 +108,7 @@ router.post('/:commentId/unlike', async function (req, res, next) {
         success: true
       });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });
@@ -123,6 +125,7 @@ router.put('/:commentId/reportSpam', async function (req, res, next) {
         success: true
       });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });
@@ -160,6 +163,7 @@ router.put('/:commentId/approve', async function (req, res, next) {
         success: true
       });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });

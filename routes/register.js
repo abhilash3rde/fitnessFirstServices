@@ -45,7 +45,7 @@ router.post('/googleAuth', async function (req, res, next) {
     await Fcm.setFcmToken(user_id, fcmToken);
     const userData = await Model.get(email);
     const authToken = await signJwt({userEmail: email, userType, userId: user_id});
-    res.json({email, userId: user_id, authToken, userType, userData, success: true});
+    res.json({email, userId: user_id, authToken, userType, userData, isNewUser: !existingUser, success: true});
   } catch (err) {
     console.log(err);
     res.status(403).json({

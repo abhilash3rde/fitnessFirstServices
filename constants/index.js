@@ -21,7 +21,7 @@ const POST_TYPE = {
 }
 
 //TODO - this is random allocation if no wall image
-const RAMDOM_WALL_IMAGE = {
+const RANDOM_WALL_IMAGE = {
   1: "https://res.cloudinary.com/matrim/image/upload/v1593788759/oottv1b6pa143q6kcdxl.jpg",
   2: "https://res.cloudinary.com/matrim/image/upload/v1593788858/ijfwfuaptywq5edpef4z.jpg",
   3: "https://res.cloudinary.com/matrim/image/upload/v1593788925/nyuvgdocpkitvcyomsqu.jpg",
@@ -77,7 +77,7 @@ const remoteMessageTypes = {
   APPOINTMENT: "appointmentNotification",
   SESSION: 'sessionNotification',
   UPDATE_POSTS: 'UPDATE_POSTS',
-  CALLBACK:'CALLBACK'
+  CALLBACK: 'CALLBACK'
 }
 const claimStatus = {
   NONE: 'NONE',
@@ -95,10 +95,15 @@ const packageTypes = {
   STRENGTH_GAIN: 'Strength Gain'
 }
 const callbackStatus = {
-  REQUESTED:'REQUESTED',
-  ACCEPTED:'ACCEPTED',
-  REJECTED:'REJECTED',
-  COMPLETED:'COMPLETED'
+  REQUESTED: 'REQUESTED',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+  COMPLETED: 'COMPLETED'
+}
+const streamStatus = {
+  SCHEDULED:'SCHEDULED',
+  LIVE:'LIVE',
+  FINISHED:'FINISHED'
 }
 
 module.exports = {
@@ -106,7 +111,7 @@ module.exports = {
   CHANNELS,
   CONTENT_TYPE,
   ENABLE_FILE_UPLOAD,
-  RAMDOM_WALL_IMAGE,
+  RANDOM_WALL_IMAGE,
   CRON_NOTIFY_HOWS_SESSION,
   WEEK_DAYS,
   TIME_STRING,
@@ -118,7 +123,8 @@ module.exports = {
   agoraAppIds,
   claimStatus,
   packageTypes,
-  callbackStatus
+  callbackStatus,
+  streamStatus
 }
 
 

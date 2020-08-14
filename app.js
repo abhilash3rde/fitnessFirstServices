@@ -27,6 +27,7 @@ const questionRouter = require('./routes/question');
 const answerRouter = require('./routes/answer');
 const fitnessRouter = require('./routes/fitness');
 const callbackRouter = require('./routes/Callback');
+const liveStreamRouter = require('./routes/liveStream');
 const middleware = require('./middleware');
 const auth = require('./auth');
 
@@ -73,6 +74,7 @@ app.use('/question', auth.ensureUser, questionRouter);
 app.use('/answer', auth.ensureUser, answerRouter);
 app.use('/fitness', auth.ensureUser, fitnessRouter);
 app.use('/callback', auth.ensureUser, callbackRouter);
+app.use('/live', auth.ensureUser, liveStreamRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler

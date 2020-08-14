@@ -126,7 +126,6 @@ async function remove(_id, userId) {
   } 
 }
 
-
 async function create(fields) {
   const model = new Model(fields);
   await model.save();

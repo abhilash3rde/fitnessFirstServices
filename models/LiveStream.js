@@ -13,9 +13,9 @@ const liveStreamSchema = mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  hostId: {
+  host: {
     type: String,
-    ref: 'User',
+    ref: 'TrainerData',
     required: true
   },
   title: {
@@ -57,8 +57,10 @@ async function create(fields) {
 
 async function setLive(streamId) {
   const model = await get(streamId);
-  if (Date(model.date) < Date.now()) {
+
+  if (new Date(model.date) < new Date) {
     model.status = streamStatus.LIVE;
+    console.log("Setting stream live");
     await model.save();
     return true;
   } else return false;
@@ -73,6 +75,8 @@ async function list(opts = {}) {
   const options = {
     select: '',
     sort: {date: -1},
+    populate: [{path:'host'}],
+
     lean: true,
     page: page,
     limit: limit

@@ -70,14 +70,16 @@ const paymentKey = {
 }
 
 const firebaseTopics = {
-  SILENT_NOTIFICATION: 'SILENT_NOTIFICATION'
+  SILENT_NOTIFICATION: 'SILENT_NOTIFICATION',
+  DISPLAY_NOTIFICATION:'DISPLAY_NOTIFICATION'
 }
 const remoteMessageTypes = {
   CALL: 'call',
   APPOINTMENT: "appointmentNotification",
   SESSION: 'sessionNotification',
   UPDATE_POSTS: 'UPDATE_POSTS',
-  CALLBACK: 'CALLBACK'
+  CALLBACK: 'CALLBACK',
+  GENERIC_NOTIFICATION:'GENERIC_NOTIFICATION'
 }
 const claimStatus = {
   NONE: 'NONE',

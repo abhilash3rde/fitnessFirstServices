@@ -191,7 +191,7 @@ async function createZoomMeeting(title, date, duration) {
     topic: title,
     settings: {
       host_video: true,
-      // approval_type:1,
+      approval_type:0,
       mute_upon_entry: true,
       auto_recording: 'local', // or cloud
     }

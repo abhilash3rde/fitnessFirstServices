@@ -4,7 +4,7 @@ const router = express.Router();
 const {admin} = require('../config');
 const LiveStream = require('../models/LiveStream');
 const TrainerData = require('../models/trainerData');
-const {userTypes, remoteMessageTypes,firebaseTopics} = require('../constants');
+const {userTypes, remoteMessageTypes, firebaseTopics} = require('../constants');
 const {createZoomMeeting, getZakToken} = require('../utility/utility');
 
 router.post('/schedule', async function (req, res, next) {
@@ -16,6 +16,25 @@ router.post('/schedule', async function (req, res, next) {
     }
     const {title, date, duration} = req.body;
     const meeting = await createZoomMeeting(title, date, duration);
+    const {name} = await TrainerData.getById(userId);
+    const notificationMessage = `${name} has started a scheduled a live session on ${title} on ${new Date(date).toLocaleDateString()}`;
+    const message = {
+      data: {
+        type: remoteMessageTypes.GENERIC_NOTIFICATION,
+        message: notificationMessage,
+        hostId: userId
+      },
+      topic: firebaseTopics.SILENT_NOTIFICATION,
+    };
+    admin
+      .messaging()
+      .send(message)
+      .then(response => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch(error => {
+        console.log('Error sending message:', error);
+      });
     const model = await LiveStream.create({
       title,
       date,
@@ -55,8 +74,8 @@ router.put('/start', async function (req, res, next) {
     const message = {
       data: {
         type: remoteMessageTypes.GENERIC_NOTIFICATION,
-        message:notificationMessage,
-        hostId:userId
+        message: notificationMessage,
+        hostId: userId
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };
@@ -87,7 +106,7 @@ router.get('/list/:page?', async function (req, res, next) {
     if (records.page < records.pages) {
       nextPage = "/live/list/" + (parseInt(records.page) + 1);
     }
-    res.json({streams:records.docs, nextPage});
+    res.json({streams: records.docs, nextPage});
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -107,7 +126,7 @@ router.get('/listMy/:page?', async function (req, res, next) {
     if (records.page < records.pages) {
       nextPage = "/live/list/" + (parseInt(records.page) + 1);
     }
-    res.json({streams:records.docs, nextPage});
+    res.json({streams: records.docs, nextPage});
   } catch (err) {
     console.log(err);
     res.status(500).json({

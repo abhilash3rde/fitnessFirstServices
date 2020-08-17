@@ -39,6 +39,8 @@ router.put('/start', async function (req, res, next) {
 
     const {streamId} = req.body;
     const model = await LiveStream.get(streamId);
+    console.log("Starting meeting #", model.meetingId);
+
     if (model.host !== userId) {
       res.status(401).json({message: 'User not authorised to start this live stream'});
       return;
@@ -78,12 +80,30 @@ router.put('/start', async function (req, res, next) {
 
 router.get('/list/:page?', async function (req, res, next) {
   try {
+    let records = [];
+    let nextPage = null;
+    const page = req.params['page'] ? req.params['page'] : 1;
+    records = await LiveStream.list({page});
+    if (records.page < records.pages) {
+      nextPage = "/live/list/" + (parseInt(records.page) + 1);
+    }
+    res.json({streams:records.docs, nextPage});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.get('/listMy/:page?', async function (req, res, next) {
+  try {
     const {userId} = req;
 
     let records = [];
     let nextPage = null;
     const page = req.params['page'] ? req.params['page'] : 1;
-    records = await LiveStream.list({page});
+    records = await LiveStream.list({page}, userId);
     if (records.page < records.pages) {
       nextPage = "/live/list/" + (parseInt(records.page) + 1);
     }

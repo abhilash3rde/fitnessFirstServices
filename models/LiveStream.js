@@ -66,7 +66,15 @@ async function setLive(streamId) {
   } else return false;
 }
 
-async function list(opts = {}) {
+async function setFinished(meetingId) {
+  const model = await Model.findOne({meetingId});
+  model.status = streamStatus.FINISHED;
+  console.log("Setting stream FINISHED");
+  await model.save();
+  return true;
+}
+
+async function list(opts = {}, hostId = null) {
   const {
     page = 1, limit = 25
   } = opts;
@@ -75,14 +83,13 @@ async function list(opts = {}) {
   const options = {
     select: '',
     sort: {date: -1},
-    populate: [{path:'host'}],
-
+    populate: [{path: 'host', select: '_id displayPictureUrl name city'}],
     lean: true,
     page: page,
     limit: limit
   };
 
-  const query = {}
+  const query = hostId ? {host: hostId} : {};
 
   await Model.paginate(query, options, async (err, result) => {
     record = result;
@@ -95,5 +102,6 @@ module.exports = {
   create,
   list,
   setLive,
+  setFinished,
   model: Model
 }

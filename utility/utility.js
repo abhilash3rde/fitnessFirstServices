@@ -191,9 +191,10 @@ async function createZoomMeeting(title, date, duration) {
     topic: title,
     settings: {
       host_video: true,
-      approval_type:0,
+      approval_type: 0,
       mute_upon_entry: true,
-      auto_recording: 'local', // or cloud
+      auto_recording: 'local', // or cloud,
+      waiting_room: false,
     }
   }
   const res = await fetch(url, {method: 'POST', headers: headers, body: JSON.stringify(data)});

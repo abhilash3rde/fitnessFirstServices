@@ -45,7 +45,8 @@ router.post('/:trainerId/book', async function (req, res, next) {
       const msgText = userData.name + " requested a call back on" + dayFullName + ".";
       const message = {
         type: remoteMessageTypes.APPOINTMENT,
-        text: msgText
+        text: msgText,
+        displayImage:userData.displayPictureUrl
       }
 
       console.log("Notifying Trainer for=>", message);

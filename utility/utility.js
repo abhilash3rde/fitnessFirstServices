@@ -116,7 +116,9 @@ const sendNotification = async (tokens, message) => {
       data: {
         "priority": "high",
         "type": message.type,
-        "content": message.text
+        "content": message.text,
+        "displayImage": message.displayImage || "",
+        "sentDate":new Date().toString()
       }
     }
   );

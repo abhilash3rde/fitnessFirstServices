@@ -78,7 +78,8 @@ const remoteMessageTypes = {
   APPOINTMENT: "appointmentNotification",
   SESSION: 'sessionNotification',
   UPDATE_POSTS: 'UPDATE_POSTS',
-  CALLBACK: 'CALLBACK',
+  CALLBACK_REQ: 'CALLBACK_REQ',
+  CALLBACK_ACCEPT: 'CALLBACK_ACCEPT',
   GENERIC_NOTIFICATION:'GENERIC_NOTIFICATION'
 }
 const claimStatus = {

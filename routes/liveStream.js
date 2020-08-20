@@ -16,13 +16,15 @@ router.post('/schedule', async function (req, res, next) {
     }
     const {title, date, duration} = req.body;
     const meeting = await createZoomMeeting(title, date, duration);
-    const {name} = await TrainerData.getById(userId);
-    const notificationMessage = `${name} has started a scheduled a live session on ${title} on ${new Date(date).toLocaleDateString()}`;
+    const {name, displayPictureUrl} = await TrainerData.getById(userId);
+    const notificationMessage = `${name} has scheduled a live session on ${title} on ${new Date(date).toLocaleDateString()}`;
     const message = {
       data: {
         type: remoteMessageTypes.GENERIC_NOTIFICATION,
         message: notificationMessage,
-        hostId: userId
+        hostId: userId,
+        displayImage: displayPictureUrl,
+        sentDate: new Date().toString()
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };
@@ -41,7 +43,8 @@ router.post('/schedule', async function (req, res, next) {
       duration,
       host: userId,
       meetingId: meeting.id,
-      meetingPassword: meeting.password
+      meetingPassword: meeting.password,
+      sentDate: new Date().toString()
     });
     res.json({success: true, stream: model});
   } catch (err) {
@@ -67,15 +70,19 @@ router.put('/start', async function (req, res, next) {
     await LiveStream.setLive(streamId);
     const zakToken = await getZakToken();
 
-    const {name} = await TrainerData.getById(userId);
-    const {title} = model;
+    const {name, displayPictureUrl} = await TrainerData.getById(userId);
+    const {title, meetingId, meetingPassword} = model;
     const notificationMessage = `${name} has started a live session on ${title}`;
 
     const message = {
       data: {
         type: remoteMessageTypes.GENERIC_NOTIFICATION,
         message: notificationMessage,
-        hostId: userId
+        hostId: userId,
+        displayImage: displayPictureUrl,
+        meetingId: meetingId.toString(),
+        meetingPassword,
+        sentDate: new Date().toString()
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };

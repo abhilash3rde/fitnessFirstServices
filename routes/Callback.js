@@ -28,8 +28,10 @@ router.post('/:trainerId/request', async function (req, res, next) {
 
       const msgText = userData.name + " has requested a call back";
       const message = {
-        type: remoteMessageTypes.APPOINTMENT,
-        text: msgText
+        type: remoteMessageTypes.CALLBACK_REQ,
+        text: msgText,
+        displayImage: userData.displayPictureUrl,
+        date:Date.now().toString()
       }
       await utility.sendNotification([token], message);
 
@@ -53,13 +55,14 @@ router.post('/:trainerId/request', async function (req, res, next) {
 router.put('/:callbackId/accept', async function (req, res, next) {
   try {
     const {userId: selfId} = req;
-    const {name: trainerName} = await TrainerData.getById(selfId);
+    const {name: trainerName, displayPictureUrl: trainerImage} = await TrainerData.getById(selfId);
     const {callbackId} = req.params;
     const {userId} = await Callback.get(callbackId);
     const token = await fcm.getToken(userId);
     const message = {
-      type: remoteMessageTypes.APPOINTMENT,
-      text: trainerName + ' has accepted your call request. Expect a call within 24 hours'
+      type: remoteMessageTypes.CALLBACK_ACCEPT,
+      text: trainerName + ' has accepted your call request. Expect a call within 24 hours',
+      displayImage: trainerImage,
     }
     await utility.sendNotification([token], message);
     await Callback.accept(callbackId);

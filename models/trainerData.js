@@ -233,7 +233,7 @@ async function edit(userId, change) {
 
 async function addPackage(trainerId, packageId) {
   const model = await getById(trainerId);
-  console.log('mod', model);
+  // console.log('mod', model);
   model.packages.push(packageId);
   await model.save();
   return model;

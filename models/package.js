@@ -4,7 +4,6 @@ const opts = {toJSON: {virtuals: true}};
 
 const db = require('../config/db');
 const Subscription = require('./Subscription');
-const {isValidObjectId} = require('../config/db');
 
 const packageSchema = mongoose.Schema({
   _id: {
@@ -38,6 +37,22 @@ const packageSchema = mongoose.Schema({
   description: {
     type: String,
     default: "Add or create new packages, customise their duration and cost. Click to add or delete packages"
+  },
+  group: {
+    type: Boolean,
+    default: false
+  },
+  maxParticipants: {
+    type: Number,
+    default: 1
+  },
+  slot: {
+    type: Object,
+    default: null
+  },
+  startDate: {
+    type: Date,
+    default: Date.now
   }
 }, opts);
 
@@ -105,7 +120,7 @@ async function edit(_id, change) {
 
 async function checkForSubscription(packageId) {
   const subscription = await Subscription.getForPackage(packageId);
-  console.log('subs', subscription)
+  // console.log('subs', subscription)
   return !!(subscription);
 }
 

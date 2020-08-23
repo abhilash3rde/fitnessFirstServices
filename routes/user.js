@@ -212,7 +212,7 @@ router.get('/mySubscriptions', async function (req, res, next) {
     if (!subscriptions) {
       throw Error("No Subscriptions")
     }
-    console.log('my ', mySubscriptions);
+    // console.log('my ', mySubscriptions);
     res.json(mySubscriptions);
   } catch (err) {
     res.status(500).json({

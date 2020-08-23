@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const Slot = require('../models/slot')
+const Slot = require('../models/slot');
 const TrainerData = require('../models/trainerData');
 const utility = require('../utility/utility');
 
@@ -19,25 +19,25 @@ router.post('/createOrUpdate', async function (req, res, next) {
     const availableSlots = [];
     trainerData.slots.map(
       slot => {
-        if (slot.subscriptionId) {
-          const key = slot.dayOfWeek +"#"+ slot.time;
+        if (slot.isSubscribed || slot.group) {
+          const key = slot.dayOfWeek + "#" + slot.time;
           bookedSlots.set(key, slot);
-        }
-        else {
+        } else {
           availableSlots.push(slot._id);
         }
       });
 
-      await TrainerData.removeSlots(trainerId, availableSlots);
-      const deleted = await Slot.deleteAll({trainerId, subscriptionId:null});
-      console.log("No of slots removed=>", deleted.deletedCount)
+    await TrainerData.removeSlots(trainerId, availableSlots);
+    const deleted = await Slot.deleteAll({trainerId, subscriptionId: null, group: false});
+    console.log("No of slots removed=>", deleted.deletedCount)
 
     await utility.asyncForEach(requestSlots, requestSlot => {
       const time = requestSlot.time;
       const duration = requestSlot.duration;
+      // if (requestSlot.group) return;
 
       requestSlot.days.map(async day => {
-        const key = day +"#"+ time;
+        const key = day + "#" + time;
         if (!bookedSlots.has(key)) {
           newSlots.push({
             time,
@@ -64,8 +64,8 @@ router.post('/createOrUpdate', async function (req, res, next) {
 
 router.put('/:slotId', async function (req, res, next) {
   try {
-    const { slotId } = req.params;
-    const { time, dayOfWeek, duration } = req.body;
+    const {slotId} = req.params;
+    const {time, dayOfWeek, duration} = req.body;
 
     const oldSlot = await Slot.get(slotId);
     const existingSlot = await Slot.findForDayAndTime(dayOfWeek, time);
@@ -81,7 +81,7 @@ router.put('/:slotId', async function (req, res, next) {
     });
     if (!slot) throw new Error("Error in modifying slot");
 
-    res.json({ slot, success: true });
+    res.json({slot, success: true});
 
   } catch (err) {
     res.status(500).json({
@@ -92,13 +92,13 @@ router.put('/:slotId', async function (req, res, next) {
 
 router.delete('/:slotId', async function (req, res, next) {
   try {
-    const { slotId } = req.params;
-    const { userId } = req;
+    const {slotId} = req.params;
+    const {userId} = req;
 
     await Slot.remove(slotId);
     const trainerData = await TrainerData.removeSlot(userId, slotId);
 
-    res.json({ success: true, trainerData });
+    res.json({success: true, trainerData});
 
   } catch (err) {
     res.status(500).json({
@@ -143,7 +143,7 @@ router.get('/getAllAvailable', async function (req, res, next) {
       resultSlots = [];
     });
 
-    res.json({ availableSlots });
+    res.json({availableSlots});
 
   } catch (err) {
     res.status(500).json({

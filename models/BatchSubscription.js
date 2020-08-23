@@ -3,7 +3,7 @@ const db = require('../config/db');
 
 const DateUtils = require('../utility/DateUtils');
 
-const Model = db.model('Subscription', {
+const Model = db.model('BatchSubscription', {
   _id: {
     type: String,
     default: cuid
@@ -20,20 +20,15 @@ const Model = db.model('Subscription', {
     index: true,
     default: null
   },
-  subscribedBy: {
+  subscriptions: [{
     type: String,
-    ref: 'UserData',
+    ref: 'Subscription',
     index: true,
     default: null
-  },
-  couponId:{
-    type:String,
-    ref:'Coupon',
-    default:null
-  },
+  }],
   active: {
     type: Boolean,
-    default: false
+    default: true
   },
   heldSessions: {
     type: Number,
@@ -51,13 +46,12 @@ const Model = db.model('Subscription', {
     type: Date,
     default: null
   },
-
 });
 
 async function get(_id) {
   const model = await Model.findOne(
-    { _id },
-    { __v: 0 }
+    {_id},
+    {__v: 0}
   ).populate('subscribedBy')
     .exec();
   return model;
@@ -65,7 +59,7 @@ async function get(_id) {
 
 async function remove(_id,) {
   const model = await get(_id);
-  if (!model) throw new Error("Subscription not found");
+  if (!model) throw new Error("BatchSubscription not found");
   await Model.deleteOne({
     _id
   });
@@ -73,7 +67,7 @@ async function remove(_id,) {
 }
 
 async function create(fields) {
-  console.log("Creating Subscription==>", fields);
+  console.log("Creating BatchSubscription==>", fields);
   const model = new Model(fields);
   await model.save();
   return model;
@@ -81,7 +75,7 @@ async function create(fields) {
 
 async function edit(_id, change) {
   const model = await get(_id);
-  if (!model) throw new Error("Subscription not found");
+  if (!model) throw new Error("BatchSubscription not found");
 
   Object.keys(change).forEach(key => {
     model[key] = change[key]
@@ -91,37 +85,29 @@ async function edit(_id, change) {
 }
 
 async function activateSubscription(_id) {
-  return await edit(_id, { active: true });
+  return await edit(_id, {active: true});
 }
 
 async function deActivateSubscription(_id) {
-  return await edit(_id, { active: false });
+  return await edit(_id, {active: false});
 }
 
 async function getForPackage(packageId) {
-  const model = await Model.findOne({ packageId });
+  const model = await Model.findOne({packageId});
   return model;
 }
 
 async function getAllForTrainer(trainerId) {
-  const model = await Model.find({ trainerId }).populate([
-    { path: 'subscribedBy' },
-    { path: 'packageId' }
-  ]).exec();
-  return model;
-}
-
-async function getAllForUser(subscribedBy) {
-  const model = await Model.find({ subscribedBy }).populate([
-    { path: 'trainerId' },
-    { path: 'packageId'}
+  const model = await Model.find({trainerId}).populate([
+    {path: 'subscriptions'},
+    {path: 'packageId'}
   ]).exec();
   return model;
 }
 
 async function updateEndDate(_id, startDate, noOfDays) {
   const model = await get(_id);
-  
+
   const today = startDate ? new Date(startDate) : await DateUtils.getTimeZoneDate('IN');
   const endDate = new Date(today.setDate(today.getDate() + noOfDays));
 
@@ -130,6 +116,12 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
 }
 
+async function addSubscription(batchId, subscriptionId) {
+  const model = await get(batchId);
+  model.subscriptions.push(subscriptionId);
+  await model.save();
+  return model;
+}
 
 module.exports = {
   get,
@@ -140,7 +132,7 @@ module.exports = {
   deActivateSubscription,
   getForPackage,
   getAllForTrainer,
-  getAllForUser,
   updateEndDate,
+  addSubscription,
   model: Model
 }

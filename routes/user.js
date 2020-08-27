@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const utility = require('../utility/utility');
-const {saveFileToServer} = require('../config/uploadConfig');
 
 const TrainerData = require('../models/trainerData');
 const UserData = require('../models/userData');
 const BmiHistory = require('../models/BmiHistory');
 const User = require('../models/user');
-const {userTypes} = require("../constants");
+const {userTypes, subscriptionType} = require("../constants");
 const Subscription = require('../models/Subscription');
+const BatchSubscription = require('../models/BatchSubscription');
 const Activities = require('./Activities');
 const Slot = require('../models/slot');
+const Package = require('../models/package');
 
 router.get('/myInfo', async function (req, res, next) {
   try {
@@ -162,7 +163,6 @@ router.get('/mySubscriptions', async function (req, res, next) {
 
     await utility.asyncForEach(subscriptions, async subscription => {
       const result = await Slot.getDayAndTime({"subscriptionId": subscription._id});
-
       const subsData = {
         active: subscription.active,
         heldSessions: subscription.heldSessions,
@@ -172,7 +172,6 @@ router.get('/mySubscriptions', async function (req, res, next) {
         startDate: subscription.startDate,
       };
 
-      // console.log("result", result)
 
       if (result && result.length > 0) {
 
@@ -204,17 +203,83 @@ router.get('/mySubscriptions', async function (req, res, next) {
           slot: {
             time: result[0]._id, //dont change groupBy field
             daysOfWeek: result[0].daysOfWeek
-          }
+          },
+          type: subscriptionType.SINGLE
         })
+      } else {
+        //Check if it is batch subscription
+        const batchSubscription = await BatchSubscription.getForPackage(subscription.packageId);
+        if (batchSubscription) {
+          const {slot} = await Package.get(subscription.packageId);
+          if (userType === userTypes.USER) {
+            mySubscriptions.push({
+                active: subscription.active,
+                heldSessions: subscription.heldSessions,
+                totalSessions: subscription.totalSessions,
+                endDate: subscription.endDate,
+                _id: subscription._id,
+                startDate: subscription.startDate,
+                package: subscription.packageId,
+                trainer: {
+                  userType: subscription.trainerId.userType,
+                  name: subscription.trainerId.name,
+                  _id: subscription.trainerId._id,
+                  displayPictureUrl: subscription.trainerId.displayPictureUrl,
+                },
+                user: {},
+                slot: {
+                  time: slot.time,
+                  daysOfWeek: slot.days
+                },
+                type: subscriptionType.SINGLE // Single as view layer expects single, actually is a batch
+              }
+            )
+          } else {
+            // Batch for trainer
+            let users = [];
+            await batchSubscription.subscriptions.map(async subscription => {
+              const {name, _id, displayPictureUrl} = subscription.subscribedBy;
+              const {startDate, endDate, heldSessions, totalSessions} = subscription;
+              users.push({
+                name,
+                _id,
+                displayPictureUrl,
+                startDate,
+                endDate,
+                heldSessions,
+                totalSessions
+              })
+            });
+            mySubscriptions.push({
+              active: batchSubscription.active,
+              endDate: batchSubscription.endDate,
+              _id: batchSubscription._id,
+              startDate: batchSubscription.startDate,
+              package: batchSubscription.packageId,
+              trainer: {},
+              heldSessions: batchSubscription.heldSessions,
+              totalSessions: batchSubscription.totalSessions,
+              users,
+              slot: {
+                time: slot.time,
+                daysOfWeek: slot.days
+              },
+              subscribedCount:batchSubscription.subscriptions.length,
+              maxParticipants: batchSubscription.packageId.maxParticipants,
+              type: subscriptionType.BATCH
+            })
+          }
+        }
+
       }
     });
 
     if (!subscriptions) {
       throw Error("No Subscriptions")
     }
-    // console.log('my ', mySubscriptions);
-    res.json(mySubscriptions);
+    res.json({subscriptions: mySubscriptions});
   } catch (err) {
+    console.log(err)
     res.status(500).json({
       err: err.message
     });

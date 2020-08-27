@@ -93,7 +93,17 @@ async function deActivateSubscription(_id) {
 }
 
 async function getForPackage(packageId) {
-  const model = await Model.findOne({packageId});
+  const model = await Model.findOne({packageId})
+    .populate([
+      {
+        path: 'subscriptions',
+        populate: [{
+          path: 'subscribedBy'//, select: 'name,userType,_id, displayPictureUrl'
+        }]
+      },
+      {path: 'packageId'}
+    ])
+    .exec();
   return model;
 }
 

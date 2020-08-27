@@ -108,7 +108,20 @@ const streamStatus = {
   LIVE:'LIVE',
   FINISHED:'FINISHED'
 }
-
+const subscriptionType = {
+  SINGLE:'SINGLE',
+  BATCH:'BATCH'
+}
+const sessionTypes ={
+  SINGLE:'SINGLE',
+  BATCH:'BATCH',
+  OFFLINE:'OFFLINE'
+}
+const sessionStatus ={
+  SCHEDULED:'SCHEDULED',
+  LIVE:'LIVE',
+  FINISHED:'FINISHED'
+}
 module.exports = {
   userTypes,
   CHANNELS,
@@ -127,7 +140,10 @@ module.exports = {
   claimStatus,
   packageTypes,
   callbackStatus,
-  streamStatus
+  streamStatus,
+  subscriptionType,
+  sessionTypes,
+  sessionStatus
 }
 
 

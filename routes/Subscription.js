@@ -16,7 +16,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const {userId} = req;
     const {trainerId, packageId} = req.params;
 
-    const {time, days, startDate, couponCode} = req.body;
+    const {time, days, couponCode} = req.body;
 
     if (!days || !days.length > 0) {
       throw new Error("Training days missing");
@@ -58,12 +58,11 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       trainerId,
       subscribedBy: userId,
       totalSessions: package.noOfSessions,
-      startDate,
       couponId: coupon
     });
     const approxDuration = package.noOfSessions / days.length;
     const noOfDays = 7 * (approxDuration);
-    await Subscription.updateEndDate(_subscription._id, startDate, noOfDays);
+    await Subscription.updateEndDate(_subscription._id, new Date(), noOfDays);
 
     if (!isGroupPackage) {
       availableSlots.map(async slot => {
@@ -71,17 +70,25 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
           subscriptionId: _subscription._id
         })
       });
-    }else {
+    } else {
       let batchSubscription = await BatchSubscription.getForPackage(packageId);
-      if(!batchSubscription){
+      if (!batchSubscription) {
         //Create new batch
+        const batchDate = new Date(package.startDate);
+        const today = new Date();
         batchSubscription = await BatchSubscription.create({
           packageId,
           trainerId,
           totalSessions: package.noOfSessions,
-          startDate,
+          startDate: batchDate < today ? today : batchDate, // if batchDate is in past, use today date
         });
-        await BatchSubscription.updateEndDate(batchSubscription._id, startDate,noOfDays);
+        const groupSlots = await Slot.findForPackage(packageId); // Set batchId for these slots
+        await groupSlots.map(async slot => {
+          await Slot.edit(slot._id, {
+            batchId: batchSubscription._id
+          });
+        });
+        await BatchSubscription.updateEndDate(batchSubscription._id, new Date(), noOfDays);
       }
       await BatchSubscription.addSubscription(batchSubscription._id, _subscription._id);
     }

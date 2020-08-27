@@ -35,6 +35,7 @@ const Model = db.model('Subscription', {
     type: Boolean,
     default: false
   },
+  sessions:[{type:String, ref:'Session'}],
   heldSessions: {
     type: Number,
     default: 0

@@ -224,6 +224,13 @@ async function getDayAndTime(criteria) {
 }
 
 
+async function findForPackage(packageId) {
+  return await Model.find(
+    {packageId}
+  );
+}
+
+
 module.exports = {
   get,
   create,
@@ -240,5 +247,6 @@ module.exports = {
   findForSubs,
   deleteAll,
   getDayAndTime,
+  findForPackage,
   model: Model
 }

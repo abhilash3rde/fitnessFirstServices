@@ -53,7 +53,7 @@ const packageSchema = mongoose.Schema({
   startDate: {
     type: Date,
     default: Date.now
-  }
+  },
 }, opts);
 
 packageSchema.virtual('totalSubscriptions', {
@@ -139,13 +139,13 @@ async function checkForSubscription(packageId) {
 //   return model;
 // }
 
-async function activatepackage(_id) {
+async function activatePackage(_id) {
   const model = await get(_id);
   model["active"] = false;
   return await model.save();
 }
 
-async function deActivatePackage(_id) {
+async function deactivatePackage(_id) {
   const model = await get(_id);
   model["active"] = true;
   return await model.save();
@@ -159,7 +159,7 @@ module.exports = {
   remove,
   // addSubscription,
   // removeSubscription,
-  activatepackage,
-  deActivatePackage,
+  activatePackage,
+  deactivatePackage,
   model: Model
 }

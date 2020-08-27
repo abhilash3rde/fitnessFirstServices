@@ -42,9 +42,9 @@ router.put('/:packageId', async function (req, res, next) {
     const {userId} = req;
 
     const {packageId} = req.params;
-    const {title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate} = req.body;
+    const {title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate, active} = req.body;
     const package_ = await Package.edit(packageId, {
-      title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate
+      title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate, active
     });
     if (!package_) throw new Error("Error in editing package");
     if (group) {
@@ -112,7 +112,7 @@ router.delete('/:packageId', async function (req, res, next) {
 router.put('/:packageId/activate', async function (req, res, next) {
   try {
     const {packageId} = req.params;
-    await Package.activatepackage(packageId);
+    await Package.activatePackage(packageId);
     res.json({success: true});
   } catch (err) {
     res.status(500).json({
@@ -124,7 +124,7 @@ router.put('/:packageId/activate', async function (req, res, next) {
 router.put('/:packageId/deactivate', async function (req, res, next) {
   try {
     const {packageId} = req.params;
-    await Package.deActivatePackage(packageId);
+    await Package.deactivatePackage(packageId);
     res.json({success: true});
   } catch (err) {
     res.status(500).json({

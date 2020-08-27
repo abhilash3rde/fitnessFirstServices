@@ -3,8 +3,9 @@ const router = express.Router();
 
 const TrainerData = require('../models/trainerData');
 const Subscription = require('../models/Subscription');
+const BatchSubscription = require('../models/BatchSubscription');
 const Slot = require('../models/slot');
-const Package = require('../models/package');
+const Session = require('../models/Activity/Session');
 const Utility = require('../utility/utility');
 const paymentModule = require('../config/payment');
 const Transaction = require('../models/Transaction');
@@ -16,10 +17,17 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const {userId} = req;
     const {trainerId, packageId} = req.params;
 
-    const {time, days, startDate, couponCode} = req.body;
+    const {time, days, couponCode} = req.body;
+
+    if (!days || !days.length > 0) {
+      throw new Error("Training days missing");
+    }
 
     const trainerData = await TrainerData.getById(trainerId);
     const package = trainerData.packages.find(package => package._id === packageId);
+    if (!package) {
+      throw new Error("Invalid package");
+    }
     let finalPrice = package.price;
     let coupon = null;
     if (!!couponCode) {
@@ -29,48 +37,76 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       finalPrice = finalPrice - (finalPrice * discount / 100);
     }
 
-    const availableSlots = trainerData.slots.filter(slot => {
-      if (!slot.subscriptionId && slot.time === time && days.includes(slot.dayOfWeek)) {
-        return true;
-      }
-    });
+    const {group: isGroupPackage} = package;
+    let availableSlots, availableDays;
+    if (!isGroupPackage) {
+      availableSlots = trainerData.slots.filter(slot => {
+        if (!slot.subscriptionId && slot.time === time && days.includes(slot.dayOfWeek)) {
+          return true;
+        }
+      });
 
-    const availableDays = availableSlots.flatMap(availableSlot => availableSlot.dayOfWeek);
-
-    if (!package) {
-      throw new Error("Invalid package");
+      availableDays = availableSlots.flatMap(availableSlot => availableSlot.dayOfWeek);
+      Utility.findMissingValue(days, availableDays, day => {
+        if (day.length > 0) {
+          throw new Error("Slot not available for " + day + " at " + time);
+        }
+      });
+    } else {
+      availableSlots = trainerData.slots.filter(slot => {
+        if (slot.group && slot.time === time && days.includes(slot.dayOfWeek))
+          return true;
+      });
     }
-
-    if (!days || !days.length > 0) {
-      throw new Error("Training days missing");
-    }
-
-    Utility.findMissingValue(days, availableDays, day => {
-      if (day.length > 0) {
-        throw new Error("Slot not available for " + day + " at " + time);
-      }
-    });
 
     const _subscription = await Subscription.create({
       packageId,
       trainerId,
       subscribedBy: userId,
       totalSessions: package.noOfSessions,
-      startDate,
-      couponId: coupon
+      couponId: coupon,
+      time,
+      days
     });
-
-    availableSlots.map(async slot => {
-      await Slot.edit(slot._id, {
-        subscriptionId: _subscription._id
-      })
-    });
-
     const approxDuration = package.noOfSessions / days.length;
     const noOfDays = 7 * (approxDuration);
-    await Subscription.updateEndDate(_subscription._id, startDate, noOfDays);
+    await Subscription.updateEndDate(_subscription._id, new Date(), noOfDays);
+
+    if (!isGroupPackage) {
+      availableSlots.map(async slot => {
+        await Slot.edit(slot._id, {
+          subscriptionId: _subscription._id
+        })
+      });
+    } else {
+      let batchSubscription = await BatchSubscription.getForPackage(packageId);
+      if (!batchSubscription) {
+        //Create new batch
+        const batchDate = new Date(package.startDate);
+        const today = new Date();
+        batchSubscription = await BatchSubscription.create({
+          packageId,
+          trainerId,
+          totalSessions: package.noOfSessions,
+          startDate: batchDate < today ? today : batchDate, // if batchDate is in past, use today date
+        });
+        const groupSlots = await Slot.findForPackage(packageId); // Set batchId for these slots
+        await groupSlots.map(async slot => {
+          await Slot.edit(slot._id, {
+            batchId: batchSubscription._id
+          });
+        });
+        await BatchSubscription.updateEndDate(batchSubscription._id, new Date(), noOfDays);
+        // await availableSlots.map(async ({_id: slotId}) => {
+        //   await Slot.edit(slotId, {batchId: batchSubscription._id});
+        // });
+      }
+      await BatchSubscription.addSubscription(batchSubscription._id, _subscription._id);
+    }
+
     if (finalPrice === 0) {
       await Subscription.activateSubscription(_subscription._id);
+      await Subscription.createSessions(_subscription._id);
       await Transaction.create({
         orderId: _subscription._id,
         subscriptionId: _subscription._id,
@@ -129,8 +165,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
 router.put('/:subsId/activate', async function (req, res, next) {
   try {
     const {subsId} = req.params;
-
     await Subscription.activateSubscription(subsId);
+    await Subscription.createSessions(subsId);
     res.json({success: true});
   } catch (err) {
     res.status(500).json({
@@ -161,6 +197,8 @@ router.put('/updateTransaction', async function (req, res, next) {
     const {subscriptionId} = notes;
     console.log("Activating subscription", subscriptionId);
     await Subscription.activateSubscription(subscriptionId);
+    await Subscription.createSessions(subscriptionId);
+
     console.log("Updating transaction", razorpay_order_id);
     const transaction = await Transaction.update(
       razorpay_order_id,

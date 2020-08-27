@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RAMDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES} = require('../constants');
+const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES} = require('../constants');
 const url = require('url');
-const {admin} = require('../config');
-
+const {admin, zoomConfig} = require('../config');
+const jwt = require('jsonwebtoken');
+const fetch = require('node-fetch');
 
 const SALT_ROUNDS = 10;
 
@@ -14,9 +15,12 @@ async function hashPassword(user) {
   user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
 }
 
+function emailUsername(emailAddress) {
+  return emailAddress.split('@')[0]
+}
 
 const uploadLocalFile = async (path) => {
-  const res = await cloudinary.uploader.upload(path,  {resource_type: "auto"});
+  const res = await cloudinary.uploader.upload(path, {resource_type: "auto"});
   fs.unlinkSync(path);
   if (res && res.secure_url) {
     console.log('file uploaded to Cloudinary', res.secure_url);
@@ -79,8 +83,8 @@ async function groupByDayAndTime(slots) {
 
 
 async function getRandomMedia() {
-  const randomNo = Math.floor(Math.random() * Object.keys(RAMDOM_WALL_IMAGE).length);
-  return RAMDOM_WALL_IMAGE[randomNo];
+  const randomNo = Math.floor(Math.random() * Object.keys(RANDOM_WALL_IMAGE).length);
+  return RANDOM_WALL_IMAGE[randomNo];
 }
 
 async function groupBy(datas, keys) {
@@ -115,7 +119,9 @@ const sendNotification = async (tokens, message) => {
       data: {
         "priority": "high",
         "type": message.type,
-        "content": message.text
+        "content": message.text,
+        "displayImage": message.displayImage || "",
+        "sentDate": new Date().toString()
       }
     }
   );
@@ -170,8 +176,62 @@ function calculateBmi(weight, height) {
   return 0;
 }
 
+function getZoomToken() {
+  const payload = {
+    iss: zoomConfig.key,
+    exp: ((new Date()).getTime() + 5000)
+  };
+  return jwt.sign(payload, zoomConfig.secret);
+}
+
+async function createZoomMeeting(title, date, duration) {
+  const url = `${zoomConfig.baseUrl}/users/${zoomConfig.userId}/meetings`;
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${getZoomToken()}`
+  }
+  const data = {
+    start_time: date,
+    duration,
+    topic: title,
+    settings: {
+      host_video: true,
+      approval_type: 0,
+      mute_upon_entry: true,
+      auto_recording: 'local', // or cloud,
+      waiting_room: false,
+    }
+  }
+  const res = await fetch(url, {method: 'POST', headers: headers, body: JSON.stringify(data)});
+  return await res.json();
+}
+
+async function getZakToken() {
+  const url = `${zoomConfig.baseUrl}/users/${zoomConfig.userId}/token?type=zak&ttl=36000`
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${getZoomToken()}`
+  }
+
+  const res = await fetch(url, {method: 'GET', headers: headers});
+  const {token} = await res.json();
+  return token;
+}
+
+function appendMilitaryTime(date, militaryTime) {
+  const dateObj = new Date(date);
+  const time = militaryTime.toString();
+  const hours = time.slice(0, 2);
+  const minutes = time.slice(2);
+  dateObj.setHours(parseInt(hours));
+  dateObj.setMinutes(parseInt(minutes));
+  dateObj.setSeconds(0);
+  return dateObj;
+}
+
 module.exports = {
   hashPassword,
+  emailUsername,
   uploadLocalFile,
   findMissingValue,
   uploadMedia,
@@ -183,5 +243,9 @@ module.exports = {
   getDayFullName,
   asyncForEach,
   monthsFromNow,
-  calculateBmi
+  calculateBmi,
+  getZoomToken,
+  createZoomMeeting,
+  getZakToken,
+  appendMilitaryTime,
 }

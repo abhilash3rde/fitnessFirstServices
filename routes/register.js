@@ -9,6 +9,7 @@ const User = require('../models/user');
 const Package = require('../models/package');
 const Fcm = require('../models/fcm');
 
+const {emailUsername} = require('../utility/utility');
 const {userTypes} = require("../constants")
 
 router.post('/googleAuth', async function (req, res, next) {
@@ -19,7 +20,7 @@ router.post('/googleAuth', async function (req, res, next) {
     const ipInfo = req.ipInfo;
 
     if (!name)
-      name = userType === userTypes.TRAINER ? 'Trainer' : 'User';
+      name = emailUsername(email);
 
     const existingUser = await User.get(email);
     if (existingUser)

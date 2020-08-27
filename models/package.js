@@ -4,7 +4,6 @@ const opts = {toJSON: {virtuals: true}};
 
 const db = require('../config/db');
 const Subscription = require('./Subscription');
-const {isValidObjectId} = require('../config/db');
 
 const packageSchema = mongoose.Schema({
   _id: {
@@ -38,7 +37,23 @@ const packageSchema = mongoose.Schema({
   description: {
     type: String,
     default: "Add or create new packages, customise their duration and cost. Click to add or delete packages"
-  }
+  },
+  group: {
+    type: Boolean,
+    default: false
+  },
+  maxParticipants: {
+    type: Number,
+    default: 1
+  },
+  slot: {
+    type: Object,
+    default: null
+  },
+  startDate: {
+    type: Date,
+    default: Date.now
+  },
 }, opts);
 
 packageSchema.virtual('totalSubscriptions', {
@@ -105,7 +120,7 @@ async function edit(_id, change) {
 
 async function checkForSubscription(packageId) {
   const subscription = await Subscription.getForPackage(packageId);
-  console.log('subs', subscription)
+  // console.log('subs', subscription)
   return !!(subscription);
 }
 
@@ -124,13 +139,13 @@ async function checkForSubscription(packageId) {
 //   return model;
 // }
 
-async function activatepackage(_id) {
+async function activatePackage(_id) {
   const model = await get(_id);
   model["active"] = false;
   return await model.save();
 }
 
-async function deActivatePackage(_id) {
+async function deactivatePackage(_id) {
   const model = await get(_id);
   model["active"] = true;
   return await model.save();
@@ -144,7 +159,7 @@ module.exports = {
   remove,
   // addSubscription,
   // removeSubscription,
-  activatepackage,
-  deActivatePackage,
+  activatePackage,
+  deactivatePackage,
   model: Model
 }

@@ -31,6 +31,8 @@ const waterIntakeRouter = require('./routes/waterIntake');
 const foodItemsRouter = require('./routes/foodItems');
 const caloriesIntakeRouter = require('./routes/caloriesIntake');
 const recommendRouter=require('./routes/recommend');
+const liveStreamRouter = require('./routes/liveStream');
+const webhookRouter = require('./routes/webhooks');
 const middleware = require('./middleware');
 const auth = require('./auth');
 
@@ -81,6 +83,8 @@ app.use('/waterIntake', auth.ensureUser, waterIntakeRouter);
 app.use('/caloriesIntake', auth.ensureUser, caloriesIntakeRouter);
 app.use('/foodItems', auth.ensureUser, foodItemsRouter);
 app.use('/recommend',auth.ensureUser,recommendRouter);
+app.use('/live', auth.ensureUser, liveStreamRouter);
+app.use('/webhooks',webhookRouter);
 
 // io.on('connection', onConnection);
 // catch 404 and forward to error handler

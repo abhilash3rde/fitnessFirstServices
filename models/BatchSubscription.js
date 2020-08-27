@@ -2,10 +2,8 @@ const cuid = require('cuid');
 const db = require('../config/db');
 
 const DateUtils = require('../utility/DateUtils');
-const {appendMilitaryTime} = require("../utility/utility");
-const {WEEK_DAYS} = require("../constants");
 
-const Model = db.model('Subscription', {
+const Model = db.model('BatchSubscription', {
   _id: {
     type: String,
     default: cuid
@@ -22,22 +20,16 @@ const Model = db.model('Subscription', {
     index: true,
     default: null
   },
-  subscribedBy: {
+  subscriptions: [{
     type: String,
-    ref: 'UserData',
+    ref: 'Subscription',
     index: true,
     default: null
-  },
-  couponId: {
-    type: String,
-    ref: 'Coupon',
-    default: null
-  },
+  }],
   active: {
     type: Boolean,
-    default: false
+    default: true
   },
-  sessions: [{type: String, ref: 'Session'}],
   heldSessions: {
     type: Number,
     default: 0
@@ -54,8 +46,6 @@ const Model = db.model('Subscription', {
     type: Date,
     default: null
   },
-  days: [{type: String}],
-  time: {type: Number}
 });
 
 async function get(_id) {
@@ -63,14 +53,13 @@ async function get(_id) {
     {_id},
     {__v: 0}
   ).populate('subscribedBy')
-    .populate('packageId')
     .exec();
   return model;
 }
 
 async function remove(_id,) {
   const model = await get(_id);
-  if (!model) throw new Error("Subscription not found");
+  if (!model) throw new Error("BatchSubscription not found");
   await Model.deleteOne({
     _id
   });
@@ -78,7 +67,7 @@ async function remove(_id,) {
 }
 
 async function create(fields) {
-  console.log("Creating Subscription==>", fields);
+  console.log("Creating BatchSubscription==>", fields);
   const model = new Model(fields);
   await model.save();
   return model;
@@ -86,7 +75,7 @@ async function create(fields) {
 
 async function edit(_id, change) {
   const model = await get(_id);
-  if (!model) throw new Error("Subscription not found");
+  if (!model) throw new Error("BatchSubscription not found");
 
   Object.keys(change).forEach(key => {
     model[key] = change[key]
@@ -104,21 +93,23 @@ async function deActivateSubscription(_id) {
 }
 
 async function getForPackage(packageId) {
-  const model = await Model.findOne({packageId});
+  const model = await Model.findOne({packageId})
+    .populate([
+      {
+        path: 'subscriptions',
+        populate: [{
+          path: 'subscribedBy'//, select: 'name,userType,_id, displayPictureUrl'
+        }]
+      },
+      {path: 'packageId'}
+    ])
+    .exec();
   return model;
 }
 
 async function getAllForTrainer(trainerId) {
   const model = await Model.find({trainerId}).populate([
-    {path: 'subscribedBy'},
-    {path: 'packageId'}
-  ]).exec();
-  return model;
-}
-
-async function getAllForUser(subscribedBy) {
-  const model = await Model.find({subscribedBy}).populate([
-    {path: 'trainerId'},
+    {path: 'subscriptions'},
     {path: 'packageId'}
   ]).exec();
   return model;
@@ -132,25 +123,14 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
   model['endDate'] = endDate;
   return await model.save();
+
 }
 
-async function createSessions(_id) {
-  const model = await get(_id);
-  const {startDate, endDate, days, time, packageId} = model;
-  const {noOfSessions} = packageId;
-  const sessions = []; // create until amount reached
-  console.log(days, time);
-  const end = new Date(endDate);
-  for (let date = new Date(startDate); date <= end; date.setDate(date.getDate() + 1)) {
-    const day = date.getDay();
-    if (days.includes(WEEK_DAYS[day]))
-      sessions.push({
-        date: appendMilitaryTime(date, time).toLocaleTimeString()
-
-      })
-    console.log(date.toLocaleDateString()); // todo:matrix optimisation
-  }
-  console.log(packageId)
+async function addSubscription(batchId, subscriptionId) {
+  const model = await get(batchId);
+  model.subscriptions.push(subscriptionId);
+  await model.save();
+  return model;
 }
 
 module.exports = {
@@ -162,8 +142,7 @@ module.exports = {
   deActivateSubscription,
   getForPackage,
   getAllForTrainer,
-  getAllForUser,
   updateEndDate,
-  createSessions,
+  addSubscription,
   model: Model
 }

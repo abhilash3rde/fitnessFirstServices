@@ -27,6 +27,7 @@ const sessionSchema = mongoose.Schema({
     type: String,
     default: null
   },
+  //package
   duration: {
     type: Number,
     default: 60

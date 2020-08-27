@@ -15,6 +15,9 @@ async function hashPassword(user) {
   user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
 }
 
+function emailUsername(emailAddress) {
+  return emailAddress.split('@')[0]
+}
 
 const uploadLocalFile = async (path) => {
   const res = await cloudinary.uploader.upload(path, {resource_type: "auto"});
@@ -118,7 +121,7 @@ const sendNotification = async (tokens, message) => {
         "type": message.type,
         "content": message.text,
         "displayImage": message.displayImage || "",
-        "sentDate":new Date().toString()
+        "sentDate": new Date().toString()
       }
     }
   );
@@ -215,9 +218,20 @@ async function getZakToken() {
   return token;
 }
 
+function appendMilitaryTime(date, militaryTime) {
+  const dateObj = new Date(date);
+  const time = militaryTime.toString();
+  const hours = time.slice(0, 2);
+  const minutes = time.slice(2);
+  dateObj.setHours(parseInt(hours));
+  dateObj.setMinutes(parseInt(minutes));
+  dateObj.setSeconds(0);
+  return dateObj;
+}
 
 module.exports = {
   hashPassword,
+  emailUsername,
   uploadLocalFile,
   findMissingValue,
   uploadMedia,
@@ -233,4 +247,5 @@ module.exports = {
   getZoomToken,
   createZoomMeeting,
   getZakToken,
+  appendMilitaryTime,
 }

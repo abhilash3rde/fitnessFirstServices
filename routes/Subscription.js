@@ -5,6 +5,7 @@ const TrainerData = require('../models/trainerData');
 const Subscription = require('../models/Subscription');
 const BatchSubscription = require('../models/BatchSubscription');
 const Slot = require('../models/slot');
+const Session = require('../models/Activity/Session');
 const Utility = require('../utility/utility');
 const paymentModule = require('../config/payment');
 const Transaction = require('../models/Transaction');
@@ -51,6 +52,11 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
           throw new Error("Slot not available for " + day + " at " + time);
         }
       });
+    } else {
+      availableSlots = trainerData.slots.filter(slot => {
+        if (slot.group && slot.time === time && days.includes(slot.dayOfWeek))
+          return true;
+      });
     }
 
     const _subscription = await Subscription.create({
@@ -58,7 +64,9 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       trainerId,
       subscribedBy: userId,
       totalSessions: package.noOfSessions,
-      couponId: coupon
+      couponId: coupon,
+      time,
+      days
     });
     const approxDuration = package.noOfSessions / days.length;
     const noOfDays = 7 * (approxDuration);
@@ -89,12 +97,16 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
           });
         });
         await BatchSubscription.updateEndDate(batchSubscription._id, new Date(), noOfDays);
+        // await availableSlots.map(async ({_id: slotId}) => {
+        //   await Slot.edit(slotId, {batchId: batchSubscription._id});
+        // });
       }
       await BatchSubscription.addSubscription(batchSubscription._id, _subscription._id);
     }
 
     if (finalPrice === 0) {
       await Subscription.activateSubscription(_subscription._id);
+      await Subscription.createSessions(_subscription._id);
       await Transaction.create({
         orderId: _subscription._id,
         subscriptionId: _subscription._id,
@@ -153,8 +165,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
 router.put('/:subsId/activate', async function (req, res, next) {
   try {
     const {subsId} = req.params;
-
     await Subscription.activateSubscription(subsId);
+    await Subscription.createSessions(subsId);
     res.json({success: true});
   } catch (err) {
     res.status(500).json({
@@ -185,6 +197,8 @@ router.put('/updateTransaction', async function (req, res, next) {
     const {subscriptionId} = notes;
     console.log("Activating subscription", subscriptionId);
     await Subscription.activateSubscription(subscriptionId);
+    await Subscription.createSessions(subscriptionId);
+
     console.log("Updating transaction", razorpay_order_id);
     const transaction = await Transaction.update(
       razorpay_order_id,

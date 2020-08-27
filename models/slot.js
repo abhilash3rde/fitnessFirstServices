@@ -111,7 +111,7 @@ async function edit(_id, change) {
   const model = await get(_id);
   if (!model) throw new Error("Slot not found");
 
-  if (model.isSubscribed) {
+  if (model.subscriptionId) {
     throw Error("Slot has active subscription");
   }
 

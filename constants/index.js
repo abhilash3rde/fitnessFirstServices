@@ -68,6 +68,11 @@ const paymentKey = {
   key_id: 'rzp_test_BuIiL164HHvbBm',
   key_secret: 'K04EHPRWO0XXd1JwapCcHR32'
 }
+const cloudinaryConfig = {
+  cloud_name: 'primefitness',
+  api_key: '572783897338239',
+  api_secret: 'qz3WFwYxgkjWfPjp5Y7nf9heejI'
+}
 
 const firebaseTopics = {
   SILENT_NOTIFICATION: 'SILENT_NOTIFICATION',
@@ -127,6 +132,7 @@ module.exports = {
   CHANNELS,
   CONTENT_TYPE,
   ENABLE_FILE_UPLOAD,
+  cloudinaryConfig,
   RANDOM_WALL_IMAGE,
   CRON_NOTIFY_HOWS_SESSION,
   WEEK_DAYS,

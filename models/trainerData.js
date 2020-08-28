@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
-const { isEmail } = require('validator');
+const {isEmail} = require('validator');
 
 const db = require('../config/db');
-const { userTypes } = require("../constants")
+const {userTypes} = require("../constants")
 
 const Package = require('./package');
 const Slot = require('./slot');
 const utility = require('../utility/utility');
 const mongoosePaginate = require('mongoose-paginate');
+const {MODELS} = require("./index");
 
-const opts = { toJSON: { virtuals: true } };
+const opts = {toJSON: {virtuals: true}};
 
 const trainerSchema = mongoose.Schema({
   _id: {
@@ -20,7 +21,7 @@ const trainerSchema = mongoose.Schema({
   email: emailSchema({
     required: true
   }),
-  userType: { type: String, default: userTypes.TRAINER }, // helpful for frontend
+  userType: {type: String, default: userTypes.TRAINER}, // helpful for frontend
   name: {
     type: String,
     default: 'Trainer'
@@ -33,16 +34,16 @@ const trainerSchema = mongoose.Schema({
     type: Number,
     default: 4.0
   },
-  dateOfBirth:{
-    type:Date,
-    default:null
+  dateOfBirth: {
+    type: Date,
+    default: null
   },
   // workingDays: {
   //   type: Array,
   //   default: []
   // },
-  slots: [{ type: String, ref: 'Slot' }],
-  packages: [{ type: String, ref: 'Package' }],
+  slots: [{type: String, ref: 'Slot'}],
+  packages: [{type: String, ref: 'Package'}],
   phone: {
     type: String
   },
@@ -84,10 +85,11 @@ const trainerSchema = mongoose.Schema({
   biceps: {
     type: Number
   },
-  approved:{
+  approved: {
     type: Boolean,
     default: false
-  }
+  },
+  certificates: [{type: String, ref: MODELS.Certificate}]
 }, opts);
 
 trainerSchema.virtual('totalSlots', {
@@ -102,7 +104,7 @@ trainerSchema.virtual('availableSlots', {
   localField: '_id',
   foreignField: 'trainerId',
   count: true,
-  match: { active: true, subscriptionId: null }
+  match: {active: true, subscriptionId: null}
 });
 
 trainerSchema.virtual('totalPosts', {
@@ -117,7 +119,7 @@ const Model = db.model('TrainerData', trainerSchema);
 
 async function get(email) {
   const model = await Model.findOne(
-    { email },
+    {email},
   )
     .populate([{
       path: 'packages',
@@ -132,7 +134,9 @@ async function get(email) {
           path: 'subscribedBy'
         }
       }
-    }, { path: 'totalPosts' }
+    },
+      {path: 'totalPosts'},
+      {path: 'certificates'},
     ])
     .exec();
 
@@ -141,7 +145,7 @@ async function get(email) {
 
 async function getById(_id) {
   const model = await Model.findOne(
-    { _id },
+    {_id},
   ).populate({
     path: 'packages',
     populate: {
@@ -161,7 +165,10 @@ async function getById(_id) {
           path: 'subscribedBy'
         }
       }
-    }, { path: 'totalPosts' }])
+    },
+      {path: 'totalPosts'},
+      {path: 'certificates'},
+    ])
     .exec();
 
   return model;
@@ -175,7 +182,7 @@ async function list(opts = {}) {
   let record = null;
   var options = {
     select: '',
-    sort: { rating: -1, experience: -1 },
+    sort: {rating: -1, experience: -1},
     populate: [{
       path: 'packages',
       populate: {
@@ -189,13 +196,13 @@ async function list(opts = {}) {
           path: 'subscribedBy'
         }
       }
-    }, { path: 'totalPosts' },{ path: 'totalSlots' }, { path: 'availableSlots' }],
+    }, {path: 'totalPosts'}, {path: 'totalSlots'}, {path: 'availableSlots'}, {path: 'certificates'},],
     lean: true,
     page: page,
     limit: limit
   };
 
-  await Model.paginate({}, options, async (err, result) =>{
+  await Model.paginate({}, options, async (err, result) => {
     record = result;
   });
   return record;
@@ -257,13 +264,13 @@ async function removePackage(trainerId, packageId) {
 async function removeSlot(trainerId, slotId) {
   const model = await getById(trainerId);
 
-  for(var i =0; i < model.slots.length; i++){
-    if(slotId === model.slots[i]._id){
+  for (var i = 0; i < model.slots.length; i++) {
+    if (slotId === model.slots[i]._id) {
       model.slots.splice(i, 1);
       i--;
     }
   }
-  
+
   await model.save();
   return model;
 }
@@ -271,8 +278,8 @@ async function removeSlot(trainerId, slotId) {
 async function removeSlots(trainerId, slots) {
   const model = await getById(trainerId);
 
-  for(var i =0; i < model.slots.length; i++){
-    if(slots.includes(model.slots[i]._id)){
+  for (var i = 0; i < model.slots.length; i++) {
+    if (slots.includes(model.slots[i]._id)) {
       model.slots.splice(i, 1);
       i--;
     }
@@ -294,12 +301,12 @@ function emailSchema(opts = {}) {
       validator: isEmail,
       message: props => `${props.value} is not a valid email address`
     },
-    {
-      validator: function (email) {
-        return isUnique(this, email)
-      },
-      message: props => 'Email already in use'
-    }
+      {
+        validator: function (email) {
+          return isUnique(this, email)
+        },
+        message: props => 'Email already in use'
+      }
     ]
   }
 }
@@ -323,15 +330,24 @@ async function addWorkingDays(trainerId, workingDays) {
   return getById(model);
 }
 
+async function addCertificate(trainerId, certificateId) {
+  const model = await getById(trainerId);
+  // if (!model.certificates) model.certificates = [certificateId];
+  // else
+  model.certificates.push(certificateId);
+  await model.save();
+  return model;
+}
+
 async function getTrainer(_id) {
   const model = await Model.findOne(
-    { _id },
-    { name:1, experience:1, rating:1, displayPictureUrl:1, wallImageUrl:1, city:1 }
+    {_id},
+    {name: 1, experience: 1, rating: 1, displayPictureUrl: 1, wallImageUrl: 1, city: 1}
   );
 
-  const { name, experience, rating, displayPictureUrl, wallImageUrl, city } = model;
+  const {name, experience, rating, displayPictureUrl, wallImageUrl, city} = model;
 
-  return { name, experience, rating, displayPictureUrl, wallImageUrl, city };
+  return {name, experience, rating, displayPictureUrl, wallImageUrl, city};
 }
 
 
@@ -350,5 +366,6 @@ module.exports = {
   addWorkingDays,
   getTrainer,
   removeSlots,
+  addCertificate,
   model: Model
 }

@@ -144,7 +144,7 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
 async function createSessions(_id) {
   const model = await get(_id);
-  const {startDate, days, time, duration, packageId, subscribedBy} = model;
+  const {startDate, days, time, duration, packageId, subscribedBy, batchId} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
   // const end = new Date(endDate);
@@ -156,7 +156,7 @@ async function createSessions(_id) {
         userId: subscribedBy._id,
         packageId: packageId._id,
         subscriptionId: model._id,
-        type: sessionTypes.SINGLE,
+        type: batchId ? sessionTypes.BATCH : sessionTypes.SINGLE,
         duration: duration
       })
   }

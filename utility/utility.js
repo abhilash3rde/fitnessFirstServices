@@ -1,12 +1,13 @@
 const bcrypt = require('bcrypt');
+const fetch = require('node-fetch');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES} = require('../constants');
+const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES, cloudinaryConfig} = require('../constants');
 const url = require('url');
 const {admin, zoomConfig} = require('../config');
 const jwt = require('jsonwebtoken');
-const fetch = require('node-fetch');
 
+cloudinary.config(cloudinaryConfig);
 const SALT_ROUNDS = 10;
 
 async function hashPassword(user) {

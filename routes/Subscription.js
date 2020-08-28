@@ -17,7 +17,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const {userId} = req;
     const {trainerId, packageId} = req.params;
 
-    const {time, days, couponCode} = req.body;
+    const {time, days, duration, couponCode} = req.body;
 
     if (!days || !days.length > 0) {
       throw new Error("Training days missing");
@@ -66,7 +66,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       totalSessions: package.noOfSessions,
       couponId: coupon,
       time,
-      days
+      days,
+      duration
     });
     const approxDuration = package.noOfSessions / days.length;
     const noOfDays = 7 * (approxDuration);
@@ -101,6 +102,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
         //   await Slot.edit(slotId, {batchId: batchSubscription._id});
         // });
       }
+      await Subscription.edit(_subscription._id, {batchId: batchSubscription._id});
       await BatchSubscription.addSubscription(batchSubscription._id, _subscription._id);
     }
 
@@ -169,6 +171,7 @@ router.put('/:subsId/activate', async function (req, res, next) {
     await Subscription.createSessions(subsId);
     res.json({success: true});
   } catch (err) {
+    console.log(err)
     res.status(500).json({
       err: err.message
     });

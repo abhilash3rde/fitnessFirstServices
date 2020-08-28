@@ -2,6 +2,8 @@ const cuid = require('cuid');
 const db = require('../config/db');
 
 const DateUtils = require('../utility/DateUtils');
+const Session = require("./Activity/Session");
+const {sessionTypes} = require("../constants");
 const {appendMilitaryTime} = require("../utility/utility");
 const {WEEK_DAYS} = require("../constants");
 
@@ -37,7 +39,7 @@ const Model = db.model('Subscription', {
     type: Boolean,
     default: false
   },
-  sessions: [{type: String, ref: 'Session'}],
+  // sessions: [{type: String, ref: 'Session'}],
   heldSessions: {
     type: Number,
     default: 0
@@ -55,7 +57,13 @@ const Model = db.model('Subscription', {
     default: null
   },
   days: [{type: String}],
-  time: {type: Number}
+  time: {type: Number},
+  duration: {type: Number},
+  batchId: {
+    type: String,
+    ref: 'BatchSubscription',
+    default: null
+  }
 });
 
 async function get(_id) {
@@ -136,21 +144,23 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
 async function createSessions(_id) {
   const model = await get(_id);
-  const {startDate, endDate, days, time, packageId} = model;
+  const {startDate, days, time, duration, packageId, subscribedBy} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
-  console.log(days, time);
-  const end = new Date(endDate);
-  for (let date = new Date(startDate); date <= end; date.setDate(date.getDate() + 1)) {
+  // const end = new Date(endDate);
+  for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate() + 1)) {
     const day = date.getDay();
     if (days.includes(WEEK_DAYS[day]))
       sessions.push({
-        date: appendMilitaryTime(date, time).toLocaleTimeString()
-
+        date: appendMilitaryTime(date, time),
+        userId: subscribedBy._id,
+        packageId: packageId._id,
+        subscriptionId: model._id,
+        type: sessionTypes.SINGLE,
+        duration: duration
       })
-    console.log(date.toLocaleDateString()); // todo:matrix optimisation
   }
-  console.log(packageId)
+  const result = await Session.createMany(sessions);
 }
 
 module.exports = {

@@ -39,10 +39,12 @@ async function get(_id) {
 }
 
 async function getForUser(userId) {
-  const model = await Model.findOne(
+  let model = await Model.findOne(
     {userId},
     {__v: 0}
   );
+  if (!model)
+    model = await createOrUpdate({userId, preferences: ''});
   return model;
 }
 

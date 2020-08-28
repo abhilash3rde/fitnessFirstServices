@@ -13,21 +13,32 @@ const sessionSchema = mongoose.Schema({
     type: Date,
     required: true
   },
+  userId: {
+    type: String,
+    ref: 'User',
+    required: true
+  },
+  packageId: {
+    type: String,
+    ref: 'Package',
+    required: true
+  },
+  subscriptionId: {
+    type: String,
+    ref: 'Subscription',
+    required: true
+  },
   startTime: {
     type: Date,
   },
   endTime: {
     type: Date,
   },
-  attendees: [{type: String, ref: 'User'}],
-  type: {
-    userType: {type: String, enum: [sessionTypes.BATCH, sessionTypes.SINGLE, sessionTypes.OFFLINE], required: true}
-  },
+  type: {type: String, enum: [sessionTypes.BATCH, sessionTypes.SINGLE, sessionTypes.OFFLINE], required: true},
   data: {
     type: String,
     default: null
   },
-  //package
   duration: {
     type: Number,
     default: 60
@@ -63,9 +74,14 @@ async function create(fields) {
   return model;
 }
 
+async function createMany(sessions) {
+  return Model.insertMany(sessions);
+}
+
 module.exports = {
   get,
   create,
   remove,
+  createMany,
   model: Model
 }

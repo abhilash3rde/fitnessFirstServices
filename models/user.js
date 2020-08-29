@@ -80,7 +80,7 @@ async function isUnique(doc, property) {
   return !existing || doc._id === existing._id;
 }
 
-module.exports = {
+  module.exports = {
   get,
   getById,
   create,

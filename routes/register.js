@@ -22,7 +22,7 @@ router.post('/googleAuth', async function (req, res, next) {
     if (!name)
       name = emailUsername(email);
 
-    const existingUser = await User.get(email);
+    const existingUser = await User.getById(user_id);
     if (existingUser)
       userType = existingUser.userType; // Change userType if already existing
     const Model = userType === userTypes.TRAINER ? TrainerData : UserData;

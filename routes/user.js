@@ -28,7 +28,7 @@ router.get('/myInfo', async function (req, res, next) {
       upcomingActivities = await Activities.getUserActivities(userId);
     }
 
-    if (!user) throw new Error('Internal server error. code 45621');
+    if (!user) throw new Error('User does not exist!');
 
     res.json({user, upcomingActivities});
   } catch (error) {

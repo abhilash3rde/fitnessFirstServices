@@ -6,7 +6,7 @@ const signJwt = require('../auth').sign;
 const TrainerData = require('../models/trainerData');
 const UserData = require('../models/userData');
 const User = require('../models/user');
-const Package = require('../models/package');
+// const Package = require('../models/package');
 const Fcm = require('../models/fcm');
 
 const {emailUsername} = require('../utility/utility');

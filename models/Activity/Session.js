@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const cuid = require('cuid');
 
 const db = require('../../config/db');
+const {getRelativeDate} = require("../../utility/DateUtils");
 const {sessionTypes, sessionStatus} = require('../../constants');
 
 const sessionSchema = mongoose.Schema({
@@ -27,6 +28,10 @@ const sessionSchema = mongoose.Schema({
     type: String,
     ref: 'Subscription',
     required: true
+  },
+  trainerId: {
+    type: String,
+    ref: 'TrainerData'
   },
   startTime: {
     type: Date,
@@ -78,10 +83,29 @@ async function createMany(sessions) {
   return Model.insertMany(sessions);
 }
 
+async function getForUser(userId, pastCount=-15, futureCount=10) {
+  const pastDate = getRelativeDate(pastCount);
+  const futureDate = getRelativeDate(futureCount);
+  return await Model.find({
+    userId,
+    date: {
+      $gte: pastDate,
+      $lte:futureDate
+    }
+  })
+    .populate([
+      {path: 'trainerId', select: '_id displayPictureUrl name city'},
+      {path: 'packageId'},
+    ])
+    .exec();
+  ;
+}
+
 module.exports = {
   get,
   create,
   remove,
   createMany,
+  getForUser,
   model: Model
 }

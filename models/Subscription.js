@@ -144,15 +144,19 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
 async function createSessions(_id) {
   const model = await get(_id);
-  const {startDate, days, time, duration, packageId, subscribedBy, batchId,trainerId} = model;
+  const {startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
-  // const end = new Date(endDate);
+  const now = new Date();
   for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate() + 1)) {
     const day = date.getDay();
-    if (days.includes(WEEK_DAYS[day]))
+
+    if (days.includes(WEEK_DAYS[day])) {
+      const sessionDate = appendMilitaryTime(date, time);
+      if (sessionDate < now) continue;
+
       sessions.push({
-        date: appendMilitaryTime(date, time),
+        date: sessionDate,
         userId: subscribedBy._id,
         packageId: packageId._id,
         subscriptionId: model._id,
@@ -160,6 +164,7 @@ async function createSessions(_id) {
         duration: duration,
         trainerId
       })
+    }
   }
   const result = await Session.createMany(sessions);
 }

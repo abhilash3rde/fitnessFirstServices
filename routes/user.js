@@ -295,9 +295,9 @@ router.get('/mySessions', async function (req, res, next) {
       res.json({sessions});
 
     } else {
-      res.json({});
+      const sessions = await Session.getForTrainer(userId)
+      res.json({sessions});
     }
-
   } catch (err) {
     console.log(err)
     res.status(500).json({

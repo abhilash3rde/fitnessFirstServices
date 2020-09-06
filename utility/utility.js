@@ -6,6 +6,7 @@ const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES
 const url = require('url');
 const {admin, zoomConfig} = require('../config');
 const jwt = require('jsonwebtoken');
+const {agoraAppIds} = require("../constants");
 
 cloudinary.config(cloudinaryConfig);
 const SALT_ROUNDS = 10;
@@ -88,7 +89,7 @@ async function getRandomMedia() {
   return RANDOM_WALL_IMAGE[randomNo];
 }
 
-async function groupBy(datas, keys) {
+function groupBy(datas, keys) {
   return datas.reduce((data, obj) => {
     const KEYS = [];
     if (KEYS.length === 0) {
@@ -112,6 +113,18 @@ async function groupBy(datas, keys) {
     return data;
   }, {});
 }
+const groupByKey = (objectArray, property) => {
+  // coolest snippet i ever found, felt i should link source
+  return objectArray.reduce((acc, obj) => {
+    const key = obj[property];
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    // Add object to list for given key's value
+    acc[key].push(obj);
+    return acc;
+  }, {});
+};
 
 const sendNotification = async (tokens, message) => {
   await admin.messaging().sendToDevice(
@@ -227,7 +240,26 @@ function appendMilitaryTime(date, militaryTime) {
   dateObj.setHours(parseInt(hours));
   dateObj.setMinutes(parseInt(minutes));
   dateObj.setSeconds(0);
+  dateObj.setMilliseconds(0);
   return dateObj;
+}
+
+
+const getHash = (str) => {
+  let hash = 0, i, chr;
+  for (i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+}
+let roundRobinIndex = 0;
+const getAgoraAppId = () => {
+  const appId = agoraAppIds[roundRobinIndex];
+  console.log("Using agora app #", roundRobinIndex + 1);
+  roundRobinIndex = (roundRobinIndex + 1) % agoraAppIds.length;
+  return appId;
 }
 
 module.exports = {
@@ -246,7 +278,10 @@ module.exports = {
   monthsFromNow,
   calculateBmi,
   getZoomToken,
+  groupByKey,
   createZoomMeeting,
   getZakToken,
   appendMilitaryTime,
+  getHash,
+  getAgoraAppId
 }

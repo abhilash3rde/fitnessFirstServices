@@ -14,7 +14,8 @@ const agoraCallSchema = mongoose.Schema({
   },
   sessionId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   parentSessionId: {
     type: String,
@@ -46,9 +47,15 @@ async function create(fields) {
   return model;
 }
 
+async function getParentSessionId(sessionId) {
+  const model = await Model.findOne({sessionId});
+  return model.parentSessionId;
+}
+
 module.exports = {
   get,
   create,
   remove,
+  getParentSessionId,
   model: Model
 }

@@ -72,8 +72,9 @@ async function setLive(streamId) {
   } else return false;
 }
 
-async function setFinished(meetingId) {
-  const model = await Model.findOne({meetingId});
+async function setFinished(meetingNumber) {
+  const model = await Model.findOne({meetingNumber});
+  if (!model) return false;
   model.status = streamStatus.FINISHED;
   console.log("Setting stream FINISHED");
   await model.save();

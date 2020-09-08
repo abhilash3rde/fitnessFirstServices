@@ -9,8 +9,8 @@ const UserData = require('../models/userData');
 const Fcm = require("../models/fcm");
 const Zoom = require("../models/Activity/Zoom");
 const Agora = require("../models/Activity/Agora");
+const {firebaseTopics} = require("../constants");
 const {zoomClientConfig} = require("../config");
-const {getHash} = require("../utility/utility");
 const {getAgoraAppId} = require("../utility/utility");
 const {remoteMessageTypes} = require("../constants");
 const {subscriptionType} = require("../constants");
@@ -147,5 +147,35 @@ router.post('/:sessionId/join', async function (req, res, next) {
     });
   }
 });
+
+router.post('/:sessionId/endAgora', async function (req, res, next) {
+  try {
+    const {sessionId: agoraSessionId} = req.params;
+    const sessionId = await Agora.getParentSessionId(agoraSessionId);
+    await Session.setFinished(sessionId);
+    const message = {
+      data: {
+        type: remoteMessageTypes.SYNC_SESSIONS,
+      },
+      topic: firebaseTopics.SILENT_NOTIFICATION,
+    };
+    admin
+      .messaging()
+      .send(message)
+      .then(response => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch(error => {
+        console.log('Error sending message:', error);
+      });
+    res.json({success: true});
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 
 module.exports = router;

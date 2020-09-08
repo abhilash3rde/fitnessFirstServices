@@ -154,6 +154,14 @@ async function setLive(sessionId, data) {
   model.startTime = new Date();
   await model.save();
 }
+
+async function setFinished(sessionId) {
+  const model = await get(sessionId);
+  model.status = sessionStatus.FINISHED;
+  model.endTime = new Date();
+  await model.save();
+}
+
 async function join(sessionId) {
   const model = await get(sessionId);
   model.joinTime = new Date();
@@ -179,6 +187,7 @@ module.exports = {
   getForUser,
   getForTrainer,
   setLive,
+  setFinished,
   getRelatedSessions,
   model: Model
 }

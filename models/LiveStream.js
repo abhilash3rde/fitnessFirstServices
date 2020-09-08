@@ -31,10 +31,16 @@ const liveStreamSchema = mongoose.Schema({
     default: streamStatus.SCHEDULED,
     enum: [streamStatus.SCHEDULED, streamStatus.FINISHED, streamStatus.LIVE]
   },
-  meetingId: {
+  meetingNumber: {
     type: Number
   },
   meetingPassword: {
+    type: String
+  },
+  clientKey: {
+    type: String
+  },
+  clientSecret: {
     type: String
   }
 });

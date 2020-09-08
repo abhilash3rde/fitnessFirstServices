@@ -1,11 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const cuid = require('cuid');
 
 const TrainerData = require('../models/trainerData');
 const BatchSubscription = require('../models/BatchSubscription');
 const Session = require('../models/Activity/Session');
 const UserData = require('../models/userData');
 const Fcm = require("../models/fcm");
+const Zoom = require("../models/Activity/Zoom");
+const Agora = require("../models/Activity/Agora");
+const {zoomClientConfig} = require("../config");
 const {getHash} = require("../utility/utility");
 const {getAgoraAppId} = require("../utility/utility");
 const {remoteMessageTypes} = require("../constants");
@@ -29,10 +33,18 @@ router.post('/:sessionId/start', async function (req, res, next) {
     if (session.type === subscriptionType.BATCH) {
       const meeting = await createZoomMeeting(session.packageId.title, new Date(), session.duration);
       const zakToken = await getZakToken();
-      res.json({success: true, data: meeting, token: zakToken});
+      const zoomFields = {
+        clientKey: zoomClientConfig.key,
+        clientSecret: zoomClientConfig.secret,
+        meetingNumber: meeting.id.toString(),
+        meetingPassword: meeting.password,
+        parentSessionId: sessionId
+      };
+      const zoomMeeting = await Zoom.create(zoomFields);
+      res.json({success: true, data: zoomFields, token: zakToken});
 
       const relatedSessions = await Session.getRelatedSessions(sessionId);
-      await relatedSessions.map(async session => await Session.setLive(session._id, meeting));
+      await relatedSessions.map(async session => await Session.setLive(session._id, zoomFields));
 
       const batchSubscription = await BatchSubscription.getForPackage(session.packageId._id);
       const users = batchSubscription.subscriptions.map(subscription => subscription.subscribedBy);
@@ -43,10 +55,9 @@ router.post('/:sessionId/start', async function (req, res, next) {
           message: notificationMessage,
           hostId: userId,
           displayImage: trainerData.displayPictureUrl,
-          meetingId: meeting.id.toString(),
-          meetingPassword: meeting.password,
           sentDate: new Date().toString(),
-          sessionType: subscriptionType.BATCH
+          sessionType: subscriptionType.BATCH,
+          ...zoomFields
         }
       };
       await users.map(async user => {
@@ -62,10 +73,15 @@ router.post('/:sessionId/start', async function (req, res, next) {
       });
     } else if (session.type === subscriptionType.SINGLE) {
       const targetUserId = session.userId;
-      const sessionId = (getHash(userId) | getHash(targetUserId)).toString();
+      const agoraSessionId = cuid(); // (getHash(userId) | getHash(targetUserId)).toString();
       const agoraAppId = getAgoraAppId();
       const fcmToken = await Fcm.getToken(targetUserId);
       const userData = await UserData.getById(targetUserId);
+      const agoraSession = await Agora.create({
+        appId: agoraAppId,
+        sessionId: agoraSessionId,
+        parentSessionId: sessionId
+      });
 
       let {name, displayPictureUrl} = userData;
       if (!!!name) name = "User";
@@ -74,16 +90,16 @@ router.post('/:sessionId/start', async function (req, res, next) {
       res.json({
         success: true, data: {
           agoraAppId,
-          sessionId,
+          sessionId: agoraSessionId,
           displayPictureUrl,
           displayName: name
         }
       });
       await Session.setLive(session._id, {
         agoraAppId,
-        sessionId,
-        displayName:trainerData.name,
-        displayImage:trainerData.displayPictureUrl
+        sessionId: agoraSessionId,
+        displayName: trainerData.name,
+        displayImage: trainerData.displayPictureUrl
       });
       const message = {
         data: {
@@ -92,8 +108,8 @@ router.post('/:sessionId/start', async function (req, res, next) {
           hostId: userId,
           displayImage: trainerData.displayPictureUrl,
           agoraAppId: agoraAppId,
-          sessionId: sessionId,
-          hostName:trainerData.name,
+          sessionId: agoraSessionId,
+          hostName: trainerData.name,
           sentDate: new Date().toString(),
           sessionType: subscriptionType.SINGLE
         }

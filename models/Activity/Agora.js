@@ -15,6 +15,10 @@ const agoraCallSchema = mongoose.Schema({
   sessionId: {
     type: String,
     required: true
+  },
+  parentSessionId: {
+    type: String,
+    required: true
   }
 });
 

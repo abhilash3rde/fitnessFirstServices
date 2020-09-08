@@ -24,9 +24,13 @@ const zoomCallSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  userId:{
-    type:String,
-    required:true
+  // userId: {
+  //   type: String,
+  //   required: true
+  // },
+  parentSessionId: {
+    type: String,
+    required: true
   }
 });
 

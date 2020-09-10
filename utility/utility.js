@@ -3,7 +3,6 @@ const fetch = require('node-fetch');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES, cloudinaryConfig} = require('../constants');
-const url = require('url');
 const {admin, zoomConfig} = require('../config');
 const jwt = require('jsonwebtoken');
 const {agoraAppIds} = require("../constants");
@@ -12,9 +11,9 @@ cloudinary.config(cloudinaryConfig);
 const SALT_ROUNDS = 10;
 
 async function hashPassword(user) {
-  if (!user.password) throw user.invalidate('password', 'password is required')
-  if (user.password.length < 6) throw user.invalidate('password', 'password must be at least 6 characters')
-  user.password = await bcrypt.hash(user.password, SALT_ROUNDS)
+  if (!user.password) throw user.invalidate('password', 'password is required');
+  if (user.password.length < 6) throw user.invalidate('password', 'password must be at least 6 characters');
+  user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
 }
 
 function emailUsername(emailAddress) {

@@ -1,6 +1,7 @@
 const userTypes = {
   TRAINER: 'TRAINER',
-  USER: 'USER'
+  USER: 'USER',
+  ADMIN:'ADMIN',
 }
 const CHANNELS = {
   STORE_CLIENT_INFO: 'STORE_CLIENT_INFO',

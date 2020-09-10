@@ -1,6 +1,7 @@
 const {isEmail} = require('validator');
 
 const db = require('../config/db');
+const {hashPassword} = require("../utility/utility");
 
 const {userTypes} = require("../constants")
 
@@ -11,7 +12,16 @@ const Model = db.model('User', {
   email: emailSchema({
     required: true
   }),
-  userType: {type: String, default: userTypes.USER, enum: [userTypes.USER, userTypes.TRAINER], required: true}
+  password: {
+    type: String,
+    maxLength: 120,
+  },
+  userType: {
+    type: String,
+    default: userTypes.USER,
+    enum: [userTypes.USER, userTypes.TRAINER, userTypes.ADMIN],
+    required: true
+  }
 })
 
 async function get(email) {
@@ -40,7 +50,9 @@ async function create(fields) {
   const existingModel = await getById(fields._id);
   if (existingModel) return existingModel;
 
-  const model = new Model(fields)
+  const model = new Model(fields);
+  if(fields.password)
+    await hashPassword(model);
   await model.save()
   return model;
 }
@@ -80,7 +92,7 @@ async function isUnique(doc, property) {
   return !existing || doc._id === existing._id;
 }
 
-  module.exports = {
+module.exports = {
   get,
   getById,
   create,

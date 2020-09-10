@@ -9,7 +9,8 @@
     "beta": "dbName=beta nodemon ./bin/www",
     "alpha": "dbName=alpha nodemon ./bin/www",
     "gamma": "dbName=gamma nodemon ./bin/www",
-    "theta": "dbName=theta nodemon ./bin/www"
+    "theta": "dbName=theta nodemon ./bin/www",
+    "delta": "dbName=delta nodemon ./bin/www"
   },
   "dependencies": {
     "arg": "^4.1.3",

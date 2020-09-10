@@ -23,7 +23,7 @@ router.get('/getAll/:page?', async function (req, res, next) {
       const postRecords = [...records.docs];
 
      await asyncForEach(postRecords, async post=>{
-        const likes = await Like.getForContent(post._id);
+        const likes =  await Like.getForContent(post._id);
         
         post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
         posts.push({...post, likes});
@@ -35,6 +35,7 @@ router.get('/getAll/:page?', async function (req, res, next) {
     }
     res.json({ posts, nextPage });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       err: err.message
     });

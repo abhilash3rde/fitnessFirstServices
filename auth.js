@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 
 const jwtSecret = process.env.JWT_SECRET || 'mark it zero'
 // const sessionSecret = process.env.SESSION_SECRET || 'random string of words'
-const adminPassword = process.env.ADMIN_PASSWORD || 'iamthewalrus'
+const adminPassword = process.env.ADMIN_PASSWORD || 'iamthewalrus';
 const jwtOpts = {
   algorithm: 'HS256',
   // expiresIn: '30d'

@@ -66,11 +66,6 @@ switch (process.argv[2]) {
         required: true
       },
       {
-        name: 'name',
-        description: 'Enter Name',
-        required: true
-      },
-      {
         name: 'password',
         hidden: true,
         description: 'Enter password',
@@ -92,12 +87,12 @@ switch (process.argv[2]) {
         console.log("Error", err);
         return
       }
-      const {email, name, password, password_re} = result;
+      const {email, password, password_re} = result;
       if (password !== password_re) {
         console.log("Passwords dont match");
         return;
       }
-      console.log("Creating admin account for ", email, name);
+      console.log("Creating admin account for ", email);
       await User.create({
         _id: cuid(),
         email,

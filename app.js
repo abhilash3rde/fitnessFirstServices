@@ -21,7 +21,6 @@ const subscriptionRouter = require('./routes/Subscription');
 const paymentRouter = require('./routes/payment');
 const sessionRouter = require('./routes/Session');
 const fileUpload = require('express-fileupload');
-// const {onConnection} = require('./routes/socket');
 const appointmentRouter = require('./routes/Appointment');
 const activityRouter = require('./routes/Activity');
 const questionRouter = require('./routes/question');
@@ -88,7 +87,6 @@ app.use('/live', auth.ensureUser, liveStreamRouter);
 app.use('/webhooks', webhookRouter);
 app.use('/session', auth.ensureUser,sessionRouter);
 
-// io.on('connection', onConnection);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -98,5 +96,4 @@ app.use(middleware.handleError);
 // schedule.scheduleJob(CRON_NOTIFY_HOWS_SESSION, function(){
 //   scheduler.notifyHowsSession();
 // });
-
 module.exports = app;

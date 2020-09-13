@@ -9,10 +9,10 @@ admin.initializeApp({
 });
 
 const zoomConfig = { // server config
-  key:'5Y66g6wkSb-LLf9wfFgO0w',
-  secret:'I8kQI5seL0hlzGh44mfuklC6Wmsk05IXB1HP',
-  userId:'roopesh@thirdessential.com',
-  baseUrl:'https://api.zoom.us/v2'
+  key: '5Y66g6wkSb-LLf9wfFgO0w',
+  secret: 'I8kQI5seL0hlzGh44mfuklC6Wmsk05IXB1HP',
+  userId: 'roopesh@thirdessential.com',
+  baseUrl: 'https://api.zoom.us/v2'
 }
 
 const zoomClientConfig = {
@@ -21,10 +21,16 @@ const zoomClientConfig = {
   userId: 'roopesh@thirdessential.com',
   domain: 'zoom.us'
 }
+const edamamConfig = {
+  appId: '3794d72a',
+  appKey: '97878e1f8b135ae65328bd7fbbcc0453',
+  baseUrl: "https://api.edamam.com/api"
+}
 
-module.exports ={
+module.exports = {
   firebaseDatabaseUrl,
   admin,
   zoomConfig,
-  zoomClientConfig
+  zoomClientConfig,
+  edamamConfig
 }

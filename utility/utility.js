@@ -5,6 +5,7 @@ const fs = require('fs');
 const {ENABLE_FILE_UPLOAD, CONTENT_TYPE, RANDOM_WALL_IMAGE, WEEK_DAYS_FULL_NAMES, cloudinaryConfig} = require('../constants');
 const {admin, zoomConfig} = require('../config');
 const jwt = require('jsonwebtoken');
+const {edamamConfig} = require("../config");
 const {agoraAppIds} = require("../constants");
 
 cloudinary.config(cloudinaryConfig);
@@ -112,6 +113,7 @@ function groupBy(datas, keys) {
     return data;
   }, {});
 }
+
 const groupByKey = (objectArray, property) => {
   // coolest snippet i ever found, felt i should link source
   return objectArray.reduce((acc, obj) => {
@@ -261,6 +263,22 @@ const getAgoraAppId = () => {
   return appId;
 }
 
+const getFoodData = async (foodName) => {
+  const url = `${edamamConfig.baseUrl}/nutrition-details?app_id=${edamamConfig.appId}&app_key=${edamamConfig.appKey}`;
+  // "https://api.edamam.com/api/nutrition-details?app_id=3794d72a&app_key=97878e1f8b135ae65328bd7fbbcc0453";
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: "demo api",
+      ingr: [`100 gram of ${foodName}`],
+    }),
+  });
+  return await response.json();
+}
+
 module.exports = {
   hashPassword,
   emailUsername,
@@ -282,5 +300,6 @@ module.exports = {
   getZakToken,
   appendMilitaryTime,
   getHash,
-  getAgoraAppId
+  getAgoraAppId,
+  getFoodData
 }

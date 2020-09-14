@@ -185,6 +185,55 @@ async function getMy(opts = {}, userId) {
   return record;
 }
 
+async function getAll(opts = {}) {
+  const {
+    page = 1, limit = 25
+  } = opts;
+
+  let record = null;
+  const options = {
+    select: '',
+    sort: { updatedOn: -1 },
+    populate: [{path: 'totalComments'}, {path:'createdBy', select:'_id, userType'}],
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  const query = {
+    spam:false
+  }
+
+  await Model.paginate(query, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
+}
+async function spam(opts = {}) {
+  const {
+    page = 1, limit = 25
+  } = opts;
+
+  let record = null;
+  const options = {
+    select: '',
+    sort: { updatedOn: -1 },
+    populate: [{path: 'totalComments'}, {path:'createdBy', select:'_id, userType'}],
+    lean: true,
+    page: page,
+    limit: limit
+  };
+
+  const query = {
+    spam:true, approved : true
+  }
+
+  await Model.paginate(query, options, async (err, result) =>{
+    record = result;
+  });
+  return record;
+}
+
 module.exports = {
   get,
   list,
@@ -194,5 +243,7 @@ module.exports = {
   addComment,
   removeComment,
   getMy,
+  getAll,
+  spam,
   model: Model
 }

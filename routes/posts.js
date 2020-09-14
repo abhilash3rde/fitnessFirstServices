@@ -333,6 +333,67 @@ router.get('/user/:userId/:page?', async function (req, res, next) {
   }
 });
 
+router.get('/admin/showall/:page?', async function (req, res, next) {
+  try {
+
+    const page = req.params['page'] ? req.params['page'] : 1;
+
+    let posts = [];
+    let nextPage = null;
+    const records = await Post.getAll({page});
+
+    if (records.docs.length > 0) {
+      const postRecords = [...records.docs];
+
+     await asyncForEach(postRecords, async post=>{
+        const likes = await Like.getForContent(post._id);
+        post.createdBy = post.createdBy == null ? null : await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+        posts.push({...post, likes});
+      });
+
+      if (records.page < records.pages) {
+        nextPage = "/post/admin/showall/"+(parseInt(records.page) + 1);
+      }
+    }
+    res.json({ posts, nextPage });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.get('/admin/spam/:page?', async function (req, res, next) {
+  try {
+
+    const page = req.params['page'] ? req.params['page'] : 1;
+
+    let posts = [];
+    let nextPage = null;
+    const records = await Post.spam({page});
+
+    if (records.docs.length > 0) {
+      const postRecords = [...records.docs];
+
+     await asyncForEach(postRecords, async post=>{
+        const likes = await Like.getForContent(post._id);
+        
+        post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
+        posts.push({...post, likes});
+      });
+
+      if (records.page < records.pages) {
+        nextPage = "/post/admin/spam/"+(parseInt(records.page) + 1);
+      }
+    }
+    res.json({ posts, nextPage });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);

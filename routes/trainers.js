@@ -13,23 +13,20 @@ router.get('/', async function (req, res, next) {
     let users;
     let record;
     let next;
-    if(userType===userTypes.USER)
-    {
-      record = await TrainerData.list({page:1});      
+    if (userType === userTypes.USER || userType === userTypes.ADMIN) {
+      record = await TrainerData.list({page: 1});
+    } else {
+      record = await UserData.list({page: 1});
     }
-    else{
-      record = await UserData.list({page:1});
-    } 
     const pages = record.pages;
-    if(record.page < pages){
-       next = "/trainers/"+(parseInt(record.page) + 1);
-    }
-    else{
+    if (record.page < pages) {
+      next = "/trainers/" + (parseInt(record.page) + 1);
+    } else {
       next = null;
     }
     users = record.docs;
 
-    res.json({trainers:users, next});
+    res.json({trainers: users, next});
   } catch (err) {
     console.log(err)
     res.status(500).json({

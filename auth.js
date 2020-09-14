@@ -3,6 +3,7 @@ const passport = require('passport')
 const Strategy = require('passport-local').Strategy
 const Users = require('./models/user');
 const bcrypt = require('bcrypt');
+const {userTypes} = require("./constants");
 
 const jwtSecret = process.env.JWT_SECRET || 'mark it zero'
 const adminPassword = process.env.ADMIN_PASSWORD || 'iamthewalrus';
@@ -10,23 +11,28 @@ const jwtOpts = {
   algorithm: 'HS256',
   // expiresIn: '30d'
 }
+const adminJwtOpts = {
+  algorithm: 'HS256',
+  expiresIn: '6d'
+}
 
 passport.use(adminStrategy());
 
 const login = async (req, res) => {
-  const {userEmail,userType,userId} = req.user;
+  const {userEmail, userType, userId} = req.user;
   const authToken = await sign({
-    userEmail,
-    userType,
-    userId
-  });
+      userEmail,
+      userType,
+      userId
+    },
+    userType === userTypes.ADMIN ? adminJwtOpts : jwtOpts);
   res.json({
     success: true,
     authToken,
     userType,
-    email:userEmail,
+    email: userEmail,
     userId
-  })
+  });
 }
 
 const authenticate = passport.authenticate('local', {
@@ -43,7 +49,7 @@ async function ensureUser(req, res, next) {
       req.userEmail = payload.userEmail;
       req.userType = payload.userType;
       req.userId = payload.userId;
-      return next()
+      return next();
     }
 
     const err = new Error('Unauthorized')
@@ -89,9 +95,9 @@ function adminStrategy() {
   })
 }
 
-async function sign(payload) {
-  const token = await jwt.sign(payload, jwtSecret, jwtOpts);
-  return token;
+async function sign(payload, opts = jwtOpts) {
+  console.log('signing token', opts);
+  return await jwt.sign(payload, jwtSecret, opts);
 }
 
 async function verify(jwtString = '') {
@@ -100,7 +106,7 @@ async function verify(jwtString = '') {
     const payload = await jwt.verify(jwtString, jwtSecret);
     return payload;
   } catch (err) {
-    err.statusCode = 401
+    err.statusCode = 401;
     throw err
   }
 }

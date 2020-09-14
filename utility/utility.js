@@ -213,13 +213,19 @@ async function createZoomMeeting(title, date, duration) {
       host_video: true,
       approval_type: 0,
       mute_upon_entry: true,
-      auto_recording: 'local', // or cloud,
+      // auto_recording: 'local', // or cloud,
+      auto_recording: 'cloud',
       waiting_room: false,
     }
   }
   const res = await fetch(url, {method: 'POST', headers: headers, body: JSON.stringify(data)});
   return await res.json();
 }
+
+// const a = async () => {
+//   console.log(await createZoomMeeting());
+// }
+// a();
 
 async function getZakToken() {
   const url = `${zoomConfig.baseUrl}/users/${zoomConfig.userId}/token?type=zak&ttl=36000`

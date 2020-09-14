@@ -91,6 +91,7 @@ router.put('/start', async function (req, res, next) {
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };
+    console.log(message);
     admin
       .messaging()
       .send(message)

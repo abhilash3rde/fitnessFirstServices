@@ -96,4 +96,5 @@ app.use(middleware.handleError);
 // schedule.scheduleJob(CRON_NOTIFY_HOWS_SESSION, function(){
 //   scheduler.notifyHowsSession();
 // });
+
 module.exports = app;

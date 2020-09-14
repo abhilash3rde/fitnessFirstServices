@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const {admin} = require('../config');
-const {firebaseTopics,remoteMessageTypes} = require('../constants');
+const {firebaseTopics, remoteMessageTypes} = require('../constants');
 const Post = require('../models/post');
 const Like = require('../models/like');
 const utility = require('../utility/utility');
@@ -22,18 +22,21 @@ router.get('/getAll/:page?', async function (req, res, next) {
     if (records.docs.length > 0) {
       const postRecords = [...records.docs];
 
-     await asyncForEach(postRecords, async post=>{
-        const likes =  await Like.getForContent(post._id);
-        
+      await asyncForEach(postRecords, async post => {
+        if (!post || !post.createdBy) {
+          console.log("no Post found or post createdBy null", post);
+          return;
+        }
+        const likes = await Like.getForContent(post._id);
         post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
         posts.push({...post, likes});
       });
 
       if (records.page < records.pages) {
-        nextPage = "/post/getAll/"+(parseInt(records.page) + 1);
+        nextPage = "/post/getAll/" + (parseInt(records.page) + 1);
       }
     }
-    res.json({ posts, nextPage });
+    res.json({posts, nextPage});
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -44,17 +47,17 @@ router.get('/getAll/:page?', async function (req, res, next) {
 
 router.put('/:postId/updateMedia', async function (req, res, next) {
   try {
-    const { postId } = req.params;
+    const {postId} = req.params;
     const mediaFile = req.files ? req.files.mediaContent : null;
     const content = await utility.uploadMedia(mediaFile);
 
     const post = await Post.edit(
       postId, {
-      ...content
-    });
+        ...content
+      });
     if (!post) throw new Error("Post updation failed");
 
-    res.json({ post });
+    res.json({post});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -64,16 +67,16 @@ router.put('/:postId/updateMedia', async function (req, res, next) {
 
 router.put('/:postId/updateText', async function (req, res, next) {
   try {
-    const { postId } = req.params;
+    const {postId} = req.params;
     const postContent = req.body;
 
     const post = await Post.edit(
       postId, {
-      ...postContent
-    });
+        ...postContent
+      });
     if (!post) throw new Error("Post updation failed");
 
-    res.json({ post });
+    res.json({post});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -83,7 +86,7 @@ router.put('/:postId/updateText', async function (req, res, next) {
 
 router.post('/', async function (req, res, next) {
   try {
-    const { userId } = req;
+    const {userId} = req;
 
     const mediaFile = req.files ? req.files.mediaContent : null;
     const postContent = req.body;
@@ -114,7 +117,7 @@ router.post('/', async function (req, res, next) {
         console.log('Error sending message:', error);
       });
 
-    res.json({ post });
+    res.json({post});
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -125,8 +128,8 @@ router.post('/', async function (req, res, next) {
 
 router.delete('/:postId', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { postId } = req.params;
+    const {userId} = req;
+    const {postId} = req.params;
 
     const result = await Post.remove(postId, userId);
     if (result)
@@ -143,7 +146,7 @@ router.delete('/:postId', async function (req, res, next) {
 
 router.get('/:postId', async function (req, res, next) {
   try {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     const post = await Post.get(postId);
     const likes = await Like.getForContent(post._id);
@@ -155,21 +158,21 @@ router.get('/:postId', async function (req, res, next) {
     if (records.docs.length > 0) {
       const commentRecords = [...records.docs];
 
-      await asyncForEach(commentRecords, async comment=>{
+      await asyncForEach(commentRecords, async comment => {
         const likes = await Like.getForContent(comment._id);
         comment.commentedBy = await UserUtils.populateUser(comment.commentedBy._id, comment.commentedBy.userType);
         comments.push({...comment, likes});
       });
 
       if (records.page < records.pages) {
-        nextPage = "/comment/getForPost/"+postId+"/"+(parseInt(records.page) + 1);
+        nextPage = "/comment/getForPost/" + postId + "/" + (parseInt(records.page) + 1);
       }
     }
 
-    if (post){
+    if (post) {
       post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
     }
-    res.json({ post, likes, comments, nextPage});
+    res.json({post, likes, comments, nextPage});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -179,8 +182,8 @@ router.get('/:postId', async function (req, res, next) {
 
 router.post('/:postId/like', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { postId } = req.params;
+    const {userId} = req;
+    const {postId} = req.params;
 
     const result = await Like.create({
       likedBy: userId,
@@ -200,7 +203,7 @@ router.post('/:postId/like', async function (req, res, next) {
 
 router.post('/:postId/unlike', async function (req, res, next) {
   try {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     const result = await Like.unlike(postId);
 
@@ -217,7 +220,7 @@ router.post('/:postId/unlike', async function (req, res, next) {
 
 router.get('/user/my/:page?', async function (req, res, next) {
   try {
-    const { userId } = req;
+    const {userId} = req;
     const page = req.params['page'] ? req.params['page'] : 1;
 
     let posts = [];
@@ -227,17 +230,17 @@ router.get('/user/my/:page?', async function (req, res, next) {
     if (records.docs.length > 0) {
       const postRecords = [...records.docs];
 
-      await asyncForEach(postRecords, async post=>{
+      await asyncForEach(postRecords, async post => {
         const likes = await Like.getForContent(post._id);
         post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
-         posts.push({...post, likes});
+        posts.push({...post, likes});
       });
 
       if (records.page < records.pages) {
-        nextPage = "/post/user/my/"+(parseInt(records.page) + 1);
+        nextPage = "/post/user/my/" + (parseInt(records.page) + 1);
       }
     }
-    res.json({ posts, nextPage });
+    res.json({posts, nextPage});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -247,10 +250,10 @@ router.get('/user/my/:page?', async function (req, res, next) {
 
 router.put('/:postId/reportSpam', async function (req, res, next) {
   try {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     const result = await Post.edit(
-     postId, {spam : true});
+      postId, {spam: true});
     if (result)
       res.json({
         success: true
@@ -265,11 +268,11 @@ router.put('/:postId/reportSpam', async function (req, res, next) {
 //Admin only
 router.put('/:postId/removeSpam', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { postId } = req.params;
+    const {userId} = req;
+    const {postId} = req.params;
 
     const result = await Post.edit(
-     postId, {spam : false});
+      postId, {spam: false});
     if (result)
       res.json({
         success: true
@@ -284,11 +287,11 @@ router.put('/:postId/removeSpam', async function (req, res, next) {
 //Admin only
 router.put('/:postId/approve', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { postId } = req.params;
+    const {userId} = req;
+    const {postId} = req.params;
 
     const result = await Post.edit(
-     postId, {approved : true});
+      postId, {approved: true});
     if (result)
       res.json({
         success: true
@@ -312,17 +315,17 @@ router.get('/user/:userId/:page?', async function (req, res, next) {
     if (records.docs.length > 0) {
       const postRecords = [...records.docs];
 
-      await asyncForEach(postRecords, async post=>{
+      await asyncForEach(postRecords, async post => {
         const likes = await Like.getForContent(post._id);
         post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
         posts.push({...post, likes});
       });
 
       if (records.page < records.pages) {
-        nextPage = "/post/user/"+userId+"/"+(parseInt(records.page) + 1);
+        nextPage = "/post/user/" + userId + "/" + (parseInt(records.page) + 1);
       }
     }
-    res.json({ posts, nextPage });
+    res.json({posts, nextPage});
   } catch (err) {
     res.status(500).json({
       err: err.message
@@ -332,7 +335,7 @@ router.get('/user/:userId/:page?', async function (req, res, next) {
 
 async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array);
+    await callback(array[index], index, array);
   }
 }
 

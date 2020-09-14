@@ -18,15 +18,20 @@ const zoomCallSchema = mongoose.Schema({
   },
   meetingNumber: {
     type: Number,
-    required: true
+    required: true,
+    index:true
   },
   meetingPassword: {
     type: String,
     required: true
   },
-  userId:{
-    type:String,
-    required:true
+  // userId: {
+  //   type: String,
+  //   required: true
+  // },
+  parentSessionId: {
+    type: String,
+    required: true
   }
 });
 
@@ -54,9 +59,15 @@ async function create(fields) {
   return model;
 }
 
+
+async function getParentSessionId(meetingNumber){
+  const model = await Model.findOne({meetingNumber});
+  return model.parentSessionId;
+}
 module.exports = {
   get,
   create,
   remove,
+  getParentSessionId,
   model: Model
 }

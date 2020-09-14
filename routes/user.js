@@ -12,6 +12,8 @@ const BatchSubscription = require('../models/BatchSubscription');
 const Activities = require('./Activities');
 const Slot = require('../models/slot');
 const Package = require('../models/package');
+const TermsConsent = require('../models/termsConsent');
+const Session = require("../models/Activity/Session");
 
 router.get('/myInfo', async function (req, res, next) {
   try {
@@ -28,7 +30,7 @@ router.get('/myInfo', async function (req, res, next) {
       upcomingActivities = await Activities.getUserActivities(userId);
     }
 
-    if (!user) throw new Error('Internal server error. code 45621');
+    if (!user) throw new Error('User does not exist!');
 
     res.json({user, upcomingActivities});
   } catch (error) {
@@ -264,7 +266,7 @@ router.get('/mySubscriptions', async function (req, res, next) {
                 time: slot.time,
                 daysOfWeek: slot.days
               },
-              subscribedCount:batchSubscription.subscriptions.length,
+              subscribedCount: batchSubscription.subscriptions.length,
               maxParticipants: batchSubscription.packageId.maxParticipants,
               type: subscriptionType.BATCH
             })
@@ -285,5 +287,33 @@ router.get('/mySubscriptions', async function (req, res, next) {
     });
   }
 });
+router.get('/mySessions', async function (req, res, next) {
+  try {
+    const {userId, userType} = req;
+    if (userType === userTypes.USER) {
+      const sessions = await Session.getForUser(userId)
+      res.json({sessions});
 
+    } else {
+      const sessions = await Session.getForTrainer(userId)
+      res.json({sessions});
+    }
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
+router.post('/acceptTerms', async function (req, res, next) {
+  try {
+    const {userId} = req;
+    await TermsConsent.create(userId);
+    res.json({success: true});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error)
+  }
+});
 module.exports = router;

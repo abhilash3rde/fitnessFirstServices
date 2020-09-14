@@ -8,24 +8,10 @@ const router = express.Router();
 
 const defaultDp = 'https://media.istockphoto.com/photos/middle-aged-gym-coach-picture-id475467038';
 const Fcm = require('../models/fcm');
-const {agoraAppIds, remoteMessageTypes} = require('../constants');
+const {getAgoraAppId} = require("../utility/utility");
+const {getHash} = require("../utility/utility");
+const {remoteMessageTypes} = require('../constants');
 
-const getHash = (str) => {
-  let hash = 0, i, chr;
-  for (i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-}
-let roundRobinIndex = 0;
-const getAgoraAppId = () => {
-  const appId = agoraAppIds[roundRobinIndex];
-  console.log("Using agora app #", roundRobinIndex + 1);
-  roundRobinIndex = (roundRobinIndex + 1) % agoraAppIds.length;
-  return appId;
-}
 router.post('/', async function (req, res, next) {
   try {
     const {targetUserId} = req.body;
@@ -45,7 +31,6 @@ router.post('/', async function (req, res, next) {
       userData = await UserData.getById(userId);
       targetUserData = await TrainerData.getById(targetUserId);
     }
-
 
     let {name, displayPictureUrl} = userData;
     if (!!!name) name = "User";

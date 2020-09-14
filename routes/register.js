@@ -6,7 +6,7 @@ const signJwt = require('../auth').sign;
 const TrainerData = require('../models/trainerData');
 const UserData = require('../models/userData');
 const User = require('../models/user');
-const Package = require('../models/package');
+// const Package = require('../models/package');
 const Fcm = require('../models/fcm');
 
 const {emailUsername} = require('../utility/utility');
@@ -22,7 +22,8 @@ router.post('/googleAuth', async function (req, res, next) {
     if (!name)
       name = emailUsername(email);
 
-    const existingUser = await User.get(email);
+    let existingUser = await User.getById(user_id);
+    if (!existingUser) existingUser = await User.get(email); // Check this again, in case user used another auth method
     if (existingUser)
       userType = existingUser.userType; // Change userType if already existing
     const Model = userType === userTypes.TRAINER ? TrainerData : UserData;
@@ -47,6 +48,18 @@ router.post('/googleAuth', async function (req, res, next) {
     const userData = await Model.get(email);
     const authToken = await signJwt({userEmail: email, userType, userId: user_id});
     res.json({email, userId: user_id, authToken, userType, userData, isNewUser: !existingUser, success: true});
+  } catch (err) {
+    console.log(err);
+    res.status(403).json({
+      err: err.message
+    });
+  }
+});
+
+router.post('/admin', async function (req, res, next) {
+  try {
+
+    res.json({email, userId: user_id, authToken, success: true});
   } catch (err) {
     console.log(err);
     res.status(403).json({

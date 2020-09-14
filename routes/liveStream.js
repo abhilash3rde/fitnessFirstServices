@@ -4,6 +4,7 @@ const router = express.Router();
 const {admin} = require('../config');
 const LiveStream = require('../models/LiveStream');
 const TrainerData = require('../models/trainerData');
+const {zoomClientConfig} = require("../config");
 const {userTypes, remoteMessageTypes, firebaseTopics} = require('../constants');
 const {createZoomMeeting, getZakToken} = require('../utility/utility');
 
@@ -42,8 +43,10 @@ router.post('/schedule', async function (req, res, next) {
       date,
       duration,
       host: userId,
-      meetingId: meeting.id,
+      meetingNumber: meeting.id,
       meetingPassword: meeting.password,
+      clientKey: zoomClientConfig.key,
+      clientSecret: zoomClientConfig.secret,
       sentDate: new Date().toString()
     });
     res.json({success: true, stream: model});
@@ -61,7 +64,7 @@ router.put('/start', async function (req, res, next) {
 
     const {streamId} = req.body;
     const model = await LiveStream.get(streamId);
-    console.log("Starting meeting #", model.meetingId);
+    console.log("Starting meeting #", model.meetingNumber);
 
     if (model.host !== userId) {
       res.status(401).json({message: 'User not authorised to start this live stream'});
@@ -71,7 +74,7 @@ router.put('/start', async function (req, res, next) {
     const zakToken = await getZakToken();
 
     const {name, displayPictureUrl} = await TrainerData.getById(userId);
-    const {title, meetingId, meetingPassword} = model;
+    const {title, meetingNumber, meetingPassword, clientKey, clientSecret} = model;
     const notificationMessage = `${name} has started a live session on ${title}`;
 
     const message = {
@@ -80,8 +83,10 @@ router.put('/start', async function (req, res, next) {
         message: notificationMessage,
         hostId: userId,
         displayImage: displayPictureUrl,
-        meetingId: meetingId.toString(),
+        meetingNumber: meetingNumber.toString(),
         meetingPassword,
+        clientKey,
+        clientSecret,
         sentDate: new Date().toString()
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,

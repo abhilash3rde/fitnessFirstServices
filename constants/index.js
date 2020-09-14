@@ -130,6 +130,13 @@ const sessionStatus ={
   LIVE:'LIVE',
   FINISHED:'FINISHED'
 }
+const foodTypes={
+  BREAKFAST:'BREAKFAST',
+  LUNCH:'LUNCH',
+  DINNER:'DINNER',
+  SNACKS: 'SNACKS'
+}
+
 module.exports = {
   userTypes,
   CHANNELS,
@@ -152,7 +159,8 @@ module.exports = {
   streamStatus,
   subscriptionType,
   sessionTypes,
-  sessionStatus
+  sessionStatus,
+  foodTypes
 }
 
 

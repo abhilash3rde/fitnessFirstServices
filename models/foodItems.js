@@ -7,6 +7,18 @@ const foodItemsSchema = mongoose.Schema({
     type: String,
     default: cuid,
   },
+  name: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    default: 100,
+  },
+  totalEnergy: {
+    type: Number,
+    required: true,
+  },
   carbs: {
     type: Number,
     required: true,
@@ -19,41 +31,54 @@ const foodItemsSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  totalEnergy: {
+  pretotal: {
     type: Number,
     required: true,
   },
-  name: {
-    type: String,
+  prefats: {
+    type: Number,
     required: true,
   },
-  quantity: {
+  precarbs: {
     type: Number,
-    default: 100,
+    required: true,
   },
-  lastUpdated: {
-    type: Date,
-    default: Date.now,
+  preproteins: {
+    type: Number,
+    required: true,
   },
 });
 
 const Model = db.model("foodItems", foodItemsSchema);
 
 async function getByName(name) {
-  console.log("get mei aaya");
-  const model = await Model.findOne({ name });
+  const model = await Model.findOne({
+    name: { $regex: ".*" + name + ".*", $options: "xsi" },
+  });
+
   return model;
 }
 
 async function create(fields) {
-  console.log("create mei aaya");
-  const model = new Model({...fields});
+  const model = new Model({
+    ...fields,
+    pretotal: fields.totalEnergy,
+    prefats: fields.fats,
+    precarbs: fields.carbs,
+    preproteins: fields.proteins,
+  });
+
   await model.save();
   return model;
 }
 
+async function getByIds(arrayOfIds) {
+  const model = await Model.find({ _id: { $in: arrayOfIds } }).select("-__v");
+  return model;
+}
 module.exports = {
   getByName,
   create,
+  getByIds,
   model: Model,
 };

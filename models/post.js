@@ -51,8 +51,8 @@ const postSchema = mongoose.Schema({
     default: false
   },
   approved:{
-    type:Boolean,
-    default: true
+    type: Boolean ,
+   // default: false
   },
   postCategory:{
     type:String,
@@ -88,7 +88,6 @@ async function list(opts = {}) {
   const {
     page = 1, limit = 25
   } = opts;
-
   let record = null;
   var options = {
     select: '',
@@ -201,7 +200,7 @@ async function getAll(opts = {}) {
   };
 
   const query = {
-    spam:false
+    spam:false,
   }
 
   await Model.paginate(query, options, async (err, result) =>{

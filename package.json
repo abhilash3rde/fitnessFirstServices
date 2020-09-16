@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "ENABLE_FILE_UPLOAD=true node ./bin/www",
-    "dev": "dbName=dev nodemon ./bin/www",
-    "prod": "nodemon ./bin/www",
+    "dev": "set mode=dev && nodemon ./bin/www",
+    "prod": "set mode='prod' && nodemon ./bin/www",
     "beta": "dbName=beta nodemon ./bin/www",
+    "qatesting": "set mode='2' && nodemon ./bin/www",
     "alpha": "dbName=alpha nodemon ./bin/www",
     "gamma": "dbName=gamma nodemon ./bin/www",
     "theta": "dbName=theta nodemon ./bin/www",

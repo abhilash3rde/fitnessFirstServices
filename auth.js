@@ -4,6 +4,7 @@ const Strategy = require('passport-local').Strategy
 const Users = require('./models/user');
 const bcrypt = require('bcrypt');
 const {userTypes} = require("./constants");
+const user = require('./models/user');
 
 const jwtSecret = process.env.JWT_SECRET || 'mark it zero'
 const adminPassword = process.env.ADMIN_PASSWORD || 'iamthewalrus';
@@ -20,7 +21,14 @@ passport.use(adminStrategy());
 
 const login = async (req, res) => {
   const {userEmail, userType, userId} = req.user;
-  const authToken = await sign({
+  const user=await user.get(userEmail)
+  // console.log(user)
+  // if (!user){
+  //   res.status(500).json({
+  //     err:'user Not Found'
+  //   });
+  // }else{
+    const authToken = await sign({
       userEmail,
       userType,
       userId
@@ -33,6 +41,8 @@ const login = async (req, res) => {
     email: userEmail,
     userId
   });
+  // }
+  
 }
 
 const authenticate = passport.authenticate('local', {

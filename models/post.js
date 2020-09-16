@@ -50,9 +50,9 @@ const postSchema = mongoose.Schema({
     type:Boolean,
     default: false
   },
-  approved:{
+  approved : {
     type: Boolean ,
-   // default: false
+    default: false
   },
   postCategory:{
     type:String,

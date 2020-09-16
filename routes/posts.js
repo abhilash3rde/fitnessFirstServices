@@ -303,6 +303,24 @@ router.put('/:postId/approve', async function (req, res, next) {
   }
 });
 
+router.put('/:postId/disapprove', async function (req, res, next) {
+  try {
+    const {userId} = req;
+    const {postId} = req.params;
+
+    const result = await Post.edit(
+      postId, {approved: false});
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 router.get('/user/:userId/:page?', async function (req, res, next) {
   try {
     const userId = req.params['userId'];

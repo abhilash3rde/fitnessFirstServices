@@ -193,7 +193,7 @@ async function getAll(opts = {}) {
   const options = {
     select: '',
     sort: { updatedOn: -1 },
-    populate: [{path: 'totalComments'}, {path:'createdBy', select:'_id, userType'}],
+    populate: [{path: 'totalComments'}, {path:'createdBy', select:'_id, userType'},{path:'comments'}],
     lean: true,
     page: page,
     limit: limit

@@ -200,7 +200,7 @@ async function getAll(opts = {}) {
   };
 
   const query = {
-    spam:false,
+    spam:false, approved : false
   }
 
   await Model.paginate(query, options, async (err, result) =>{

@@ -16,7 +16,8 @@ async function populateUser(userId, userType) {
         displayPictureUrl = userData.displayPictureUrl;
         wallImageUrl = userData.wallImageUrl;
     }
-    return { userId, userType, name, displayPictureUrl, wallImageUrl };
+    const data = { userId, userType, name, displayPictureUrl, wallImageUrl }
+    return data;
 
 }
 

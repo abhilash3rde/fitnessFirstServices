@@ -21,7 +21,8 @@ passport.use(adminStrategy());
 
 const login = async (req, res) => {
   const {userEmail, userType, userId} = req.user;
-  const user=await user.get(userEmail)
+  // console.log(req.user)
+  // const user=await user.get(userEmail)
   // console.log(user)
   // if (!user){
   //   res.status(500).json({

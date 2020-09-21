@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
  const mode = ['dev','prod','testing']
- const modee=process.env.mode || mode[1]
+ const modee = process.env.mode || mode[1]
  console.log(modee,'1')
 let dbName
 let dbString

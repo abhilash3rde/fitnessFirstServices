@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const expressip = require('express-ip');
+var schedule = require('node-schedule');
 
 const indexRouter = require('./routes/index');
 const registerRouter = require('./routes/register');
@@ -36,6 +37,9 @@ const liveStreamRouter = require('./routes/liveStream');
 const webhookRouter = require('./routes/webhooks');
 const middleware = require('./middleware');
 const auth = require('./auth');
+const meetings = require('./routes/Meetings')
+const ScheduledMeetings = require('./models/meetings')
+const liveStreamFuntions = require('./models/LiveStream')
 
 const app = express();
 app.use(expressip().getIpInfoMiddleware);
@@ -88,15 +92,27 @@ app.use('/recommend', auth.ensureUser, recommendRouter);
 app.use('/live', auth.ensureUser, liveStreamRouter);
 app.use('/webhooks', webhookRouter);
 app.use('/session', auth.ensureUser,sessionRouter);
-
+app.use('/meetings', auth.ensureUser ,meetings)
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
 app.use(middleware.handleError);
 
-// schedule.scheduleJob(CRON_NOTIFY_HOWS_SESSION, function(){
-//   scheduler.notifyHowsSession();
-// });
+schedule.scheduleJob('*/10 * * * *', async function(){
+
+  ScheduledMeetings.model.find().exec().then(meetings => {
+    meetings.map((meet,index)=>{
+      const now = new Date()
+      const endTime = new Date(meet.endTime)
+      if(now > endTime && meet.status === "LIVE"){
+        liveStreamFuntions.setFinished(meet.meetingNumber)
+      }
+    })
+  }).catch(err=>{
+    console.log(err);
+  })
+   
+});
 
 module.exports = app;

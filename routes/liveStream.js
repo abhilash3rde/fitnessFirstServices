@@ -7,6 +7,7 @@ const TrainerData = require('../models/trainerData');
 const {zoomClientConfig} = require("../config");
 const {userTypes, remoteMessageTypes, firebaseTopics} = require('../constants');
 const {createZoomMeeting, getZakToken} = require('../utility/utility');
+const meetings = require('../models/meetings')
 
 router.post('/schedule', async function (req, res, next) {
   try {
@@ -49,6 +50,7 @@ router.post('/schedule', async function (req, res, next) {
       clientSecret: zoomClientConfig.secret,
       sentDate: new Date().toString()
     });
+   
     res.json({success: true, stream: model});
   } catch (err) {
     console.log(err);
@@ -101,6 +103,16 @@ router.put('/start', async function (req, res, next) {
       .catch(error => {
         console.log('Error sending message:', error);
       });
+      let end = new Date()
+      end.setHours(new Date().getHours() + 1)
+      end.setMinutes(00)
+      const meet = meetings.create({
+        meetingNumber: meeting.id,
+        status : "LIVE",
+        startTime : new Date(),
+        endTime : end
+      })
+      console.log(meet)
     res.json({success: true, token: zakToken});
   } catch (err) {
     console.log(err);

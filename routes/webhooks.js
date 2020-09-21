@@ -7,6 +7,7 @@ const Zoom = require('../models/Activity/Zoom');
 const Session = require('../models/Activity/Session');
 const {firebaseTopics} = require("../constants");
 const {remoteMessageTypes} = require("../constants");
+const meetings = require('../models/meetings')
 
 router.post('/endMeeting/', async function (req, res, next) {
   try {
@@ -35,6 +36,7 @@ router.post('/endMeeting/', async function (req, res, next) {
           });
       }
     }
+    meetings.edit(meetingNumber, { status: "FINISHED"  })
     res.json({success: true});
   } catch (err) {
     console.log(err);

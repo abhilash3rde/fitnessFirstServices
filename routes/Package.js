@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
 const Slot = require('../models/slot');
 const Package = require('../models/package');
 const TrainerData = require('../models/trainerData');
@@ -17,6 +16,13 @@ router.post('/create', async function (req, res, next) {
 
     if (group) {
       const {days, time, duration} = slot;
+      const availableSlots = await Slot.getAllAvailableSlots()
+  
+     availableSlots.map((slott, index) => {
+        if (!(days.includes(slott.dayOfWeek) && time === slott.time))
+          throw new Error("Slot already taken");
+      })
+      
       const slots = [];
       days.map(day => slots.push({
         time,

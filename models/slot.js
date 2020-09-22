@@ -129,6 +129,11 @@ async function findAvailableSlots(object) {
     time: object.time
   });
 }
+async function getBookedSlots(trainerId) {
+  return await Model.find({
+    trainerId: trainerId,
+  });
+}
 
 async function updateAll(allSlots) {
   const slots = await Model.updateMany(allSlots);
@@ -239,6 +244,7 @@ module.exports = {
   insertAll,
   updateAll,
   findAvailableSlots,
+  getBookedSlots,
   findForDayAndTime,
   updateForDayTime,
   getAllAvailableSlots,

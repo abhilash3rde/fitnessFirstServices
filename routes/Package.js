@@ -3,6 +3,7 @@ const router = express.Router();
 const Slot = require('../models/slot');
 const Package = require('../models/package');
 const TrainerData = require('../models/trainerData');
+const { default: validator } = require('validator');
 
 router.post('/create', async function (req, res, next) {
   try {
@@ -16,24 +17,25 @@ router.post('/create', async function (req, res, next) {
 
     if (group) {
       const {days, time, duration} = slot;
-      const availableSlots = await Slot.getAllAvailableSlots()
-  
-     availableSlots.map((slott, index) => {
-        if (!(days.includes(slott.dayOfWeek) && time === slott.time))
-          throw new Error("Slot already taken");
-      })
-      
-      const slots = [];
-      days.map(day => slots.push({
-        time,
-        dayOfWeek: day,
-        duration: duration,
-        trainerId: userId,
-        group: true,
-        packageId: package._id
-      }));
-      const insertedSlots = await Slot.insertAll(slots);
-      await TrainerData.addSlots(userId, insertedSlots);
+      const availableSlots = await Slot.getBookedSlots(userId)
+      console.log(availableSlots)
+      days.map((day, i)=>{
+        availableSlots.map((slott, index) => {
+          if (day === slott.dayOfWeek && time === slott.time && !slott.group && slott.active)
+           throw new Error(`Slot already taken on ${day}`);
+           })   
+       })   
+       const slots = [];
+       days.map(day => slots.push({
+         time,
+         dayOfWeek: day,
+         duration: duration,
+         trainerId: userId,
+         group: true,
+         packageId: package._id
+       }));
+       const insertedSlots = await Slot.insertAll(slots);
+       await TrainerData.addSlots(userId, insertedSlots);
     }
     res.json({package});
   } catch (err) {

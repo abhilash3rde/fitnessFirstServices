@@ -149,6 +149,7 @@ router.get('/:postId', async function (req, res, next) {
     const { postId } = req.params;
 
     const postDB = await Post.get(postId);
+    console.log(postDB)
     const post = await { ...postDB._doc }
     const likes = await Like.getForContent(post._id);
     let comments = [];
@@ -172,7 +173,7 @@ router.get('/:postId', async function (req, res, next) {
     if (post) {
       post.createdBy = await UserUtils.populateUser(post.createdBy._id, post.createdBy.userType);
     }
-    res.json({ post, likes, comments, nextPage });
+    res.json({ postDB, likes, comments, nextPage });
   } catch (err) {
     res.status(500).json({
       err: err.message

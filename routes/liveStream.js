@@ -106,13 +106,13 @@ router.put('/start', async function (req, res, next) {
       let end = new Date()
       end.setHours(new Date().getHours() + 1)
       end.setMinutes(00)
-      const meet = meetings.create({
+      
+    meetings.create({
         meetingNumber: meeting.id,
         status : "LIVE",
         startTime : new Date(),
         endTime : end
       })
-      console.log(meet)
     res.json({success: true, token: zakToken});
   } catch (err) {
     console.log(err);

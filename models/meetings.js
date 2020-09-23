@@ -33,15 +33,20 @@ const Model = db.model('Meetings', meetingsSchema);
 
 async function create(fields) {
   const model = new Model(fields);
-  await model.save();
-  return model;
+  await model.save().then(()=>{
+    console.log("Meeting save")
+    return model;
+  }).catch((err)=>{
+    console.log("error while saving meeting")
+    console.log(err)
+  })
+ 
 }
 
 
 
 async function list() {
   Model.find().exec().then(meetings => {
-      console.log(meetings)
       return meetings
   }).catch(err=>{
       console.log(err)

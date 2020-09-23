@@ -5,7 +5,7 @@ const {getFoodData} = require("../utility/utility");
 
 router.post("/getByName/", async (req, res, next) => {
   try {
-    const {name} = req.body;
+    const {name , qty} = req.body;
     const foodItem = await foodItems.getByName(name);
 
     if (foodItem) {
@@ -13,17 +13,28 @@ router.post("/getByName/", async (req, res, next) => {
       return res.json({foodItem, success: true});
     } else {
       //if fooditem doesnt exist then call api to get details
-      const resData = await getFoodData(name);
-
+      const resData = await getFoodData(name, qty);
       if (resData.totalNutrientsKCal) {
-        const data = {
-          quantity: 100,
-          name: name,
-          totalEnergy: resData.totalNutrientsKCal.ENERC_KCAL.quantity,
-          fats: resData.totalNutrientsKCal.FAT_KCAL.quantity,
-          carbs: resData.totalNutrientsKCal.CHOCDF_KCAL.quantity,
-          proteins: resData.totalNutrientsKCal.PROCNT_KCAL.quantity,
-        };
+        let data = {}
+        if(qty){
+          data = {
+            quantity: 1,
+            name: name,
+            totalEnergy: resData.totalNutrientsKCal.ENERC_KCAL.quantity,
+            fats: resData.totalNutrientsKCal.FAT_KCAL.quantity,
+            carbs: resData.totalNutrientsKCal.CHOCDF_KCAL.quantity,
+            proteins: resData.totalNutrientsKCal.PROCNT_KCAL.quantity,
+          };
+        }else{
+          data = {
+            quantity: 100,
+            name: name,
+            totalEnergy: resData.totalNutrientsKCal.ENERC_KCAL.quantity,
+            fats: resData.totalNutrientsKCal.FAT_KCAL.quantity,
+            carbs: resData.totalNutrientsKCal.CHOCDF_KCAL.quantity,
+            proteins: resData.totalNutrientsKCal.PROCNT_KCAL.quantity,
+          };
+        }
         const foodItem = await foodItems.create(data); //save this new foodItem in our database
         return res.json({foodItem, success: true});
       } else {

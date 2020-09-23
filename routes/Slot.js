@@ -122,7 +122,7 @@ router.get('/getAllAvailable', async function (req, res, next) {
 
       refinedSlots.push(slot);
     });
-
+    
     const availableSlots = await utility.groupBy(refinedSlots, ['dayOfWeek']);
     let resultSlots = [];
 

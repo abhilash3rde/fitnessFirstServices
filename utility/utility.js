@@ -214,7 +214,7 @@ async function createZoomMeeting(title, date, duration) {
       approval_type: 0,
       mute_upon_entry: true,
       // auto_recording: 'local', // or cloud,
-      auto_recording: 'cloud',
+      auto_recording: 'none',
       waiting_room: false,
     }
   }

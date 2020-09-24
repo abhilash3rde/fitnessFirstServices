@@ -35,7 +35,6 @@ async function create(fields) {
   const model = new Model(fields);
   await model.save().then(()=>{
     console.log("Meeting save")
-    return model;
   }).catch((err)=>{
     console.log("error while saving meeting")
     console.log(err)

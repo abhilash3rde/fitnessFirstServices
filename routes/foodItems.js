@@ -6,8 +6,9 @@ const {getFoodData} = require("../utility/utility");
 router.post("/getByName/", async (req, res, next) => {
   try {
     const {name , qty} = req.body;
-    const foodItem = await foodItems.getByName(name);
-
+    console.log(qty)
+    const foodItem = await foodItems.getByName(name, qty);
+    console.log(foodItem)
     if (foodItem) {
       //if foodItem exists in our database then send that foodItem
       return res.json({foodItem, success: true});
@@ -20,6 +21,7 @@ router.post("/getByName/", async (req, res, next) => {
           data = {
             quantity: 1,
             name: name,
+            type : qty,
             totalEnergy: resData.totalNutrientsKCal.ENERC_KCAL.quantity,
             fats: resData.totalNutrientsKCal.FAT_KCAL.quantity,
             carbs: resData.totalNutrientsKCal.CHOCDF_KCAL.quantity,
@@ -29,6 +31,7 @@ router.post("/getByName/", async (req, res, next) => {
           data = {
             quantity: 100,
             name: name,
+            type : qty,
             totalEnergy: resData.totalNutrientsKCal.ENERC_KCAL.quantity,
             fats: resData.totalNutrientsKCal.FAT_KCAL.quantity,
             carbs: resData.totalNutrientsKCal.CHOCDF_KCAL.quantity,

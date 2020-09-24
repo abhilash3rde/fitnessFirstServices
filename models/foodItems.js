@@ -47,13 +47,18 @@ const foodItemsSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  type : {
+    type : Boolean,
+    required : true
+  }
 });
 
 const Model = db.model("foodItems", foodItemsSchema);
 
-async function getByName(name) {
+async function getByName(name, qty) {
   const model = await Model.findOne({
     name: { $regex: ".*" + name + ".*", $options: "xsi" },
+    type : qty
   });
 
   return model;

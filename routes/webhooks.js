@@ -8,15 +8,12 @@ const Session = require('../models/Activity/Session');
 const {firebaseTopics} = require("../constants");
 const {remoteMessageTypes} = require("../constants");
 const meetings = require('../models/meetings')
-const {streamStatus} = require('../constants');
 
 router.post('/endMeeting/', async function (req, res, next) {
   try {
     const {payload} = req.body;
     const {id: meetingNumber} = payload.object;
-    console.log(req.body,'WEBHOOK')
     const success = await LiveStream.setFinished(meetingNumber);
-    console.log(success,'WEBHOOK')
     if (!success) {
       // meetingId did not belong to a live stream, check for zoom session
       const sessionId = await Zoom.getParentSessionId(meetingNumber);
@@ -35,11 +32,11 @@ router.post('/endMeeting/', async function (req, res, next) {
             console.log('Successfully sent message WEBHOOK:', response);
           })
           .catch(error => {
-            console.log('Error sending message: WEBHOOK', error);
+            console.log('Error sending message WEBHOOK:', error);
           });
       }
     }
-    meetings.edit(meetingNumber, { status: streamStatus.FINISHED  })
+    meetings.edit(meetingNumber, { status: "FINISHED"  })
     res.json({success: true});
   } catch (err) {
     console.log(err);

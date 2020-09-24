@@ -98,7 +98,7 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 app.use(middleware.handleError);
-
+ //ToDos : add scheduler controller
 schedule.scheduleJob('*/10 * * * *', async function(){
 
   ScheduledMeetings.model.find().exec().then(meetings => {

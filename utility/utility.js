@@ -214,7 +214,7 @@ async function createZoomMeeting(title, date, duration) {
       approval_type: 0,
       mute_upon_entry: true,
       // auto_recording: 'local', // or cloud,
-      auto_recording: 'cloud',
+      auto_recording: 'none',
       waiting_room: false,
     }
   }
@@ -269,7 +269,7 @@ const getAgoraAppId = () => {
   return appId;
 }
 
-const getFoodData = async (foodName) => {
+const getFoodData = async (foodName , qty) => {
   const url = `${edamamConfig.baseUrl}/nutrition-details?app_id=${edamamConfig.appId}&app_key=${edamamConfig.appKey}`;
   // "https://api.edamam.com/api/nutrition-details?app_id=3794d72a&app_key=97878e1f8b135ae65328bd7fbbcc0453";
   const response = await fetch(url, {
@@ -279,7 +279,7 @@ const getFoodData = async (foodName) => {
     },
     body: JSON.stringify({
       title: "demo api",
-      ingr: [`100 gram of ${foodName}`],
+      ingr: [qty ? `1 qty of ${foodName}` : `100 gram of ${foodName}`],
     }),
   });
   return await response.json();

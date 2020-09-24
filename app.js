@@ -107,6 +107,7 @@ schedule.scheduleJob('*/10 * * * *', async function(){
       const endTime = new Date(meet.endTime)
       if(now > endTime && meet.status === "LIVE"){
         liveStreamFuntions.setFinished(meet.meetingNumber)
+        ScheduledMeetings.edit(meet.meetingNumber, { status: "FINISHED"  })
       }
     })
   }).catch(err=>{

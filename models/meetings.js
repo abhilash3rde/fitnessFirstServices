@@ -68,7 +68,7 @@ async function edit(_id, change) {
     Object.keys(change).forEach(key => {
       model[key] = change[key]
     });
-    console.log(model)
+    console.log(model,change,'change')
     await model.save();
     return await get(_id);
   }

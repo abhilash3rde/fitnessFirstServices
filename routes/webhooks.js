@@ -8,6 +8,7 @@ const Session = require('../models/Activity/Session');
 const {firebaseTopics} = require("../constants");
 const {remoteMessageTypes} = require("../constants");
 const meetings = require('../models/meetings')
+const {streamStatus} = require('../constants');
 
 router.post('/endMeeting/', async function (req, res, next) {
   try {
@@ -36,7 +37,7 @@ router.post('/endMeeting/', async function (req, res, next) {
           });
       }
     }
-    meetings.edit(meetingNumber, { status: "FINISHED"  })
+    meetings.edit(meetingNumber, { status: streamStatus.FINISHED  })
     res.json({success: true});
   } catch (err) {
     console.log(err);

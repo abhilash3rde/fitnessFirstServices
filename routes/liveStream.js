@@ -39,6 +39,18 @@ router.post('/schedule', async function (req, res, next) {
       .catch(error => {
         console.log('Error sending message:', error);
       });
+      console.log(new Date(date))
+      let endtime = new Date(date)
+      endtime.setHours(new Date().getHours() + 1)
+      endtime.setMinutes(00) 
+      console.log(endtime)
+      meetings.create({
+          meetingNumber: meeting._id,
+          status : "LIVE",
+          startTime : new Date(date),
+          endTime : endtime
+      })
+
     const model = await LiveStream.create({
       title,
       date,
@@ -104,15 +116,7 @@ router.put('/start', async function (req, res, next) {
         console.log('Error sending message:', error);
       });
 
-      let end = new Date()
-      end.setHours(new Date().getHours() + 1)
-      end.setMinutes(00) 
-      meetings.create({
-          meetingNumber: meetingNumber.toString(),
-          status : "LIVE",
-          startTime : new Date(),
-          endTime : end
-      })
+      
     res.json({success: true, token: zakToken});
   } catch (err) {
     console.log(err);

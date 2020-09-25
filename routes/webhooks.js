@@ -36,7 +36,7 @@ router.post('/endMeeting/', async function (req, res, next) {
           });
       }
     }
-    meetings.edit(meetingNumber, { status: "FINISHED"  })
+    meetings.edit(meetingNumber)
     res.json({success: true});
   } catch (err) {
     console.log(err);

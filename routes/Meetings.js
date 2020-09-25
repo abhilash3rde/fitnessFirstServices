@@ -44,12 +44,10 @@ router.put('/:id/end', async function (req, res, next) {
   try {
     const { id } = req.params;
     console.log(id)
-    const result = await meetings.edit(
-      id, { status: "FINISHED"  });
-    if (result)
+    await meetings.edit(id);
       res.json({
         success: true
-      });
+      })
   } catch (err) {
     res.status(500).json({
       err: err.message

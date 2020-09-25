@@ -60,7 +60,9 @@ router.post('/', async function (req, res, next) {
       },
     );
     await ActiveCalls.create(userId);
-    res.json({sessionId, agoraAppId, displayPictureUrl:targetDisplayPictureUrl, displayName: targetName, success: true}); // TODO : add call config here
+    const data={sessionId, agoraAppId, displayPictureUrl:targetDisplayPictureUrl, displayName: targetName, success: true}
+    console.log(data,"Start Call ")
+    res.json(data); // TODO : add call config here
   } catch (err) {
     console.log(err)
     res.status(500).json({

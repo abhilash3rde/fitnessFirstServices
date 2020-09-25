@@ -49,6 +49,9 @@ async function create(fields) {
 
 async function getParentSessionId(sessionId) {
   const model = await Model.findOne({sessionId});
+  if(!model){
+    return null;
+  }
   return model.parentSessionId;
 }
 

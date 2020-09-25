@@ -38,8 +38,7 @@ const webhookRouter = require('./routes/webhooks');
 const middleware = require('./middleware');
 const auth = require('./auth');
 const meetings = require('./routes/Meetings')
-const ScheduledMeetings = require('./models/meetings')
-const liveStreamFuntions = require('./models/LiveStream')
+const scheduler = require('./utility/Scheduler')
 
 const app = express();
 app.use(expressip().getIpInfoMiddleware);
@@ -99,22 +98,8 @@ app.use(function (req, res, next) {
 });
 app.use(middleware.handleError);
  //ToDos : add scheduler controller
-schedule.scheduleJob('*/10 * * * *', async function(){
-
-  ScheduledMeetings.model.find().exec().then(meetings => {
-  
-    meetings.map((meet,index)=>{
-      const now = new Date()
-      const endTime = new Date(meet.endTime)
-      if(now > endTime && meet.status === "LIVE"){
-        liveStreamFuntions.setFinished(meet.meetingNumber)
-        ScheduledMeetings.edit(meet.meetingNumber)
-      }
-    })
-  }).catch(err=>{
-    console.log(err);
-  })
-   
-});
+  // schedule.scheduleJob('*/1 * * * *', async function(){
+  //    scheduler.endMeeting()
+  // });
 
 module.exports = app;

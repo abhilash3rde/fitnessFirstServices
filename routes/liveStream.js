@@ -45,7 +45,7 @@ router.post('/schedule', async function (req, res, next) {
       endtime.setMinutes(00) 
       console.log(endtime)
       meetings.create({
-          meetingNumber: meeting._id,
+          meetingNumber: meeting.id,
           status : "LIVE",
           startTime : new Date(date),
           endTime : endtime

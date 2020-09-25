@@ -62,15 +62,26 @@ async function get(_id) {
     return model;
   }
 
-async function edit(_id, change) {
+// async function edit(_id, change) {
 
-    const model = await get(_id);
-    Object.keys(change).forEach(key => {
-      model[key] = change[key]
-    });
-    console.log(model,change,'change')
-    await model.save();
-    return await get(_id);
+//     const model = await get(_id);
+//     Object.keys(change).forEach(key => {
+//       model[key] = change[key]
+//     });
+//     console.log(model,change,'change')
+//     await model.save();
+//     return await get(_id);
+//   }
+async function edit(meetingNumber) {
+  if(meetingNumber){
+    const model = await Model.findOne({meetingNumber});
+    if (!model) console.log("steam not found");
+     else{
+      model.status = streamStatus.FINISHED;
+      console.log("Setting meeting FINISHED");
+      await model.save();
+    }
+  }
   }
 
 module.exports = {

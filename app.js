@@ -102,12 +102,13 @@ app.use(middleware.handleError);
 schedule.scheduleJob('*/10 * * * *', async function(){
 
   ScheduledMeetings.model.find().exec().then(meetings => {
+  
     meetings.map((meet,index)=>{
       const now = new Date()
       const endTime = new Date(meet.endTime)
       if(now > endTime && meet.status === "LIVE"){
         liveStreamFuntions.setFinished(meet.meetingNumber)
-        ScheduledMeetings.edit(meet.meetingNumber, { status: "FINISHED"  })
+        ScheduledMeetings.edit(meet.meetingNumber)
       }
     })
   }).catch(err=>{

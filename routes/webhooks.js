@@ -29,10 +29,10 @@ router.post('/endMeeting/', async function (req, res, next) {
           .messaging()
           .send(message)
           .then(response => {
-            console.log('Successfully sent message:', response);
+            console.log('Successfully sent message WEBHOOK:', response);
           })
           .catch(error => {
-            console.log('Error sending message:', error);
+            console.log('Error sending message WEBHOOK:', error);
           });
       }
     }

@@ -76,7 +76,7 @@ async function setFinished(meetingNumber) {
   const model = await Model.findOne({meetingNumber});
   if (!model) return false;
   model.status = streamStatus.FINISHED;
-  console.log("Setting stream FINISHED");
+  console.log("Setting stream FINISHED",model.status);
   await model.save();
   return true;
 }

@@ -61,7 +61,8 @@ const TIME_STRING = ['0000', '0100', '0200', '0300', '0400',
 
 const agoraApps = {
   primary: '2a11008a3f634ee99d4bf91a8197a9fb', //keepmefit34
-  secondary: 'da0c4d0c5bcb47799554eb975cb8f86a' //roopesh.namdev12
+  secondary: '2a11008a3f634ee99d4bf91a8197a9fb', //keepmefit34
+  // secondary: 'da0c4d0c5bcb47799554eb975cb8f86a' //roopesh.namdev12
 }
 const agoraAppIds = [agoraApps.primary, agoraApps.secondary]
 //test key

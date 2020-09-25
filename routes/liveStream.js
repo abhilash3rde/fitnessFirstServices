@@ -39,6 +39,7 @@ router.post('/schedule', async function (req, res, next) {
       .catch(error => {
         console.log('Error sending message:', error);
       });
+      /*
       console.log(new Date(date))
       let endtime = new Date(date)
       endtime.setHours(new Date().getHours() + 1)
@@ -50,6 +51,7 @@ router.post('/schedule', async function (req, res, next) {
           startTime : new Date(date),
           endTime : endtime
       })
+      */
 
     const model = await LiveStream.create({
       title,

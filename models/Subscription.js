@@ -50,14 +50,14 @@ const Model = db.model('Subscription', {
   },
   startDate: {
     type: Date,
-    default: Date.now
+    default: Date.now()
   },
   endDate: {
     type: Date,
     default: null
   },
   days: [{type: String}],
-  time: {type: Number},
+  time: {type: String},
   duration: {type: Number},
   batchId: {
     type: String,
@@ -147,7 +147,7 @@ async function createSessions(_id) {
   const {startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
-  const now = new Date();
+  const now =await DateUtils.getTimeZoneDate('IN');
   for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate() + 1)) {
     const day = date.getDay();
 

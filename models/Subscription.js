@@ -147,7 +147,7 @@ async function createSessions(_id) {
   const {startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
-  const now =await DateUtils.getTimeZoneDate('IN');
+  const now = await DateUtils.getTimeZoneDate('IN');
   for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate() + 1)) {
     const day = date.getDay();
 
@@ -156,7 +156,7 @@ async function createSessions(_id) {
       if (sessionDate < now) continue;
 
       sessions.push({
-        date: new Date(sessionDate.toUTCString()),
+        date: sessionDate,
         userId: subscribedBy._id,
         packageId: packageId._id,
         subscriptionId: model._id,

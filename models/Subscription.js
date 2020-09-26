@@ -156,7 +156,7 @@ async function createSessions(_id) {
       if (sessionDate < now) continue;
 
       sessions.push({
-        date: sessionDate,
+        date: new Date(sessionDate.toUTCString()),
         userId: subscribedBy._id,
         packageId: packageId._id,
         subscriptionId: model._id,

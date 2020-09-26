@@ -240,7 +240,7 @@ async function getZakToken() {
 }
 
 function appendMilitaryTime(date, militaryTime) {
-  const dateObj = new Date(date);
+  const dateObj = date;
   const time = militaryTime.toString();
   const hours = time.slice(0, 2);
   const minutes = time.slice(2);

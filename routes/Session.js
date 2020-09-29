@@ -152,7 +152,9 @@ router.post('/:sessionId/endAgora', async function (req, res, next) {
   try {
     const {sessionId: agoraSessionId} = req.params;
     const sessionId = await Agora.getParentSessionId(agoraSessionId);
-    await Session.setFinished(sessionId);
+    if(sessionId !==null){
+      await Session.setFinished(sessionId);
+    }
     const message = {
       data: {
         type: remoteMessageTypes.SYNC_SESSIONS,

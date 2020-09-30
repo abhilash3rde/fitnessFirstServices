@@ -42,7 +42,7 @@ router.post('/getCouponDiscount', async function (req, res, next) {
   try {
     const {couponCode, trainerId} = req.body;
     let discount = await Coupon.peek(couponCode, trainerId);
-    res.json(discount);
+    res.json({discount});
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
     console.log(error)

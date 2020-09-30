@@ -95,12 +95,8 @@ async function redeem(couponCode, trainerId, userId) {
 }
 
 async function peek(couponCode, trainerId) {
-  const model = await Model.findOne({couponCode: transformer(couponCode), trainerId});
-  const details = {
-    discount : model.percentageOff ,
-    redeemedOn : model.redeemedOn
-  }
-  return details;
+  const model = await Model.findOne({couponCode: transformer(couponCode), trainerId, redeemedOn: null});
+  return model.percentageOff;
 }
 
 module.exports = {

@@ -31,10 +31,11 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     let finalPrice = package.price;
     let coupon = null;
     if (!!couponCode) {
-      let discount = await Coupon.peek(couponCode, trainerId);
-      if (discount)
+      let details = await Coupon.peek(couponCode, trainerId);
+      console.log(details)
+      if (details.discount)
         coupon = (await Coupon.redeem(couponCode, trainerId)).couponId;
-      finalPrice = finalPrice - (finalPrice * discount / 100);
+      finalPrice = finalPrice - (finalPrice * details.discount / 100);
     }
 
     const {group: isGroupPackage} = package;

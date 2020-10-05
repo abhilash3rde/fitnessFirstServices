@@ -38,6 +38,34 @@ router.get('/getCoupons', async function (req, res, next) {
   }
 });
 
+//for admin only 
+router.get('/getAll', async function (req, res, next) {
+  try {
+    let coupons = await Coupon.getForAdmin();
+    res.json({coupons, success: true});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error)
+  }
+});
+
+router.put('/:copounId/approve', async function (req, res, next) {
+  try {
+    const { userId } = req;
+    const { couponId } = req.params;
+
+    const result = await Coupon.approveCoupon(couponId);
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
+
 router.post('/getCouponDiscount', async function (req, res, next) {
   try {
     const {couponCode, trainerId} = req.body;

@@ -63,12 +63,32 @@ async function get(_id) {
 async function getForUser(trainerId) {
   const model = await Model.find(
     {trainerId},
-
+    {approved : true},
     {__v: 0}
   ).sort({createdOn: -1});
   return model;
 }
-
+async function approveCoupon(_id) {
+  try {
+    const model = await Model.findOne(
+      {_id},
+      {__v: 0}
+    );
+    model.approved = true
+    await model.save()
+    return true;
+  }
+  catch {
+    return false
+  }
+}
+async function getForAdmin() {
+  const model = await Model.find(
+    {approved : false},
+    {__v: 0}
+  ).sort({createdOn: -1});
+  return model;
+}
 async function create(fields) {
   const model = new Model(fields);
   await model.save();
@@ -102,7 +122,9 @@ async function peek(couponCode, trainerId) {
 module.exports = {
   get,
   create,
+  approveCoupon,
   getForUser,
+  getForAdmin,
   redeem,
   clone,
   peek,

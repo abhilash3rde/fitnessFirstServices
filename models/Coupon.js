@@ -62,8 +62,7 @@ async function get(_id) {
 
 async function getForUser(trainerId) {
   const model = await Model.find(
-    {trainerId},
-    {approved : true},
+    {trainerId , approved : true},
     {__v: 0}
   ).sort({createdOn: -1});
   return model;
@@ -86,7 +85,9 @@ async function getForAdmin() {
   const model = await Model.find(
     {approved : false},
     {__v: 0}
-  ).populate('trainerId').sort({createdOn: -1});
+  ).populate('trainerId')
+  .sort({createdOn: -1})
+  .exec();
   return model;
 }
 async function create(fields) {

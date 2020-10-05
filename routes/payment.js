@@ -16,7 +16,7 @@ router.post('/generateCoupons', async function (req, res, next) {
     let coupon = await Coupon.create({
       trainerId: userId,
       percentageOff,
-      approved: Math.random() > 0.5,
+      approved: false,
       validTill: monthsFromNow(validity)
     });
     let coupons = await Coupon.clone(coupon, count - 1);

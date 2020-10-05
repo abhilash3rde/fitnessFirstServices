@@ -14,13 +14,9 @@ const couponSchema = mongoose.Schema({
   },
   trainerId: {
     type: String,
-    ref: 'User',
+    ref: 'TrainerData',
     required: true,
     index: true
-  },
-  trainerData: {
-    type: String,
-    ref: 'User',
   },
   userId: {
     type: String,
@@ -89,10 +85,7 @@ async function getForAdmin() {
   const model = await Model.find(
     {approved : false},
     {__v: 0}
-  ).populate({ 
-    path: 'TrainerId',
-    model: 'TrainerData',
-})
+  ).populate('trainerId')
   .sort({createdOn: -1})
   .exec();
   return model;

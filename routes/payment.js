@@ -51,10 +51,9 @@ router.get('/getAll', async function (req, res, next) {
   }
 });
 
-router.put('/:couponId/approve', async function (req, res, next) {
+router.put('/:couponId/:userId/approve', async function (req, res, next) {
   try {
-    const { userId } = req;
-    const { couponId } = req.params;
+    const { couponId , userId} = req.params;
     console.log(userId)
     const result = await Coupon.approveCoupon(couponId);
     const {displayPictureUrl} = await TrainerData.getById(userId);
@@ -65,7 +64,7 @@ router.put('/:couponId/approve', async function (req, res, next) {
         type: remoteMessageTypes.GENERIC_NOTIFICATION,
         message: notificationMessage,
         hostId: userId,
-        displayImage: displayPictureUrl,
+        displayImage: displayPictureUrl ? displayPictureUrl : "",
         sentDate: new Date().toString()
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,

@@ -6,7 +6,9 @@ const BankAccount = require('../models/BankAccount');
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transaction');
 const {monthsFromNow} = require('../utility/utility');
-
+const {admin} = require('../config');
+const {userTypes, remoteMessageTypes, firebaseTopics} = require('../constants');
+const TrainerData = require('../models/trainerData');
 router.post('/generateCoupons', async function (req, res, next) {
   try {
     let {userId} = req;
@@ -53,13 +55,36 @@ router.put('/:couponId/approve', async function (req, res, next) {
   try {
     const { userId } = req;
     const { couponId } = req.params;
-
+    console.loh(userId)
     const result = await Coupon.approveCoupon(couponId);
+    const {displayPictureUrl} = await TrainerData.getById(userId);
+    const notificationMessage = `Your coupon has been approved from the admin`;
+    const message = {
+      data: {
+        type: remoteMessageTypes.GENERIC_NOTIFICATION,
+        message: notificationMessage,
+        hostId: userId,
+        displayImage: displayPictureUrl,
+        sentDate: new Date().toString()
+      },
+      topic: firebaseTopics.SILENT_NOTIFICATION,
+    };
+    admin
+      .messaging()
+      .send(message)
+      .then(response => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch(error => {
+        console.log('Error sending message:', error);
+      });
+    
     if (result)
       res.json({
         success: true
       });
   } catch (err) {
+    console.log(err)
     res.status(500).json({
       err: err.message
     });

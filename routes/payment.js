@@ -6,10 +6,7 @@ const BankAccount = require('../models/BankAccount');
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transaction');
 const {monthsFromNow} = require('../utility/utility');
-const TrainerData = require('../models/trainerData');
-const fcm = require('../models/fcm');
-const utility = require('../utility/utility');
-const {userTypes, WEEK_DAYS, remoteMessageTypes} = require('../constants');
+
 router.post('/generateCoupons', async function (req, res, next) {
   try {
     let {userId} = req;
@@ -52,26 +49,10 @@ router.get('/getAll', async function (req, res, next) {
   }
 });
 
-router.put('/:couponId/:userId/approve', async function (req, res, next) {
+router.put('/:couponId/approve', async function (req, res, next) {
   try {
-    const { couponId , userId } = req.params;
-    console.log(userId)
-    const token = await fcm.getToken(userId);
-    const trainerData = await TrainerData.getById(userId);
-    
-    if (!token) throw new Error("Unable to get FCM token");
-
-    const msgText = "Your coupon has been approved, Check coupon section for more details";
-    const message = {
-      type: remoteMessageTypes.CALLBACK_REQ,
-      text: msgText,
-      displayImage: trainerData.displayPictureUrl,
-      date: Date.now().toString()
-    }
-    console.log(token , "...token.........")
-    console.log(message , "...msg.........")
-    await utility.sendNotification([token], message);
-
+    const { userId } = req;
+    const { couponId } = req.params;
     const result = await Coupon.approveCoupon(couponId);
     if (result)
       res.json({

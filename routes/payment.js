@@ -6,9 +6,10 @@ const BankAccount = require('../models/BankAccount');
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transaction');
 const {monthsFromNow} = require('../utility/utility');
-const {admin} = require('../config');
-const {userTypes, remoteMessageTypes, firebaseTopics} = require('../constants');
 const TrainerData = require('../models/trainerData');
+const fcm = require('../models/fcm');
+const utility = require('../utility/utility');
+const {userTypes, WEEK_DAYS, remoteMessageTypes} = require('../constants');
 router.post('/generateCoupons', async function (req, res, next) {
   try {
     let {userId} = req;
@@ -53,39 +54,27 @@ router.get('/getAll', async function (req, res, next) {
 
 router.put('/:couponId/:userId/approve', async function (req, res, next) {
   try {
-    const { couponId , userId} = req.params;
-    console.log(userId)
-    const result = await Coupon.approveCoupon(couponId);
-    const {displayPictureUrl} = await TrainerData.getById(userId);
-    console.log(displayPictureUrl)
-    const notificationMessage = "Your coupon has been approved from the admin";
-    const message = {
-      data: {
-        type: remoteMessageTypes.GENERIC_NOTIFICATION,
-        message: notificationMessage,
-        hostId: userId,
-        displayImage: displayPictureUrl,
-        sentDate: new Date().toString()
-      },
-      topic: firebaseTopics.SILENT_NOTIFICATION,
-    };
-    console.log(message)
-    admin
-      .messaging()
-      .send(message)
-      .then(response => {
-        console.log('Successfully sent message:', response);
-      })
-      .catch(error => {
-        console.log('Error sending message:', error);
-      });
+    const { couponId , userId } = req.params;
+    const token = await fcm.getToken(userId);
+    const trainerData = await TrainerData.getById(trainerId);
     
+    if (!token) throw new Error("Unable to get FCM token");
+
+    const msgText = "Your coupon has been approved, Check coupon section for more details";
+    const message = {
+      type: remoteMessageTypes.CALLBACK_REQ,
+      text: msgText,
+      displayImage: trainerData.displayPictureUrl,
+      date: Date.now().toString()
+    }
+    await utility.sendNotification([token], message);
+
+    const result = await Coupon.approveCoupon(couponId);
     if (result)
       res.json({
         success: true
       });
   } catch (err) {
-    console.log(err)
     res.status(500).json({
       err: err.message
     });

@@ -55,9 +55,10 @@ router.put('/:couponId/approve', async function (req, res, next) {
   try {
     const { userId } = req;
     const { couponId } = req.params;
-    console.loh(userId)
+    console.log(userId)
     const result = await Coupon.approveCoupon(couponId);
     const {displayPictureUrl} = await TrainerData.getById(userId);
+    console.log(displayPictureUrl)
     const notificationMessage = `Your coupon has been approved from the admin`;
     const message = {
       data: {

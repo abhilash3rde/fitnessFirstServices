@@ -55,8 +55,9 @@ router.get('/getAll', async function (req, res, next) {
 router.put('/:couponId/:userId/approve', async function (req, res, next) {
   try {
     const { couponId , userId } = req.params;
+    console.log(userId)
     const token = await fcm.getToken(userId);
-    const trainerData = await TrainerData.getById(trainerId);
+    const trainerData = await TrainerData.getById(userId);
     
     if (!token) throw new Error("Unable to get FCM token");
 
@@ -67,6 +68,8 @@ router.put('/:couponId/:userId/approve', async function (req, res, next) {
       displayImage: trainerData.displayPictureUrl,
       date: Date.now().toString()
     }
+    console.log(token , "...token.........")
+    console.log(message , "...msg.........")
     await utility.sendNotification([token], message);
 
     const result = await Coupon.approveCoupon(couponId);

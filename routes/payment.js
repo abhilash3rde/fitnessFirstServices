@@ -58,17 +58,18 @@ router.put('/:couponId/:userId/approve', async function (req, res, next) {
     const result = await Coupon.approveCoupon(couponId);
     const {displayPictureUrl} = await TrainerData.getById(userId);
     console.log(displayPictureUrl)
-    const notificationMessage = `Your coupon has been approved from the admin`;
+    const notificationMessage = "Your coupon has been approved from the admin";
     const message = {
       data: {
         type: remoteMessageTypes.GENERIC_NOTIFICATION,
         message: notificationMessage,
         hostId: userId,
-        displayImage: displayPictureUrl ? displayPictureUrl : "",
+        displayImage: displayPictureUrl,
         sentDate: new Date().toString()
       },
       topic: firebaseTopics.SILENT_NOTIFICATION,
     };
+    console.log(message)
     admin
       .messaging()
       .send(message)

@@ -99,10 +99,37 @@ async function peek(couponCode, trainerId) {
   return model.percentageOff;
 }
 
+async function getForAdmin() {
+  const model = await Model.find(
+    {approved : false},
+    {__v: 0}
+  ).populate('trainerId')
+  .sort({createdOn: -1})
+  .exec();
+  return model;
+}
+
+async function approveCoupon(_id) {
+  try {
+    const model = await Model.findOne(
+      {_id},
+      {__v: 0}
+    );
+    model.approved = true
+    await model.save()
+    return true;
+  }
+  catch {
+    return false
+  }
+}
+
 module.exports = {
   get,
   create,
   getForUser,
+  approveCoupon,
+  getForAdmin,
   redeem,
   clone,
   peek,

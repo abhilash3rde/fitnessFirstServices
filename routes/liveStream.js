@@ -16,29 +16,31 @@ router.post('/schedule', async function (req, res, next) {
       res.status(401).json({message: 'User not authorised to create live stream'});
       return;
     }
-    const {title, date, duration} = req.body;
+    const {title, date, duration,instantLive} = req.body;
     const meeting = await createZoomMeeting(title, date, duration);
     const {name, displayPictureUrl} = await TrainerData.getById(userId);
-    const notificationMessage = `${name} has scheduled a live session on ${title} on ${new Date(date).toLocaleDateString()}`;
-    const message = {
-      data: {
-        type: remoteMessageTypes.GENERIC_NOTIFICATION,
-        message: notificationMessage,
-        hostId: userId,
-        displayImage: displayPictureUrl,
-        sentDate: new Date().toString()
-      },
-      topic: firebaseTopics.SILENT_NOTIFICATION,
-    };
-    admin
-      .messaging()
-      .send(message)
-      .then(response => {
-        console.log('Successfully sent message:', response);
-      })
-      .catch(error => {
-        console.log('Error sending message:', error);
-      });
+    if(!instantLive){
+      const notificationMessage = `${name} has scheduled a live session on ${title} on ${new Date(date).toLocaleDateString()}`;
+      const message = {
+        data: {
+          type: remoteMessageTypes.GENERIC_NOTIFICATION,
+          message: notificationMessage,
+          hostId: userId,
+          displayImage: displayPictureUrl,
+          sentDate: new Date().toString()
+        },
+        topic: firebaseTopics.SILENT_NOTIFICATION,
+      };
+      admin
+        .messaging()
+        .send(message)
+        .then(response => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch(error => {
+          console.log('Error sending message:', error);
+        });
+    }
       /*
       console.log(new Date(date))
       let endtime = new Date(date)

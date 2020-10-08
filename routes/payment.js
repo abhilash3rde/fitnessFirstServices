@@ -6,7 +6,10 @@ const BankAccount = require('../models/BankAccount');
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transaction');
 const {monthsFromNow} = require('../utility/utility');
-
+const TrainerData = require('../models/trainerData');
+const fcm = require('../models/fcm');
+const utility = require('../utility/utility');
+const {userTypes, WEEK_DAYS, remoteMessageTypes} = require('../constants');
 router.post('/generateCoupons', async function (req, res, next) {
   try {
     let {userId} = req;
@@ -16,7 +19,7 @@ router.post('/generateCoupons', async function (req, res, next) {
     let coupon = await Coupon.create({
       trainerId: userId,
       percentageOff,
-      approved: Math.random() > 0.5,
+      approved: false,
       validTill: monthsFromNow(validity)
     });
     let coupons = await Coupon.clone(coupon, count - 1);
@@ -35,6 +38,47 @@ router.get('/getCoupons', async function (req, res, next) {
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
     console.log(error)
+  }
+});
+
+//for admin only 
+router.get('/getAll', async function (req, res, next) {
+  try {
+    let coupons = await Coupon.getForAdmin();
+    res.json({coupons, success: true});
+  } catch (error) {
+    res.status(500).json({error: error.toLocaleString()});
+    console.log(error)
+  }
+});
+
+router.put('/:couponId/:userId/approve', async function (req, res, next) {
+  try {
+    const { couponId , userId } = req.params;
+    console.log(userId)
+    const token = await fcm.getToken(userId);
+    const trainerData = await TrainerData.getById(userId);
+    
+    if (!token) throw new Error("Unable to get FCM token");
+
+    const msgText = "Your coupon has been approved, Check coupon section for more details";
+    const message = {
+      type: remoteMessageTypes.COUPON_APPROVED,
+      text: msgText,
+      displayImage: trainerData.displayPictureUrl,
+      date: Date.now().toString()
+    }
+    await utility.sendNotification([token], message);
+
+    const result = await Coupon.approveCoupon(couponId);
+    if (result)
+      res.json({
+        success: true
+      });
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
   }
 });
 

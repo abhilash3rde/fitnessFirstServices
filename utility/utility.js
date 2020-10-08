@@ -128,6 +128,8 @@ const groupByKey = (objectArray, property) => {
 };
 
 const sendNotification = async (tokens, message) => {
+  console.log(tokens, '.........token')
+  console.log(message, '.............msg')
   await admin.messaging().sendToDevice(
     tokens,
     {

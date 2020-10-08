@@ -9,7 +9,9 @@ const mealSchema = mongoose.Schema({
     ref: "User",
     required: true,
   },
-
+  measure: {
+    type: String,
+  },
   _id: {
     type: String,
     default: cuid,

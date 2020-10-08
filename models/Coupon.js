@@ -14,7 +14,7 @@ const couponSchema = mongoose.Schema({
   },
   trainerId: {
     type: String,
-    ref: 'User',
+    ref: 'TrainerData',
     required: true,
     index: true
   },
@@ -62,13 +62,34 @@ async function get(_id) {
 
 async function getForUser(trainerId) {
   const model = await Model.find(
-    {trainerId},
-
+    {trainerId , approved : true},
     {__v: 0}
   ).sort({createdOn: -1});
   return model;
 }
-
+async function approveCoupon(_id) {
+  try {
+    const model = await Model.findOne(
+      {_id},
+      {__v: 0}
+    );
+    model.approved = true
+    await model.save()
+    return true;
+  }
+  catch {
+    return false
+  }
+}
+async function getForAdmin() {
+  const model = await Model.find(
+    {approved : false},
+    {__v: 0}
+  ).populate('trainerId')
+  .sort({createdOn: -1})
+  .exec();
+  return model;
+}
 async function create(fields) {
   const model = new Model(fields);
   await model.save();
@@ -95,7 +116,7 @@ async function redeem(couponCode, trainerId, userId) {
 }
 
 async function peek(couponCode, trainerId) {
-  const model = await Model.findOne({couponCode: transformer(couponCode), trainerId});
+  const model = await Model.findOne({couponCode: transformer(couponCode), trainerId, redeemedOn: null});
   return model.percentageOff;
 }
 
@@ -127,6 +148,7 @@ async function approveCoupon(_id) {
 module.exports = {
   get,
   create,
+  approveCoupon,
   getForUser,
   approveCoupon,
   getForAdmin,

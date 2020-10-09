@@ -162,9 +162,9 @@ async function createSessions(_id) {
 // let setdate =
 
 
-  for (let date = new Date(startDate); sessions.length < noOfSessions;) {
+  for (let date = new Date(startDate); sessions.length < noOfSessions; date) {
     const day = date.getDay();
-    
+    console.log("creating session" );
     if (days.includes(WEEK_DAYS[day])) {
       const sessionDate = appendMilitaryTime(date, time);
       if (sessionDate < now) continue;

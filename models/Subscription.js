@@ -162,7 +162,7 @@ async function createSessions(_id) {
 // let setdate =
 
 
-  for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate())) {
+  for (let date = new Date(startDate); sessions.length < noOfSessions;) {
     const day = date.getDay();
     
     if (days.includes(WEEK_DAYS[day])) {

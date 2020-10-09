@@ -148,13 +148,27 @@ async function createSessions(_id) {
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
   const now = await DateUtils.getTimeZoneDate('IN');
-  for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate() + 1)) {
-    const day = date.getDay();
 
+  // no of sessions = 10;
+  // startDate =today
+  // days =["fri","sat"]
+  // 
+
+
+
+
+
+
+// let setdate =
+
+
+  for (let date = new Date(startDate); sessions.length < noOfSessions; date.setDate(date.getDate())) {
+    const day = date.getDay();
+    
     if (days.includes(WEEK_DAYS[day])) {
       const sessionDate = appendMilitaryTime(date, time);
       if (sessionDate < now) continue;
-
+      
       sessions.push({
         date: sessionDate,
         userId: subscribedBy._id,
@@ -165,6 +179,7 @@ async function createSessions(_id) {
         trainerId
       })
     }
+    date.setDate(date.getDate() + 1 );
   }
   const result = await Session.createMany(sessions);
 }

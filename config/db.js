@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
  console.log(modee,'1')
 let dbName
 let dbString
+console.log(Date(),"Date()");
+console.log(new Date(),"new Date()");
 
  switch (mode[0]){
    case 'dev':

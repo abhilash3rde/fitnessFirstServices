@@ -147,8 +147,9 @@ async function createSessions(_id) {
   const {startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId} = model;
   const {noOfSessions} = packageId;
   const sessions = []; // create until amount reached
-  const now = await DateUtils.getTimeZoneDate('IN');
-
+  // const now = await DateUtils.getTimeZoneDate('IN');
+  const now = new Date();
+console.log(now,typeof now)
   // no of sessions = 10;
   // startDate =today
   // days =["fri","sat"]
@@ -160,16 +161,25 @@ async function createSessions(_id) {
 
 
 // let setdate =
-
-
-  for (let date = new Date(startDate); sessions.length < noOfSessions; date) {
-    const day = date.getDay();
-    console.log("creating session" );
+var date = new Date(startDate)
+let sessionDate=''
+  for (let i = noOfSessions; sessions.length < i; i--) {
+    console.log(startDate,date,"starts")
+    console.log(time,"time",i)
+    
+    let day = date.getDay();
+    // console.log("creating session", model);
     if (days.includes(WEEK_DAYS[day])) {
-      const sessionDate = appendMilitaryTime(date, time);
-      if (sessionDate < now) continue;
+      sessionDate =await appendMilitaryTime(date, time);
+      date.setDate(date.getDate() + 1 );
+      console.log(sessionDate,"sessionDate",sessionDate < now)
+      if (sessionDate < now) {
+        date.setDate(date.getDate() + 1 );
       
-      sessions.push({
+        continue;
+       }
+      
+     let result =await  Session.create({
         date: sessionDate,
         userId: subscribedBy._id,
         packageId: packageId._id,
@@ -178,10 +188,25 @@ async function createSessions(_id) {
         duration: duration,
         trainerId
       })
+      console.log(result)
+      // sessions.push({
+      //   date: sessionDate,
+      //   userId: subscribedBy._id,
+      //   packageId: packageId._id,
+      //   subscriptionId: model._id,
+      //   type: batchId ? sessionTypes.BATCH : sessionTypes.SINGLE,
+      //   duration: duration,
+      //   trainerId
+      // })
+    }else{
+      date.setDate(date.getDate() + 1 );
+
     }
-    date.setDate(date.getDate() + 1 );
+    console.log(i)
   }
-  const result = await Session.createMany(sessions);
+  console.log(sessions,"sessions")
+  // const result = await Session.createMany(sessions);
+  return ;
 }
 
 module.exports = {

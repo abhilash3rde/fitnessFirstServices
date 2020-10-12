@@ -4,9 +4,19 @@ const mongoose = require('mongoose');
  console.log(modee,'1')
 let dbName
 let dbString
-console.log(Date(),"Date()");
-console.log(new Date(),"new Date()");
+let date= new Date().toString();
+let date1= Date.now()
+let now = new Date();
+let time = new Date().getTimezoneOffset();
+let newmin = time % 60;
+let newhrs = time / 60;
+now.setHours(now.getHours() - newhrs);
+now.setMinutes(now.getMinutes() - newmin);
 
+
+// console.log(date1 - time,"time")
+
+console.log(new Date(date1 - time))
  switch (mode[0]){
    case 'dev':
      console.log('dev')

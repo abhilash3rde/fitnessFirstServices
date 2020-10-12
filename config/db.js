@@ -12,7 +12,17 @@ let newmin = time % 60;
 let newhrs = time / 60;
 now.setHours(now.getHours() - newhrs);
 now.setMinutes(now.getMinutes() - newmin);
+// let myDate = new Date();
 
+// let futureStartAtDate = moment.isDate(myDate);
+
+// var date = moment(myDate).utcOffset(330, true);
+
+// console.log(date, "==>")
+// let dateObject = date.toDate();
+// console.log(typeof dateObject, "type");
+
+// console.log(dateObject.getHours());
 
 // console.log(date1 - time,"time")
 

@@ -3,9 +3,9 @@ const db = require('../config/db');
 
 const DateUtils = require('../utility/DateUtils');
 const Session = require("./Activity/Session");
-const {sessionTypes} = require("../constants");
-const {appendMilitaryTime} = require("../utility/utility");
-const {WEEK_DAYS} = require("../constants");
+const { sessionTypes } = require("../constants");
+const { appendMilitaryTime } = require("../utility/utility");
+const { WEEK_DAYS } = require("../constants");
 
 const Model = db.model('Subscription', {
   _id: {
@@ -56,9 +56,9 @@ const Model = db.model('Subscription', {
     type: Date,
     default: null
   },
-  days: [{type: String}],
-  time: {type: String},
-  duration: {type: Number},
+  days: [{ type: String }],
+  time: { type: String },
+  duration: { type: Number },
   batchId: {
     type: String,
     ref: 'BatchSubscription',
@@ -68,8 +68,8 @@ const Model = db.model('Subscription', {
 
 async function get(_id) {
   const model = await Model.findOne(
-    {_id},
-    {__v: 0}
+    { _id },
+    { __v: 0 }
   ).populate('subscribedBy')
     .populate('packageId')
     .exec();
@@ -104,30 +104,30 @@ async function edit(_id, change) {
 }
 
 async function activateSubscription(_id) {
-  return await edit(_id, {active: true});
+  return await edit(_id, { active: true });
 }
 
 async function deActivateSubscription(_id) {
-  return await edit(_id, {active: false});
+  return await edit(_id, { active: false });
 }
 
 async function getForPackage(packageId) {
-  const model = await Model.findOne({packageId});
+  const model = await Model.findOne({ packageId });
   return model;
 }
 
 async function getAllForTrainer(trainerId) {
-  const model = await Model.find({trainerId}).populate([
-    {path: 'subscribedBy'},
-    {path: 'packageId'}
+  const model = await Model.find({ trainerId }).populate([
+    { path: 'subscribedBy' },
+    { path: 'packageId' }
   ]).exec();
   return model;
 }
 
 async function getAllForUser(subscribedBy) {
-  const model = await Model.find({subscribedBy}).populate([
-    {path: 'trainerId'},
-    {path: 'packageId'}
+  const model = await Model.find({ subscribedBy }).populate([
+    { path: 'trainerId' },
+    { path: 'packageId' }
   ]).exec();
   return model;
 }
@@ -144,12 +144,13 @@ async function updateEndDate(_id, startDate, noOfDays) {
 
 async function createSessions(_id) {
   const model = await get(_id);
-  const {startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId} = model;
-  const {noOfSessions} = packageId;
+  const { startDate, days, time, duration, packageId, subscribedBy, batchId, trainerId } = model;
+  const { noOfSessions } = packageId;
   const sessions = []; // create until amount reached
   // const now = await DateUtils.getTimeZoneDate('IN');
+  let sessionsCreated = 0;
   const now = new Date();
-console.log(now,typeof now)
+  console.log(now, typeof now)
   // no of sessions = 10;
   // startDate =today
   // days =["fri","sat"]
@@ -160,26 +161,21 @@ console.log(now,typeof now)
 
 
 
-// let setdate =
-var date = new Date(startDate)
-let sessionDate=''
-  for (let i = noOfSessions; sessions.length < i; i--) {
-    console.log(startDate,date,"starts")
-    console.log(time,"time",i)
-    
-    let day = date.getDay();
+  // let setdate =
+
+  let sessionDate = ''
+  for (const date = new Date(startDate); sessionsCreated < noOfSessions; date.setDate(date.getDate() + 1)) {
+    console.log(startDate, date, "starts")
+    console.log(time, "time")
+    sessionDate = await appendMilitaryTime(date, time);
+
+    const day = date.getDay();
     // console.log("creating session", model);
     if (days.includes(WEEK_DAYS[day])) {
-      sessionDate =await appendMilitaryTime(date, time);
-      date.setDate(date.getDate() + 1 );
-      console.log(sessionDate,"sessionDate",sessionDate < now)
-      if (sessionDate < now) {
-        date.setDate(date.getDate() + 1 );
-      
-        continue;
-       }
-      
-     let result =await  Session.create({
+      console.log(sessionDate, "sessionDate", sessionDate < now)
+      if (sessionDate < now) continue;
+
+      const ses = await Session.create({
         date: sessionDate,
         userId: subscribedBy._id,
         packageId: packageId._id,
@@ -187,8 +183,12 @@ let sessionDate=''
         type: batchId ? sessionTypes.BATCH : sessionTypes.SINGLE,
         duration: duration,
         trainerId
-      })
-      console.log(result)
+      });
+      console.log(ses)
+      if (ses !== null) {
+        sessionsCreated += 1;
+
+      }
       // sessions.push({
       //   date: sessionDate,
       //   userId: subscribedBy._id,
@@ -198,15 +198,11 @@ let sessionDate=''
       //   duration: duration,
       //   trainerId
       // })
-    }else{
-      date.setDate(date.getDate() + 1 );
-
     }
-    console.log(i)
+    // date.setDate(date.getDate() + 1 );
   }
-  console.log(sessions,"sessions")
+  // console.log(sessions, "sessions")
   // const result = await Session.createMany(sessions);
-  return ;
 }
 
 module.exports = {

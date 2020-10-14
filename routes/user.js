@@ -295,23 +295,26 @@ router.get('/mySessions', async function (req, res, next) {
     const {userId, userType} = req;
     if (userType === userTypes.USER) {
       const sessions = await Session.getForUser(userId)
-     sessions.map(date =>{
-        var sessiondate= new Date(date.date);
+     sessions.map(data =>{
         var now = new Date();
-      date.status= sessiondate - now > 0 ? date.status  : sessionStatus.NOTHELD
+      if(now - data.date > 0 && !data.startTime ) {
+        Session.setNotheld(data._id)
+        data.status = sessionStatus.NOTHELD
+      }
       })
       res.json({sessions});
 
     } else {
       const sessions = await Session.getForTrainer(userId)
-      sessions.map(date =>{
-        var sessiondate= new Date(date.date);
+      sessions.map(data =>{
         var now = new Date();
-        console.log(Math.abs(sessiondate - now) / 36e5)
-      date.status= sessiondate - now > 0 ? date.status  : sessionStatus.NOTHELD
-      console.log( date.status)
+        if(now - data.date > 0 && !data.startTime ) {
+          console.log(data,"Not Held")
+        Session.setNotheld(data._id)
+        data.status = sessionStatus.NOTHELD
+        }
       })
-      console.log(sessions)
+      // console.log(sessions)
       res.json({sessions});
     }
   } catch (err) {

@@ -58,7 +58,7 @@ const sessionSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: [sessionStatus.SCHEDULED, sessionStatus.LIVE, sessionStatus.FINISHED],
+    enum: [sessionStatus.SCHEDULED, sessionStatus.LIVE, sessionStatus.FINISHED,sessionStatus.NOTHELD],
     default: sessionStatus.SCHEDULED
   }
 });
@@ -164,6 +164,12 @@ async function setFinished(sessionId) {
   model.endTime = new Date();
   await model.save();
 }
+async function setNotheld(sessionId) {
+  const model = await get(sessionId);
+  model.status = sessionStatus.NOTHELD;
+  model.endTime = new Date();
+  await model.save();
+}
 
 async function join(sessionId) {
   const model = await get(sessionId);
@@ -191,6 +197,7 @@ module.exports = {
   getForTrainer,
   setLive,
   setFinished,
+  setNotheld,
   getRelatedSessions,
   model: Model
 }

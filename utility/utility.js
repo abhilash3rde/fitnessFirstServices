@@ -240,7 +240,6 @@ async function getZakToken() {
   const {token} = await res.json();
   return token;
 }
-let i = 0
 async function appendMilitaryTime(date, militaryTime) {
   const dateObj = date;
   const time = militaryTime.toString();
@@ -250,7 +249,6 @@ async function appendMilitaryTime(date, militaryTime) {
   dateObj.setMinutes(parseInt(minutes));
   dateObj.setSeconds(0);
   dateObj.setMilliseconds(0);
-  console.log(dateObj,"call", i++ )
   return dateObj;
 }
 

@@ -130,7 +130,8 @@ const sessionTypes ={
 const sessionStatus ={
   SCHEDULED:'SCHEDULED',
   LIVE:'LIVE',
-  FINISHED:'FINISHED'
+  FINISHED:'FINISHED',
+  NOTHELD:"NOTHELD"
 }
 const foodTypes={
   BREAKFAST:'BREAKFAST',

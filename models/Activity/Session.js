@@ -37,12 +37,15 @@ const sessionSchema = mongoose.Schema({
   },
   startTime: {
     type: Date,
+    default:null
   },
   endTime: {
     type: Date,
+    default:null
   },
   joinTime: {
     type: Date,
+    default:null
   },
   type: {type: String, enum: [sessionTypes.BATCH, sessionTypes.SINGLE, sessionTypes.OFFLINE], required: true},
   data: {

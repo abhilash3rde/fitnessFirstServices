@@ -96,10 +96,13 @@ app.use('/meetings', auth.ensureUser ,meetings)
 app.use(function (req, res, next) {
   next(createError(404));
 });
-app.use(middleware.handleError);
 
-  // schedule.scheduleJob('*/1 * * * *', async function(){
-  //    scheduler.endMeeting()
-  // });
+app.use(middleware.handleError);
+var rule = new schedule.RecurrenceRule();
+rule.second = 5
+ let j = schedule.scheduleJob(rule, function(){
+    //  scheduler.endMeeting()
+    console.log("schedular Works")
+  });
 
 module.exports = app;

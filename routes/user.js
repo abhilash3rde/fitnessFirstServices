@@ -14,6 +14,9 @@ const Slot = require('../models/slot');
 const Package = require('../models/package');
 const TermsConsent = require('../models/termsConsent');
 const Session = require("../models/Activity/Session");
+const {sessionTypes, sessionStatus} = require('../constants');
+
+const { session } = require('passport');
 
 router.get('/myInfo', async function (req, res, next) {
   try {
@@ -292,10 +295,23 @@ router.get('/mySessions', async function (req, res, next) {
     const {userId, userType} = req;
     if (userType === userTypes.USER) {
       const sessions = await Session.getForUser(userId)
+     sessions.map(date =>{
+        var sessiondate= new Date(date.date);
+        var now = new Date();
+      date.status= sessiondate - now > 0 ? date.status  : sessionStatus.NOTHELD
+      })
       res.json({sessions});
 
     } else {
       const sessions = await Session.getForTrainer(userId)
+      sessions.map(date =>{
+        var sessiondate= new Date(date.date);
+        var now = new Date();
+        console.log(Math.abs(sessiondate - now) / 36e5)
+      date.status= sessiondate - now > 0 ? date.status  : sessionStatus.NOTHELD
+      console.log( date.status)
+      })
+      console.log(sessions)
       res.json({sessions});
     }
   } catch (err) {

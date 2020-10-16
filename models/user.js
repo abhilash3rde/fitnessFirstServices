@@ -31,6 +31,12 @@ async function get(email) {
   );
   return model;
 }
+async function getAllusers() {
+  const model = await Model.find(
+    {}
+  );
+  return model;
+}
 
 async function getById(_id) {
   const model = await Model.findOne(
@@ -96,6 +102,7 @@ module.exports = {
   get,
   getById,
   create,
+  getAllusers,
   remove,
   setUserType,
   model: Model

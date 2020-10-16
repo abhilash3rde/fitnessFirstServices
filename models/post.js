@@ -232,6 +232,12 @@ async function spam(opts = {}) {
   });
   return record;
 }
+async function getallpostforcount() {
+  const model = await Model.find(
+    {}
+  );
+  return model;
+}
 
 module.exports = {
   get,
@@ -241,6 +247,7 @@ module.exports = {
   remove,
   addComment,
   removeComment,
+  getallpostforcount,
   getMy,
   getAll,
   spam,

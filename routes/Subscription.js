@@ -249,7 +249,7 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
     const {subscriptionId} = req.params;
     const {razorpay_order_id} = req.body;
 
-
+logg.info('rollbackStarted',{subscriptionId,razorpay_order_id,completedOn})
     const slots = await Slot.findForSubs(subscriptionId);
 
     const newSlots = [];
@@ -271,7 +271,8 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
 
 
         if (!slotsDeleted || !slotRemoved) {
-          throw Error("Error in rollback");
+      logg.error('Slotnotfound',"Error in slotes")
+      throw Error("Error in rollback");
         }
       });
       const insertedSlots = await Slot.insertAll(newSlots);
@@ -286,8 +287,11 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
       }
     )
     if (!transaction) {
+      logg.error('rollbackerr',"Error updating transaction status")
       throw Error("Error updating transaction status")
     }
+    await Subscription.remove(subscriptionId)
+    logg.info('rollbackDone',{subscriptionId,razorpay_order_id,completedOn})
 
     res.json({success: true});
   } catch (err) {

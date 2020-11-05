@@ -76,7 +76,7 @@ async function get(_id) {
   return model;
 }
 
-async function remove(_id,) {
+async function remove(_id) {
   const model = await get(_id);
   if (!model) throw new Error("Subscription not found");
   await Model.deleteOne({

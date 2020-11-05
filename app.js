@@ -95,7 +95,7 @@ fs.readdir(directoryPath, function (err, files) {
       if(name == file){
         fs.readFile(file,(err,data)=>{
           if(err) res.json(err)
-          res.json(data.toString())
+          res.json(data)
         })
         // res.write(file)
         // res.writeHead(200, {'Content-Type': 'text/html'});

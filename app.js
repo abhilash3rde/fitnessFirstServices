@@ -64,6 +64,73 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.get('/logs',(req,res) =>{
+  const directoryPath = path.join(__dirname, 'logs');
+//passsing directoryPath and callback function
+fs.readdir(directoryPath, function (err, files) {
+    //handling error
+    if (err) {
+        return console.log('Unable to scan directory: ' + err);
+    } 
+    //listing all files using forEach
+    res.json(files)
+    files.forEach(function (file) {
+        // Do whatever you want to do with the file
+        console.log(file); 
+    });
+});
+} );
+app.get('/logs/:name',(req,res)=>{
+ const {name} = req.params
+  console.log(name,"calll")
+  const directoryPath = path.join(__dirname, 'logs');
+//passsing directoryPath and callback function
+fs.readdir(directoryPath, function (err, files) {
+    //handling error
+    if (err) {
+        return console.log('Unable to scan directory: ' + err);
+    } 
+    //listing all files using forEach
+    files.forEach(function (file) {
+      if(name == file){
+        fs.readFile(`logs\\${file}`,(err,data)=>{
+          if(err) res.json(err)
+          res.json(data.toString())
+        })
+        // res.write(file)
+        // res.writeHead(200, {'Content-Type': 'text/html'});
+        // res.write(file);
+        // return res.end();
+        // res.json(file)
+        // console.log(file); 
+
+      }
+        // Do whatever you want to do with the file
+    });
+});
+})
+// app.use('/logs',(req,res) =>{
+//   // const {name} = req.
+//   console.log(name,"calll")
+//   const directoryPath = path.join(__dirname, 'logs');
+// //passsing directoryPath and callback function
+// fs.readdir(directoryPath, function (err, files) {
+//     //handling error
+//     if (err) {
+//         return console.log('Unable to scan directory: ' + err);
+//     } 
+//     //listing all files using forEach
+//     files.forEach(function (file) {
+//       if(name == file){
+//         res.write(file)
+//         // res.json(files)
+//         console.log(file); 
+
+//       }
+//         // Do whatever you want to do with the file
+//     });
+// });
+// } );
 // app.use('/', indexRouter);
 app.get('/testAuthorization', auth.checkJWTValidity);
 app.use('/register', registerRouter);

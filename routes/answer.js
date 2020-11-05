@@ -3,13 +3,14 @@ const router = express.Router();
 const Like = require('../models/like');
 const Question = require('../models/question');
 const Answer = require('../models/answer');
-
+const Logger = require('../services/logger_service')
+let logg = new Logger('answer')
 router.post('/:questionId', async function (req, res, next) {
     try {
       const { userId } = req;
       const { questionId } = req.params;
       const { answerText} = req.body;
-
+logg.info('answerbeforesave',{userId,questionId,answerText})
       const answer = await Answer.create({
           postedBy: userId,
           answerText
@@ -20,8 +21,11 @@ router.post('/:questionId', async function (req, res, next) {
         question = await Question.addAnswer(questionId, answer._id);
       }
 
-      if (question)
+      if (question){
         res.json({ question });
+
+logg.info('answeraftersave',{question})
+      }
     } catch (err) {
       res.status(500).json({
         err: err.message
@@ -58,8 +62,10 @@ router.post('/:answerId/like', async function (req, res, next) {
       contentId: answerId,
       contentType: 'ANSWER'
     })
-    if (result)
+    if (result){
+      logg.info(`answer/${answerId,userId}`,{result})
       res.json({ success: true });
+    }
   } catch (err) {
     res.status(500).json({
       err: err.message

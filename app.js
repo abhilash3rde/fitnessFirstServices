@@ -2,6 +2,7 @@ const createError = require('http-errors');
 const express = require('express');
 var cors = require('cors');
 const path = require('path');
+var fs = require('fs')
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const expressip = require('express-ip');
@@ -39,22 +40,22 @@ const middleware = require('./middleware');
 const auth = require('./auth');
 const meetings = require('./routes/Meetings')
 const scheduler = require('./utility/Scheduler')
-
 const app = express();
 app.use(expressip().getIpInfoMiddleware);
-
 app.use(fileUpload({
   limits: {fileSize: 50 * 1024 * 1024},
   abortOnLimit: true,
   useTempFiles: true,
   tempFileDir: './uploads'
 }));
+// app.use(logg)
 
 app.use(cors());
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+app.use(logger('combined', { stream: accessLogStream }))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -63,6 +64,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+// app.use('/', indexRouter);
 app.get('/testAuthorization', auth.checkJWTValidity);
 app.use('/register', registerRouter);
 app.post('/login', auth.authenticate, auth.login);

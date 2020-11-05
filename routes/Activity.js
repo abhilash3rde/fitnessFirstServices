@@ -6,13 +6,15 @@ const Subscription = require('../models/Subscription');
 const Slot = require('../models/slot');
 const Posts = require('../models/post');
 const Activities = require('./Activities')
-
+const Logger = require('../services/logger_service')
+let logg = new Logger('Activity')
 
 router.get('/recent', async function (req, res, next) {
     try {
         const { userId, userType } = req;
 
         let upcomingActivities;
+        logg.info('recent',{userId, userType})
 
         if (userType === userTypes.TRAINER) {
             upcomingActivities = await Activities.getTrainerActivities(userId);

@@ -11,21 +11,24 @@ const paymentModule = require('../config/payment');
 const Transaction = require('../models/Transaction');
 const DateUtils = require('../utility/DateUtils');
 const Coupon = require('../models/Coupon');
-
+const Logger = require('../services/logger_service')
+let logg = new Logger('subscription')
 router.post('/:trainerId/:packageId', async function (req, res, next) {
   try {
     const {userId} = req;
     const {trainerId, packageId} = req.params;
 
     const {time, days, duration, couponCode} = req.body;
-
+logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, days, duration, couponCode} )
     if (!days || !days.length > 0) {
+      logg.error('daysNotFound',"Training days missing")
       throw new Error("Training days missing");
     }
 
     const trainerData = await TrainerData.getById(trainerId);
     const package = trainerData.packages.find(package => package._id === packageId);
     if (!package) {
+      logg.error('packageNotFound',"Invalid package")
       throw new Error("Invalid package");
     }
     let finalPrice = package.price;
@@ -49,6 +52,8 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
       availableDays = availableSlots.flatMap(availableSlot => availableSlot.dayOfWeek);
       Utility.findMissingValue(days, availableDays, day => {
         if (day.length > 0) {
+      logg.error('SlotNotAvail',`Slot not available for  + ${day } + at + ${time}`)
+
           throw new Error("Slot not available for " + day + " at " + time);
         }
       });
@@ -140,6 +145,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const order = await paymentModule.orders.create(options);
 
     if (!order) {
+      logg.error("orderError","Error creating order")
       throw Error("Error creating order");
     }
 
@@ -151,12 +157,15 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     });
 
     if (!transaction) {
+      logg.error("TransactionError","Error while creating Transaction")
+
       throw Error("Error while creating Transaction");
     }
-
+logg.info('response',{success: true, metadata, orderId: order.id, subscriptionId: _subscription._id})
     res.json({success: true, metadata, orderId: order.id, subscriptionId: _subscription._id});
   } catch (err) {
     console.log(err)
+    logg.error('err',{err})
     res.status(500).json({
       err: err.message
     });
@@ -194,7 +203,7 @@ router.put('/:subsId/deactivate', async function (req, res, next) {
 router.put('/updateTransaction', async function (req, res, next) {
   try {
     const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
-
+logg.info('updateTransaction',{razorpay_order_id, razorpay_payment_id, razorpay_signature})
     const {status, notes} = await paymentModule.orders.fetch(razorpay_order_id);
     const completedOn = status === 'completed' ? Date.now() : null;
     const {subscriptionId} = notes;
@@ -203,6 +212,8 @@ router.put('/updateTransaction', async function (req, res, next) {
     await Subscription.createSessions(subscriptionId);
 
     console.log("Updating transaction", razorpay_order_id);
+logg.info("Updating transaction", {razorpay_order_id})
+
     const transaction = await Transaction.update(
       razorpay_order_id,
       {
@@ -213,14 +224,18 @@ router.put('/updateTransaction', async function (req, res, next) {
         completedOn
       }
     )
+    logg.info("transaction Details", {transaction})
 
     if (!transaction) {
+      logg.error("transaction Details",{error:"Error wile updating transaction"})
       throw Error("Error updating transaction status")
     }
 
     res.json({success: true});
   } catch (err) {
     console.log(err);
+    logg.error("updateTransaction",{err})
+
     res.status(500).json({
       err: err.message
     });

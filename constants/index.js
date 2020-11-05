@@ -66,9 +66,14 @@ const agoraApps = {
 }
 const agoraAppIds = [agoraApps.primary, agoraApps.secondary]
 //test key
+// const paymentKey = {
+//   key_id: 'rzp_test_BuIiL164HHvbBm',
+//   key_secret: 'K04EHPRWO0XXd1JwapCcHR32'
+// }
+//live key
 const paymentKey = {
-  key_id: 'rzp_test_BuIiL164HHvbBm',
-  key_secret: 'K04EHPRWO0XXd1JwapCcHR32'
+  key_id: 'rzp_live_Z1qaojafA5AsxV',
+  key_secret: 'SEUTkTlTSnYhL3uGx1ekC2BN'
 }
 const cloudinaryConfig = {
   cloud_name: 'primefitness',

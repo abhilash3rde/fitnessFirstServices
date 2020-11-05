@@ -15,7 +15,8 @@ const Package = require('../models/package');
 const TermsConsent = require('../models/termsConsent');
 const Session = require("../models/Activity/Session");
 const {sessionTypes, sessionStatus} = require('../constants');
-
+const Logger = require('../services/logger_service')
+let logg = new Logger('user')
 const { session } = require('passport');
 
 router.get('/myInfo', async function (req, res, next) {
@@ -38,6 +39,7 @@ router.get('/myInfo', async function (req, res, next) {
     res.json({user, upcomingActivities});
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
+    logg.error('myinfo',{error})
     console.log(error)
   }
 });
@@ -59,11 +61,16 @@ router.get('/info/:userId', async function (req, res, next) {
       upcomingActivities = await Activities.getUserActivities(userId);
     }
 
-    if (!user) throw new Error('Internal server error. code 45621');
+    if (!user) {
+    logg.error('myinfo','Internal server error. code 45621')
 
+      throw new Error('Internal server error. code 45621');
+    }
     res.json({user, upcomingActivities});
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
+    logg.error(`'/info/${userId}`,{error})
+
     console.log(error)
   }
 });
@@ -86,12 +93,14 @@ router.put('/', async function (req, res, next) {
         weight: req.body.weight,
         userId
       });
-      console.log("saved bmi", record);
     }
     if (userData) {
+      logg.info('userdata',{userData})
       res.json({success: true, userData});
     } else throw new Error("Could not update user data");
   } catch (error) {
+    logg.error('/',error)
+
     res.status(500).json({error: error.toLocaleString()});
   }
 });
@@ -120,6 +129,8 @@ router.put('/displayImage', async function (req, res, next) {
 
     res.json({contentURL, success: true});
   } catch (err) {
+    logg.error('displayImage',error)
+
     res.status(500).json({
       err: err.message
     });
@@ -150,6 +161,8 @@ router.put('/wallImage', async function (req, res, next) {
 
     res.json({contentURL, success: true});
   } catch (err) {
+    logg.error('wallImage',error)
+
     res.status(500).json({
       err: err.message
     });
@@ -280,11 +293,14 @@ router.get('/mySubscriptions', async function (req, res, next) {
     });
 
     if (!subscriptions) {
+      logg.error('mysubscription',{userType,userId})
       throw Error("No Subscriptions")
     }
     res.json({subscriptions: mySubscriptions});
   } catch (err) {
     console.log(err)
+    logg.error('mysubscription',{error:err})
+
     res.status(500).json({
       err: err.message
     });
@@ -302,6 +318,7 @@ router.get('/mySessions', async function (req, res, next) {
         data.status = sessionStatus.NOTHELD
       }
       })
+      logg.info('mysession',{userId,userType,sessions})
       res.json({sessions});
 
     } else {
@@ -315,6 +332,8 @@ router.get('/mySessions', async function (req, res, next) {
         }
       })
       // console.log(sessions)
+      logg.info('mysession',{userId,userType,sessions})
+
       res.json({sessions});
     }
   } catch (err) {
@@ -329,9 +348,11 @@ router.post('/acceptTerms', async function (req, res, next) {
   try {
     const {userId} = req;
     await TermsConsent.create(userId);
+    logg.info("terms",userId)
     res.json({success: true});
   } catch (error) {
     res.status(500).json({error: error.toLocaleString()});
+    logg.error('terms',{error})
     console.log(error)
   }
 });

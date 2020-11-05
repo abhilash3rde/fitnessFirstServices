@@ -93,7 +93,7 @@ fs.readdir(directoryPath, function (err, files) {
     //listing all files using forEach
     files.forEach(function (file) {
       if(name == file){
-        fs.readFile(`logs\\${file}`,(err,data)=>{
+        fs.readFile(file,(err,data)=>{
           if(err) res.json(err)
           res.json(data.toString())
         })

@@ -90,7 +90,7 @@ async function list(opts = {}, hostId = null) {
   const options = {
     select: '',
     sort: {date: -1},
-    populate: [{path: 'host', select: '_id displayPictureUrl name city'}],
+    populate: [{path: 'host', select: '_id displayPictureUrl name city active'}],
     lean: true,
     page: page,
     limit: limit

@@ -19,7 +19,7 @@ router.post('/:trainerId/:packageId', async function (req, res, next) {
     const {trainerId, packageId} = req.params;
 
     const {time, days, duration, couponCode} = req.body;
-logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, days, duration, couponCode} )
+    logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, days, duration, couponCode} )
     if (!days || !days.length > 0) {
       logg.error('daysNotFound',"Training days missing")
       throw new Error("Training days missing");
@@ -27,6 +27,8 @@ logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, day
 
     const trainerData = await TrainerData.getById(trainerId);
     const package = trainerData.packages.find(package => package._id === packageId);
+    logg.info('package',package)
+
     if (!package) {
       logg.error('packageNotFound',"Invalid package")
       throw new Error("Invalid package");
@@ -79,6 +81,8 @@ logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, day
     await Subscription.updateEndDate(_subscription._id, new Date(), noOfDays);
 
     if (!isGroupPackage) {
+      logg.info("singlePackage",availableSlots )
+
       availableSlots.map(async slot => {
         await Slot.edit(slot._id, {
           subscriptionId: _subscription._id
@@ -98,6 +102,8 @@ logg.info(`subscription /${trainerId + '/' + packageId} / initiate` , {time, day
         });
         const groupSlots = await Slot.findForPackage(packageId); // Set batchId for these slots
         await groupSlots.map(async slot => {
+            logg.info("Groupslotes",groupSlots )
+
           await Slot.edit(slot._id, {
             batchId: batchSubscription._id
           });
@@ -205,14 +211,14 @@ router.put('/updateTransaction', async function (req, res, next) {
     const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 logg.info('updateTransaction',{razorpay_order_id, razorpay_payment_id, razorpay_signature})
     const {status, notes} = await paymentModule.orders.fetch(razorpay_order_id);
-    const completedOn = status === 'completed' ? Date.now() : null;
+    const completedOn = status == 'paid' ? Date.now() : null;
     const {subscriptionId} = notes;
     console.log("Activating subscription", subscriptionId);
     await Subscription.activateSubscription(subscriptionId);
     await Subscription.createSessions(subscriptionId);
 
-    console.log("Updating transaction", razorpay_order_id);
-logg.info("Updating transaction", {razorpay_order_id})
+    console.log("Updating transaction", razorpay_order_id,status, notes);
+logg.info("Updating transaction", {razorpay_order_id,status, notes})
 
     const transaction = await Transaction.update(
       razorpay_order_id,
@@ -251,6 +257,7 @@ router.put('/:subscriptionId/rollback', async function (req, res, next) {
 
 logg.info('rollbackStarted',{subscriptionId,razorpay_order_id,completedOn})
     const slots = await Slot.findForSubs(subscriptionId);
+    logg.info("RollbackSlotes",slots )
 
     const newSlots = [];
     let trainerId;
@@ -276,6 +283,8 @@ logg.info('rollbackStarted',{subscriptionId,razorpay_order_id,completedOn})
         }
       });
       const insertedSlots = await Slot.insertAll(newSlots);
+    logg.info('insertedSlots',{insertedSlots})
+
       await TrainerData.addSlots(trainerId, insertedSlots);
     }
 
@@ -290,7 +299,7 @@ logg.info('rollbackStarted',{subscriptionId,razorpay_order_id,completedOn})
       logg.error('rollbackerr',"Error updating transaction status")
       throw Error("Error updating transaction status")
     }
-    await Subscription.remove(subscriptionId)
+    // await Subscription.remove(subscriptionId)
     logg.info('rollbackDone',{subscriptionId,razorpay_order_id,completedOn})
 
     res.json({success: true});

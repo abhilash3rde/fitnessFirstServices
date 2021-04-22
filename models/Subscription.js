@@ -125,7 +125,7 @@ async function getAllForTrainer(trainerId) {
 }
 
 async function getAllForUser(subscribedBy) {
-  const model = await Model.find({ subscribedBy }).populate([
+  const model = await Model.find({ subscribedBy,active:true }).populate([
     { path: 'trainerId' },
     { path: 'packageId' }
   ]).exec();

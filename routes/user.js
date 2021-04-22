@@ -18,6 +18,7 @@ const {sessionTypes, sessionStatus} = require('../constants');
 const Logger = require('../services/logger_service')
 let logg = new Logger('user')
 const { session } = require('passport');
+const {converteddate} = require('../utility/DateUtils')
 
 router.get('/myInfo', async function (req, res, next) {
   try {
@@ -312,7 +313,8 @@ router.get('/mySessions', async function (req, res, next) {
     if (userType === userTypes.USER) {
       const sessions = await Session.getForUser(userId)
      sessions.map(data =>{
-        var now = new Date();
+        var now = converteddate();
+        console.log(now)
       if(now - data.date > 0 && !data.startTime ) {
         Session.setNotheld(data._id)
         data.status = sessionStatus.NOTHELD
@@ -324,9 +326,10 @@ router.get('/mySessions', async function (req, res, next) {
     } else {
       const sessions = await Session.getForTrainer(userId)
       sessions.map(data =>{
-        var now = new Date();
+        var now = converteddate();
+        // console.log(converteddate())
         if(now - data.date > 0 && !data.startTime ) {
-          console.log(data,"Not Held")
+        console.log(data.date,"Not Held")
         Session.setNotheld(data._id)
         data.status = sessionStatus.NOTHELD
         }

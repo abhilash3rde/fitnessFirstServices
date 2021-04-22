@@ -30,9 +30,33 @@ function getRelativeDate(dayCount) {
   now.setDate(now.getDate() + dayCount);
   return now;
 }
+const convertdate = (date) => {
+
+  // let now = new Date();
+  let time = new Date(date);
+  let ofset = time.getTimezoneOffset()
+  // console.log(ofset,'ofset')
+  let newmin = ofset % 60;
+  let newhrs = ofset / 60;
+  newhrs = time.getHours() - newhrs
+  newmin = time.getMinutes() - newmin
+  // console.log(date,"----------------------------",time.getDate(),"---------------------",ofset,'ofset')
+  time.setDate(time.getDate())
+  time.setHours(newhrs);
+  time.setMinutes(newmin);
+  // console.log(time,'now-------------')
+  return time
+
+}
+const converteddate = () => {
+  return convertdate(new Date())
+
+}
 
 module.exports = {
   getTimeZoneDate,
   getDateBasedOnDay,
   getRelativeDate,
+  convertdate,
+  converteddate
 }

@@ -136,6 +136,7 @@ router.get('/list/:page?', async function (req, res, next) {
     let nextPage = null;
     const page = req.params['page'] ? req.params['page'] : 1;
     records = await LiveStream.list({page});
+    records.docs = records.docs.filter(data=>{return data.host.active === true})
     if (records.page < records.pages) {
       nextPage = "/live/list/" + (parseInt(records.page) + 1);
     }

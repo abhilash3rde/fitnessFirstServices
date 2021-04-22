@@ -35,6 +35,7 @@ const adminRoutes = require('./routes/admin');
 const caloriesIntakeRouter = require('./routes/caloriesIntake');
 const recommendRouter = require('./routes/recommend');
 const liveStreamRouter = require('./routes/liveStream');
+const YoutubeRouter = require('./routes/youtube');
 const webhookRouter = require('./routes/webhooks');
 const middleware = require('./middleware');
 const auth = require('./auth');
@@ -46,7 +47,7 @@ app.use(fileUpload({
   limits: {fileSize: 50 * 1024 * 1024},
   abortOnLimit: true,
   useTempFiles: true,
-  tempFileDir: './uploads'
+  tempFileDir:path.join(__dirname, '/uploads')
 }));
 // app.use(logg)
 
@@ -143,6 +144,7 @@ app.use('/trainer', auth.ensureUser, TrainerRouter);
 app.use('/user', auth.ensureUser, userRouter);
 app.use('/users', auth.ensureUser, usersRouter);
 app.use('/post', auth.ensureUser, postRouter);
+app.use('/youtube', auth.ensureUser, YoutubeRouter);
 app.use('/comment', auth.ensureUser, commentRouter);
 app.use('/call', auth.ensureUser, callRouter);
 app.use('/package', auth.ensureUser, packageRouter);

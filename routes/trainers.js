@@ -14,11 +14,13 @@ router.get('/', async function (req, res, next) {
     let record;
     let next;
     if (userType === userTypes.USER || userType === userTypes.ADMIN) {
-      record = await TrainerData.list({page: 1});
+      record = await TrainerData.list({});
+      // record.docs = record.docs.filter(data => data.active !==undefined ? data.active === true : data)
     } else {
       record = await UserData.list({page: 1});
     }
     const pages = record.pages;
+    // console.log(record.page < pages)
     if (record.page < pages) {
       next = "/trainers/" + (parseInt(record.page) + 1);
     } else {
@@ -26,7 +28,7 @@ router.get('/', async function (req, res, next) {
     }
     users = record.docs;
 
-    res.json({trainers: users, next});
+    res.json({trainers: users, next,pages});
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -141,5 +143,18 @@ router.delete('/package/:packageId', async function (req, res, next) {
     });
   }
 });
+router.put('/:id',async function (req,res,next){
+  try{
+    const {active} = req.body;
+    const {id} = req.params;
+    const trainer = await TrainerData.edit(id, {active});
+    console.log(trainer,active,id)
+    res.json({success: true});
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+})
 
 module.exports = router;

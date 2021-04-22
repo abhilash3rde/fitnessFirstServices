@@ -89,6 +89,11 @@ const trainerSchema = mongoose.Schema({
     type: Boolean,
     default: false
   },
+  active: {
+    type: Boolean,
+    default: true
+  },
+  
   certificates: [{type: String, ref: MODELS.Certificate}]
 }, opts);
 
@@ -176,7 +181,7 @@ async function getById(_id) {
 
 async function list(opts = {}) {
   const {
-    page = 1, limit = 10
+    page = 1, limit = 20
   } = opts;
 
   let record = null;

@@ -36,13 +36,44 @@ router.post('/create', async function (req, res, next) {
     });
   }
 });
+router.post('/create/package/admin/:userId', async function (req, res, next) {
+  try {
+    const {userId} = req.params;
+    const {title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate} = req.body;
+    const package = await Package.create({
+      title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate
+    });
+    if (!package) throw new Error("Error in creating package");
+    await TrainerData.addPackage(userId, package._id);
 
+    if (group) {
+      const {days, time, duration} = slot;
+      const slots = [];
+      days.map(day => slots.push({
+        time,
+        dayOfWeek: day,
+        duration: duration,
+        trainerId: userId,
+        group: true,
+        packageId: package._id
+      }));
+      const insertedSlots = await Slot.insertAll(slots);
+      await TrainerData.addSlots(userId, insertedSlots);
+    }
+    res.json({package});
+  } catch (err) {
+    res.status(500).json({
+      err: err.message
+    });
+  }
+});
 router.put('/:packageId', async function (req, res, next) {
   try {
     const {userId} = req;
 
     const {packageId} = req.params;
     const {title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate, active} = req.body;
+    console.log(req.body)
     const package_ = await Package.edit(packageId, {
       title, noOfSessions, price, description, category, group, maxParticipants, slot, startDate, active
     });

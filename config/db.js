@@ -39,7 +39,8 @@ console.log(new Date(date1 - time))
 break;
 case "testing":
   console.log('testing')
-  dbName =  'delta';
+  // dbName =  'delta';
+  dbName =  'priyamTest';
  dbString=`mongodb+srv://boi:244466666@cluster0-nssjy.mongodb.net/${dbName}?retryWrites=true&w=majority` //Yatan Cluster
 mongoose.connect(
   process.env.MONGO_URI || dbString,

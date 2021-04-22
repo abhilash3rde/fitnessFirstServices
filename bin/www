@@ -7,8 +7,14 @@
 var app = require('../app');
 var debug = require('debug')('te-gym-api:server');
 var http = require('http');
+var path = require('path')
+const fs = require('fs');
+const options = {
+  key: fs.readFileSync(path.join(__dirname,'./api_gym.pem')).toString(),
+  cert: fs.readFileSync(path.join(__dirname,'./api_gym.crt')).toString(),
+};
+var server = http.createServer(options,app);
 
-var server = http.createServer(app);
 
 // var socketApi = require('../socketAPI');
 // var io = socketApi.io;

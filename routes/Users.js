@@ -39,7 +39,9 @@ router.get('/', async function (req, res, next) {
     let nextPage;
     if(userType===userTypes.USER)
       {
-        record = await TrainerData.list({page});      
+        record = await TrainerData.list({page});    
+      record.docs = record.docs.filter(data => data.active !==undefined ? data.active === true : data)
+
       }
       else{
         record = await UserData.list({page});

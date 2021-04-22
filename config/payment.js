@@ -1,5 +1,5 @@
 const Razorpay = require('razorpay');
-const {paymentKey} = require('../constants');
+const {paymentKey} = require('../constants/index');
 
 const instance = new Razorpay({
   key_id: paymentKey.key_id,

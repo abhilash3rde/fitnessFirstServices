@@ -2,7 +2,8 @@ const cuid = require('cuid');
 const mongoose = require('mongoose');
 const db = require('../config/db');
 const opts = {toJSON: {virtuals: true}};
-
+const Logger = require('../services/logger_service')
+let logg = new Logger('subscription')
 const slotSchema = mongoose.Schema({
   _id: {
     type: String,
@@ -114,7 +115,7 @@ async function edit(_id, change) {
   if (model.subscriptionId) {
     throw Error("Slot has active subscription");
   }
-
+    logg.info('slotedit',change)
   Object.keys(change).forEach(key => {
     model[key] = change[key]
   });
